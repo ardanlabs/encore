@@ -207,8 +207,7 @@ func initService() (*Service, error) {
 }
 
 func (s *Service) Shutdown(force context.Context) {
-	s.log.Info(force, "shutdown", "status", "shutdown started")
-	defer s.log.Info(force, "shutdown", "status", "shutdown complete")
+	s.log.Info(force, "shutdown", "status", "shutdown complete")
 
 	ctx, cancel := context.WithTimeout(force, s.shutdownTimeout)
 	defer cancel()

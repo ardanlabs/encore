@@ -19,3 +19,6 @@
 
 # Go workspace file
 go.work
+encore.gen.go
+encore.gen.cue
+/.encore
