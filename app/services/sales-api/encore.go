@@ -2,6 +2,8 @@ package encore
 
 import (
 	"context"
+	"database/sql"
+	_ "embed"
 	"errors"
 	"expvar"
 	"fmt"
@@ -12,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	edb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/build/all"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
@@ -26,6 +29,10 @@ import (
 )
 
 var build = "develop"
+
+var ebdDB = edb.NewDatabase("url", edb.DatabaseConfig{
+	Migrations: "./v1/migrations",
+})
 
 //encore:service
 type Service struct {
@@ -121,12 +128,15 @@ func initService() (*Service, error) {
 	log.Info(ctx, "startup", "status", "initializing database support")
 
 	db, err := sqldb.Open(sqldb.Config{
+		EDB:          ebdDB,
 		MaxIdleConns: cfg.DB.MaxIdleConns,
 		MaxOpenConns: cfg.DB.MaxOpenConns,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("connecting to db: %w", err)
 	}
+
+	seedDatabase(ctx, db)
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
@@ -226,4 +236,39 @@ func (s *Service) Shutdown(force context.Context) {
 //encore:api public raw path=/!fallback
 func (s *Service) Fallback(w http.ResponseWriter, req *http.Request) {
 	s.api.Handler.ServeHTTP(w, req)
+}
+
+//go:embed v1/seeds/seed.sql
+var seedDoc string
+
+func seedDatabase(ctx context.Context, db *sqlx.DB) (err error) {
+	if err := sqldb.StatusCheck(ctx, db); err != nil {
+		return fmt.Errorf("status check database: %w", err)
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if errTx := tx.Rollback(); errTx != nil {
+			if errors.Is(errTx, sql.ErrTxDone) {
+				return
+			}
+
+			err = fmt.Errorf("rollback: %w", errTx)
+			return
+		}
+	}()
+
+	if _, err := tx.Exec(seedDoc); err != nil {
+		return fmt.Errorf("exec: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit: %w", err)
+	}
+
+	return nil
 }

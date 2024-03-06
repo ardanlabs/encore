@@ -16,5 +16,32 @@ dev-brew:
 	brew update
 	brew list encore || brew install encoredev/tap/encore
 
-encore-run:
+# ==============================================================================
+# Run Project
+
+encore-up:
 	encore run -v
+
+GENERATE_ID = $(shell docker ps | grep encoredotdev | cut -c1-12)
+SET_ID = $(eval MY_ID=$(GENERATE_ID))
+
+encore-down:
+	$(SET_ID)
+	docker stop $(MY_ID)
+	docker rm $(MY_ID) -v
+
+# ==============================================================================
+# Access Project
+
+token:
+	curl -il \
+	--user "admin@example.com:gophers" http://localhost:3000/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+
+users:
+	curl -il \
+	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
+
+pgcli:
+	pgcli $(shell encore db conn-uri url | sed -e 's/localhost/127.0.0.1/g')
+
+

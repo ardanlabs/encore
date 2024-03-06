@@ -32,17 +32,14 @@ var (
 
 // Config is the required properties to use the database.
 type Config struct {
+	EDB          *edb.Database
 	MaxIdleConns int
 	MaxOpenConns int
 }
 
 // Open knows how to open a database connection based on the configuration.
 func Open(cfg Config) (*sqlx.DB, error) {
-	ebdDB := edb.NewDatabase("url", edb.DatabaseConfig{
-		Migrations: "./migrations",
-	})
-
-	db := sqlx.NewDb(ebdDB.Stdlib(), "pgx")
+	db := sqlx.NewDb(cfg.EDB.Stdlib(), "pgx")
 	db.SetMaxIdleConns(cfg.MaxIdleConns)
 	db.SetMaxOpenConns(cfg.MaxOpenConns)
 
