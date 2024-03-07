@@ -2,8 +2,6 @@ package encore
 
 import (
 	"context"
-	"database/sql"
-	_ "embed"
 	"errors"
 	"expvar"
 	"fmt"
@@ -14,7 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	edb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/build/all"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
@@ -30,16 +27,12 @@ import (
 
 var build = "develop"
 
-var ebdDB = edb.NewDatabase("url", edb.DatabaseConfig{
-	Migrations: "./v1/migrations",
-})
-
 //encore:service
 type Service struct {
-	log             *logger.Logger
-	db              *sqlx.DB
-	api             *http.Server
-	shutdownTimeout time.Duration
+	log      *logger.Logger
+	db       *sqlx.DB
+	api      *http.Server
+	shutdown time.Duration
 }
 
 // initService is called by Encore to initialize the service.
@@ -136,6 +129,8 @@ func initService() (*Service, error) {
 		return nil, fmt.Errorf("connecting to db: %w", err)
 	}
 
+	// TODO: I don't like this here because it's more of an ops thing, but
+	// for now I will leave it as I learn more.
 	seedDatabase(ctx, db)
 
 	// -------------------------------------------------------------------------
@@ -207,19 +202,21 @@ func initService() (*Service, error) {
 	}()
 
 	s := Service{
-		log:             log,
-		db:              db,
-		api:             &api,
-		shutdownTimeout: cfg.Web.ShutdownTimeout,
+		log:      log,
+		db:       db,
+		api:      &api,
+		shutdown: cfg.Web.ShutdownTimeout,
 	}
 
 	return &s, nil
 }
 
+// Shutdown implements a function that will be called by encore when the service
+// is signaled to shutdown.
 func (s *Service) Shutdown(force context.Context) {
 	s.log.Info(force, "shutdown", "status", "shutdown complete")
 
-	ctx, cancel := context.WithTimeout(force, s.shutdownTimeout)
+	ctx, cancel := context.WithTimeout(force, s.shutdown)
 	defer cancel()
 
 	if err := s.api.Shutdown(ctx); err != nil {
@@ -236,39 +233,4 @@ func (s *Service) Shutdown(force context.Context) {
 //encore:api public raw path=/!fallback
 func (s *Service) Fallback(w http.ResponseWriter, req *http.Request) {
 	s.api.Handler.ServeHTTP(w, req)
-}
-
-//go:embed v1/seeds/seed.sql
-var seedDoc string
-
-func seedDatabase(ctx context.Context, db *sqlx.DB) (err error) {
-	if err := sqldb.StatusCheck(ctx, db); err != nil {
-		return fmt.Errorf("status check database: %w", err)
-	}
-
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if errTx := tx.Rollback(); errTx != nil {
-			if errors.Is(errTx, sql.ErrTxDone) {
-				return
-			}
-
-			err = fmt.Errorf("rollback: %w", errTx)
-			return
-		}
-	}()
-
-	if _, err := tx.Exec(seedDoc); err != nil {
-		return fmt.Errorf("exec: %w", err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit: %w", err)
-	}
-
-	return nil
 }
