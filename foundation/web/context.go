@@ -3,6 +3,8 @@ package web
 import (
 	"context"
 	"time"
+
+	"encore.dev/middleware"
 )
 
 type ctxKey int
@@ -60,4 +62,9 @@ func setStatusCode(ctx context.Context, statusCode int) {
 
 func setValues(ctx context.Context, v *Values) context.Context {
 	return context.WithValue(ctx, key, v)
+}
+
+func SetValues(req middleware.Request, v *Values) middleware.Request {
+	ctx := context.WithValue(req.Context(), key, v)
+	return req.WithContext(ctx)
 }

@@ -5,27 +5,27 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Install dependencies
 
-dev-gotooling:
+gotooling:
 	go install github.com/divan/expvarmon@latest
 	go install github.com/rakyll/hey@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install golang.org/x/tools/cmd/goimports@latest
 
-dev-brew:
+brew:
 	brew update
 	brew list encore || brew install encoredev/tap/encore
 
 # ==============================================================================
 # Run Project
 
-encore-up:
+up:
 	encore run -v
 
 GENERATE_ID = $(shell docker ps | grep encoredotdev | cut -c1-12)
 SET_ID = $(eval MY_ID=$(GENERATE_ID))
 
-encore-down:
+down:
 	$(SET_ID)
 	docker stop $(MY_ID)
 	docker rm $(MY_ID) -v
@@ -44,4 +44,5 @@ users:
 pgcli:
 	pgcli $(shell encore db conn-uri url | sed -e 's/localhost/127.0.0.1/g')
 
-
+curl:
+	curl -il "http://127.0.0.1:4000/test?limit=2&offset=2"

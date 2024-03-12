@@ -14,6 +14,7 @@ import (
 
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/build/all"
+	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/testgrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
@@ -33,6 +34,8 @@ type Service struct {
 	db       *sqlx.DB
 	api      *http.Server
 	shutdown time.Duration
+
+	testGrp *testgrp.Handlers
 }
 
 // initService is called by Encore to initialize the service.
@@ -206,6 +209,8 @@ func initService() (*Service, error) {
 		db:       db,
 		api:      &api,
 		shutdown: cfg.Web.ShutdownTimeout,
+
+		testGrp: testgrp.New(),
 	}
 
 	return &s, nil
