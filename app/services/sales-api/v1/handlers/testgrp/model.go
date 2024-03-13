@@ -2,11 +2,18 @@ package testgrp
 
 type Status struct {
 	Status string
-	Limit  int
-	Offset int
+	Limit  string
+	Offset string
 }
 
 type QueryParams struct {
-	Limit  int `query:"limit"`
-	Offset int `query:"offset"`
+	Limit  string `query:"limit"`
+	Offset string `query:"offset"`
+}
+
+func (qp QueryParams) Params() map[string]string {
+	return map[string]string{
+		"limit":  qp.Limit,
+		"offset": qp.Offset,
+	}
 }

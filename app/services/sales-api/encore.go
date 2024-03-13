@@ -16,6 +16,8 @@ import (
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/build/all"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/testgrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
+	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
 	"github.com/ardanlabs/encore/business/web/v1/debug"
@@ -33,6 +35,8 @@ type Service struct {
 	log      *logger.Logger
 	db       *sqlx.DB
 	api      *http.Server
+	auth     *auth.Auth
+	usrCore  *user.Core
 	shutdown time.Duration
 
 	testGrp *testgrp.Handlers
@@ -204,10 +208,16 @@ func initService() (*Service, error) {
 		serverErrors <- api.ListenAndServe()
 	}()
 
+	// -------------------------------------------------------------------------
+
+	usrCore := user.NewCore(log, delegate.New(log), userdb.NewStore(log, db))
+
 	s := Service{
 		log:      log,
 		db:       db,
 		api:      &api,
+		auth:     auth,
+		usrCore:  usrCore,
 		shutdown: cfg.Web.ShutdownTimeout,
 
 		testGrp: testgrp.New(),

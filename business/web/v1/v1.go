@@ -9,6 +9,8 @@ type ErrorResponse struct {
 	Fields map[string]string `json:"fields,omitempty"`
 }
 
+func (er ErrorResponse) ErrDetails() {}
+
 // TrustedError is used to pass an error during the request through the
 // application with web specific context.
 type TrustedError struct {
