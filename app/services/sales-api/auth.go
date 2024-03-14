@@ -19,41 +19,21 @@ var (
 
 //encore:authhandler
 func (s *Service) AuthHandler(ctx context.Context, token string) (encauth.UID, *auth.Claims, error) {
-	// Handle the errors better
-
 	claims, err := s.auth.Authenticate(ctx, "Bearer "+token)
 	if err != nil {
 		s.log.Error(ctx, "authenticate: failed", "ERROR", err)
-		return "", nil, &errs.Error{
-			Code:    errs.Unauthenticated,
-			Message: "process details document",
-			Details: v1.ErrorResponse{
-				Error: http.StatusText(http.StatusUnauthorized),
-			},
-		}
+		return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
 	}
 
 	if claims.Subject == "" {
 		s.log.Error(ctx, "authorize: you are not authorized for that action, no claims")
-		return "", nil, &errs.Error{
-			Code:    errs.Unauthenticated,
-			Message: "process details document",
-			Details: v1.ErrorResponse{
-				Error: http.StatusText(http.StatusUnauthorized),
-			},
-		}
+		return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
 	}
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
 		s.log.Error(ctx, "parsing subject: %s", ErrInvalidID)
-		return "", nil, &errs.Error{
-			Code:    errs.InvalidArgument,
-			Message: "process details document",
-			Details: v1.ErrorResponse{
-				Error: ErrInvalidID.Error(),
-			},
-		}
+		return "", nil, v1.NewError(errs.InvalidArgument, ErrInvalidID.Error())
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil

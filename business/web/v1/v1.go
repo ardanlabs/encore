@@ -1,15 +1,82 @@
 // Package v1 provides types and support related to web v1 functionality.
 package v1
 
-import "errors"
+import (
+	"errors"
+
+	"encore.dev/beta/errs"
+	"encore.dev/middleware"
+)
 
 // ErrorResponse is the form used for API responses from failures in the API.
 type ErrorResponse struct {
-	Error  string            `json:"error"`
+	Err    string            `json:"error"`
 	Fields map[string]string `json:"fields,omitempty"`
 }
 
+// ErrDetails implements the encore ErrDetails interface.
 func (er ErrorResponse) ErrDetails() {}
+
+// =============================================================================
+
+// NewError constructs an encore error based on an app error.
+func NewError(code errs.ErrCode, err string) *errs.Error {
+	return &errs.Error{
+		Code:    code,
+		Message: err,
+		Details: ErrorResponse{
+			Err: err,
+		},
+	}
+}
+
+// NewErrorResponse constructs an encore middleware response with
+// a Go error.
+func NewErrorResponse(status int, err error) middleware.Response {
+	return middleware.Response{
+		HTTPStatus: status,
+		Err: &errs.Error{
+			Code:    errs.Internal,
+			Message: err.Error(),
+			Details: ErrorResponse{
+				Err: err.Error(),
+			},
+		},
+	}
+}
+
+// NewErrorResponseWithMessage constructs an encore middleware response
+// with a message.
+func NewErrorResponseWithMessage(status int, message string) middleware.Response {
+	return middleware.Response{
+		HTTPStatus: status,
+		Err: &errs.Error{
+			Code:    errs.Internal,
+			Message: message,
+			Details: ErrorResponse{
+				Err: message,
+			},
+		},
+	}
+}
+
+// NewErrorResponseWithFields constructs an encore middleware response
+// with an error and fields.
+func NewErrorResponseWithFields(status int, message string, fields map[string]string) middleware.Response {
+	return middleware.Response{
+		HTTPStatus: status,
+		Err: &errs.Error{
+			Code:    errs.Internal,
+			Message: message,
+			Details: ErrorResponse{
+				Err:    message,
+				Fields: fields,
+			},
+		},
+	}
+}
+
+// =============================================================================
 
 // TrustedError is used to pass an error during the request through the
 // application with web specific context.
@@ -42,8 +109,11 @@ func GetTrustedError(err error) *TrustedError {
 	if !errors.As(err, &te) {
 		return nil
 	}
+
 	return te
 }
+
+// =============================================================================
 
 // PageDocument is the form used for API responses from query API calls.
 type PageDocument[T any] struct {

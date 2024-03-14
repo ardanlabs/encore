@@ -8,7 +8,6 @@ import (
 	"time"
 
 	encauth "encore.dev/beta/auth"
-	"encore.dev/beta/errs"
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	v1 "github.com/ardanlabs/encore/business/web/v1"
@@ -20,12 +19,12 @@ import (
 
 //encore:middleware target=all
 func (s *Service) Context(req middleware.Request, next middleware.Next) middleware.Response {
-	v := web.Values{
+	v := values{
 		TraceID: req.Data().Trace.TraceID,
 		Now:     time.Now().UTC(),
 	}
 
-	req = web.SetValues(req, &v)
+	req = setValues(req, &v)
 
 	return next(req)
 }
@@ -71,8 +70,7 @@ func (s *Service) Errors(req middleware.Request, next middleware.Next) middlewar
 
 	s.log.Error(ctx, "errors message", "msg", resp.Err)
 
-	var er v1.ErrorResponse
-	var status int
+	var midResp middleware.Response
 
 	switch {
 	case v1.IsTrustedError(resp.Err):
@@ -80,40 +78,20 @@ func (s *Service) Errors(req middleware.Request, next middleware.Next) middlewar
 
 		if validate.IsFieldErrors(trsErr.Err) {
 			fieldErrors := validate.GetFieldErrors(trsErr.Err)
-			er = v1.ErrorResponse{
-				Error:  "data validation error",
-				Fields: fieldErrors.Fields(),
-			}
-			status = trsErr.Status
+			midResp = v1.NewErrorResponseWithFields(trsErr.Status, "data validation error", fieldErrors.Fields())
 			break
 		}
 
-		er = v1.ErrorResponse{
-			Error: trsErr.Error(),
-		}
-		status = trsErr.Status
+		midResp = v1.NewErrorResponse(trsErr.Status, trsErr)
 
 	case auth.IsAuthError(resp.Err):
-		er = v1.ErrorResponse{
-			Error: http.StatusText(http.StatusUnauthorized),
-		}
-		status = http.StatusUnauthorized
+		midResp = v1.NewErrorResponseWithMessage(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 
 	default:
-		er = v1.ErrorResponse{
-			Error: http.StatusText(http.StatusInternalServerError),
-		}
-		status = http.StatusInternalServerError
+		midResp = v1.NewErrorResponseWithMessage(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 	}
 
-	return middleware.Response{
-		HTTPStatus: status,
-		Err: &errs.Error{
-			Code:    errs.Internal,
-			Message: "process details document",
-			Details: er,
-		},
-	}
+	return midResp
 }
 
 //encore:middleware target=tag:authuser
@@ -123,42 +101,31 @@ func (s *Service) AuthUser(req middleware.Request, next middleware.Next) middlew
 
 	if len(req.Data().PathParams) == 1 {
 		id := req.Data().PathParams[0]
-		var err error
 
-		userID, err = uuid.Parse(id.Value)
+		userID, err := uuid.Parse(id.Value)
 		if err != nil {
-			return middleware.Response{
-				HTTPStatus: http.StatusBadRequest,
-				Err:        v1.NewTrustedError(ErrInvalidID, http.StatusBadRequest),
-			}
+			return v1.NewErrorResponse(http.StatusBadRequest, ErrInvalidID)
 		}
 
 		usr, err := s.usrCore.QueryByID(ctx, userID)
 		if err != nil {
 			switch {
 			case errors.Is(err, user.ErrNotFound):
-				return middleware.Response{
-					HTTPStatus: http.StatusNoContent,
-					Err:        v1.NewTrustedError(err, http.StatusNoContent),
-				}
+				return v1.NewErrorResponse(http.StatusNoContent, err)
+
 			default:
-				return middleware.Response{
-					HTTPStatus: http.StatusInternalServerError,
-					Err:        fmt.Errorf("querybyid: userID[%s]: %w", userID, err),
-				}
+				return v1.NewErrorResponse(http.StatusInternalServerError, fmt.Errorf("querybyid: userID[%s]: %w", userID, err))
 			}
 		}
 
 		ctx = setUser(ctx, usr)
 	}
 
-	claims, _ := encauth.Data().(*auth.Claims)
+	claims := encauth.Data().(*auth.Claims)
 
 	if err := s.auth.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
-		return middleware.Response{
-			HTTPStatus: http.StatusBadRequest,
-			Err:        auth.NewAuthError("authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err),
-		}
+		authErr := auth.NewAuthError("authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
+		return v1.NewErrorResponse(http.StatusBadRequest, authErr)
 	}
 
 	return next(req)
