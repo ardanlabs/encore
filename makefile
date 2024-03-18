@@ -55,9 +55,18 @@ auth:
 
 create:
 	curl -il -X POST \
-	-d '{"name": "bill", "email": "bill@ardanlabs.com", "roles": ["ADMIN"], "department": "IT", "password": "123", "passwordConfirm": "123"}' \
+	-d '{"name": "bill", "email": "bill2@ardanlabs.com", "roles": ["ADMIN"], "department": "IT", "password": "123", "passwordConfirm": "123"}' \
 	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users"
 
 token:
 	curl -il \
 	--user "admin@example.com:gophers" http://127.0.0.1:4000/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+
+update:
+	curl -il -X PUT \
+	-d '{"name": "jill"}' \
+	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/6e7bcb19-8389-44a2-9bcf-074d9bcd2bb8"
+
+delete:
+	curl -il -X DELETE \
+	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/6e7bcb19-8389-44a2-9bcf-074d9bcd2bb8"

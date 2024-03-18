@@ -13,16 +13,30 @@ import (
 	"github.com/ardanlabs/encore/business/web/v1/auth"
 )
 
+// Handlers manages the set of handler functions for this domain.
 type Handlers struct {
 	user *user.Core
 	auth *auth.Auth
 }
 
+// New constructs a Handlers for use.
 func New(user *user.Core, auth *auth.Auth) *Handlers {
 	return &Handlers{
 		user: user,
 		auth: auth,
 	}
+}
+
+// Token provides an API token for the authenticated user.
+func (h *Handlers) Token(ctx context.Context, kid string) (Token, error) {
+	claims := encauth.Data().(*auth.Claims)
+
+	tkn, err := h.auth.GenerateToken(kid, *claims)
+	if err != nil {
+		return Token{}, fmt.Errorf("generatetoken: %w", err)
+	}
+
+	return toToken(tkn), nil
 }
 
 // Create adds a new user to the system.
@@ -43,14 +57,36 @@ func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) 
 	return toAppUser(usr), nil
 }
 
-// Token provides an API token for the authenticated user.
-func (h *Handlers) Token(ctx context.Context, kid string) (Token, error) {
-	claims := encauth.Data().(*auth.Claims)
-
-	tkn, err := h.auth.GenerateToken(kid, *claims)
+// Update updates an existing user.
+func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser) (AppUser, error) {
+	uu, err := toCoreUpdateUser(app)
 	if err != nil {
-		return Token{}, fmt.Errorf("generatetoken: %w", err)
+		return AppUser{}, v1.NewTrustedError(err, http.StatusBadRequest)
 	}
 
-	return toToken(tkn), nil
+	usr, err := getUser(ctx)
+	if err != nil {
+		return AppUser{}, fmt.Errorf("user missing in context: %w", err)
+	}
+
+	updUsr, err := h.user.Update(ctx, usr, uu)
+	if err != nil {
+		return AppUser{}, fmt.Errorf("update: userID[%s] uu[%+v]: %w", usr.ID, uu, err)
+	}
+
+	return toAppUser(updUsr), nil
+}
+
+// Delete removes an existing user.
+func (h *Handlers) Delete(ctx context.Context, userID string) error {
+	usr, err := getUser(ctx)
+	if err != nil {
+		return fmt.Errorf("user missing in context: %w", err)
+	}
+
+	if err := h.user.Delete(ctx, usr); err != nil {
+		return fmt.Errorf("delete: userID[%s]: %w", usr.ID, err)
+	}
+
+	return nil
 }

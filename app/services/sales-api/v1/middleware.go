@@ -4,11 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
-	"time"
 
 	encauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
+	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	v1 "github.com/ardanlabs/encore/business/web/v1"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
@@ -16,46 +15,19 @@ import (
 	"github.com/google/uuid"
 )
 
+// =============================================================================
+// Global middleware functions.
+// The order matters so be careful when injecting new middleware.
+
 //encore:middleware target=all
 func (s *Service) Context(req middleware.Request, next middleware.Next) middleware.Response {
 	v := values{
 		TraceID: req.Data().Trace.TraceID,
-		Now:     time.Now().UTC(),
 	}
 
 	req = setValues(req, &v)
 
 	return next(req)
-}
-
-//encore:middleware target=all
-func (s *Service) Logger(req middleware.Request, next middleware.Next) middleware.Response {
-	type queryParameters interface {
-		Params() map[string]string
-	}
-
-	ctx := req.Context()
-	er := req.Data()
-
-	path := er.Path
-	if qp, ok := er.Payload.(queryParameters); ok {
-		var b strings.Builder
-		fmt.Fprintf(&b, "%s?", path)
-		for k, v := range qp.Params() {
-			fmt.Fprintf(&b, "%s=%s&", k, v)
-		}
-		path = b.String()
-		path = path[:len(path)-1]
-	}
-
-	s.log.Info(ctx, "request started", "endpoint", er.Endpoint, "path", path)
-
-	resp := next(req)
-
-	s.log.Info(ctx, "request completed", "endpoint", er.Endpoint, "path", path,
-		"statuscode", resp.HTTPStatus, "since", time.Since(getTime(ctx)).String())
-
-	return resp
 }
 
 //encore:middleware target=all
@@ -92,6 +64,11 @@ func (s *Service) Errors(req middleware.Request, next middleware.Next) middlewar
 
 	return midResp
 }
+
+// =============================================================================
+// Auth related middleware
+// These middleware functions must come after the global middleware functions
+// above. These are targeted so the order doesn't matter.
 
 //encore:middleware target=tag:auth_admin_only
 func (s *Service) AuthorizeAdminOnly(req middleware.Request, next middleware.Next) middleware.Response {
@@ -130,7 +107,7 @@ func (s *Service) AuthUser(req middleware.Request, next middleware.Next) middlew
 			}
 		}
 
-		ctx = setUser(ctx, usr)
+		req = usergrp.SetUser(req, usr)
 	}
 
 	claims := encauth.Data().(*auth.Claims)
