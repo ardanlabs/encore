@@ -77,7 +77,7 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser)
 	return toAppUser(updUsr), nil
 }
 
-// Delete removes an existing user.
+// Delete removes a user from the system.
 func (h *Handlers) Delete(ctx context.Context, userID string) error {
 	usr, err := getUser(ctx)
 	if err != nil {
@@ -89,4 +89,43 @@ func (h *Handlers) Delete(ctx context.Context, userID string) error {
 	}
 
 	return nil
+}
+
+// Query returns a list of users with paging.
+func (h *Handlers) Query(ctx context.Context, qp QueryParams) (v1.PageDocument[AppUser], error) {
+	if err := validatePaging(qp); err != nil {
+		return v1.PageDocument[AppUser]{}, err
+	}
+
+	filter, err := parseFilter(qp)
+	if err != nil {
+		return v1.PageDocument[AppUser]{}, err
+	}
+
+	orderBy, err := parseOrder(qp)
+	if err != nil {
+		return v1.PageDocument[AppUser]{}, err
+	}
+
+	users, err := h.user.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	if err != nil {
+		return v1.PageDocument[AppUser]{}, fmt.Errorf("query: %w", err)
+	}
+
+	total, err := h.user.Count(ctx, filter)
+	if err != nil {
+		return v1.PageDocument[AppUser]{}, fmt.Errorf("count: %w", err)
+	}
+
+	return v1.NewPageDocument(toAppUsers(users), total, qp.Page, qp.Rows), nil
+}
+
+// QueryByID returns a user by its ID.
+func (h *Handlers) QueryByID(ctx context.Context) (AppUser, error) {
+	usr, err := getUser(ctx)
+	if err != nil {
+		return AppUser{}, fmt.Errorf("user missing in context: %w", err)
+	}
+
+	return toAppUser(usr), nil
 }

@@ -11,6 +11,18 @@ import (
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 
+// QueryParams represents the set of possible query strings.
+type QueryParams struct {
+	Page             int    `query:"page"`
+	Rows             int    `query:"rows"`
+	OrderBy          string `query:"orderBy"`
+	ID               string `query:"user_id"`
+	Name             string `query:"name"`
+	Email            string `query:"email"`
+	StartCreatedDate string `query:"start_created_date"`
+	EndCreatedDate   string `query:"end_created_date"`
+}
+
 // AppUser represents information about an individual user.
 type AppUser struct {
 	ID           string   `json:"id"`

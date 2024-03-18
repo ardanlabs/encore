@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
+	v1 "github.com/ardanlabs/encore/business/web/v1"
 )
 
-//encore:api auth method=GET path=/v1/users/token/:kid
+//encore:api auth method=GET path=/v1/token/:kid
 func (s *Service) UserGrp_Token(ctx context.Context, kid string) (usergrp.Token, error) {
 	return s.usrGrp.Token(ctx, kid)
 }
@@ -24,4 +25,14 @@ func (s *Service) UserGrp_Update(ctx context.Context, userID string, auu usergrp
 //encore:api auth method=DELETE path=/v1/users/:userID tag:auth_user
 func (s *Service) UserGrp_Delete(ctx context.Context, userID string) error {
 	return s.usrGrp.Delete(ctx, userID)
+}
+
+//encore:api auth method=GET path=/v1/users tag:auth_admin_only
+func (s *Service) UserGrp_Query(ctx context.Context, qp usergrp.QueryParams) (v1.PageDocument[usergrp.AppUser], error) {
+	return s.usrGrp.Query(ctx, qp)
+}
+
+//encore:api auth method=GET path=/v1/users/:userID tag:auth_user
+func (s *Service) UserGrp_QueryById(ctx context.Context, userID string) (usergrp.AppUser, error) {
+	return s.usrGrp.QueryByID(ctx)
 }

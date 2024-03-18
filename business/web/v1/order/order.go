@@ -4,7 +4,6 @@ package order
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/ardanlabs/encore/foundation/validate"
@@ -44,14 +43,12 @@ func NewBy(field string, direction string) By {
 
 // Parse constructs a By value by parsing a string in the form
 // of "field,direction".
-func Parse(r *http.Request, defaultOrder By) (By, error) {
-	v := r.URL.Query().Get("orderBy")
-
-	if v == "" {
+func Parse(orderBy string, defaultOrder By) (By, error) {
+	if orderBy == "" {
 		return defaultOrder, nil
 	}
 
-	orderParts := strings.Split(v, ",")
+	orderParts := strings.Split(orderBy, ",")
 
 	var by By
 	switch len(orderParts) {
@@ -61,13 +58,13 @@ func Parse(r *http.Request, defaultOrder By) (By, error) {
 	case 2:
 		direction := strings.Trim(orderParts[1], " ")
 		if _, exists := directions[direction]; !exists {
-			return By{}, validate.NewFieldsError(v, fmt.Errorf("unknown direction: %s", by.Direction))
+			return By{}, validate.NewFieldsError(orderBy, fmt.Errorf("unknown direction: %s", by.Direction))
 		}
 
 		by = NewBy(strings.Trim(orderParts[0], " "), direction)
 
 	default:
-		return By{}, validate.NewFieldsError(v, errors.New("unknown order field"))
+		return By{}, validate.NewFieldsError(orderBy, errors.New("unknown order field"))
 	}
 
 	return by, nil
