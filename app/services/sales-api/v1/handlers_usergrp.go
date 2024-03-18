@@ -10,3 +10,8 @@ import (
 func (s *Service) UserGrp_Create(ctx context.Context, app usergrp.AppNewUser) (usergrp.AppUser, error) {
 	return s.usrGrp.Create(ctx, app)
 }
+
+//encore:api auth method=GET path=/v1/users/token/:kid
+func (s *Service) UserGrp_Token(ctx context.Context, kid string) (usergrp.Token, error) {
+	return s.usrGrp.Token(ctx, kid)
+}

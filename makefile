@@ -33,10 +33,6 @@ down:
 # ==============================================================================
 # Access Project
 
-token:
-	curl -il \
-	--user "admin@example.com:gophers" http://localhost:3000/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
-
 users:
 	curl -il \
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
@@ -61,3 +57,7 @@ create:
 	curl -il -X POST \
 	-d '{"name": "bill", "email": "bill@ardanlabs.com", "roles": ["ADMIN"], "department": "IT", "password": "123", "passwordConfirm": "123"}' \
 	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users"
+
+token:
+	curl -il \
+	--user "admin@example.com:gophers" http://127.0.0.1:4000/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1

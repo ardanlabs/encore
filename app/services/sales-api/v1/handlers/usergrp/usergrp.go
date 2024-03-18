@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	encauth "encore.dev/beta/auth"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	v1 "github.com/ardanlabs/encore/business/web/v1"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
@@ -43,48 +44,13 @@ func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) 
 }
 
 // Token provides an API token for the authenticated user.
-// func (h *Handlers) Token(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-// 	kid := web.Param(r, "kid")
-// 	if kid == "" {
-// 		return validate.NewFieldsError("kid", errors.New("missing kid"))
-// 	}
+func (h *Handlers) Token(ctx context.Context, kid string) (Token, error) {
+	claims := encauth.Data().(*auth.Claims)
 
-// 	email, pass, ok := r.BasicAuth()
-// 	if !ok {
-// 		return auth.NewAuthError("must provide email and password in Basic auth")
-// 	}
+	tkn, err := h.auth.GenerateToken(kid, *claims)
+	if err != nil {
+		return Token{}, fmt.Errorf("generatetoken: %w", err)
+	}
 
-// 	addr, err := mail.ParseAddress(email)
-// 	if err != nil {
-// 		return auth.NewAuthError("invalid email format")
-// 	}
-
-// 	usr, err := h.user.Authenticate(ctx, *addr, pass)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, user.ErrNotFound):
-// 			return v1.NewTrustedError(err, http.StatusNotFound)
-// 		case errors.Is(err, user.ErrAuthenticationFailure):
-// 			return auth.NewAuthError(err.Error())
-// 		default:
-// 			return fmt.Errorf("authenticate: %w", err)
-// 		}
-// 	}
-
-// 	claims := auth.Claims{
-// 		RegisteredClaims: jwt.RegisteredClaims{
-// 			Subject:   usr.ID.String(),
-// 			Issuer:    "service project",
-// 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-// 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-// 		},
-// 		Roles: usr.Roles,
-// 	}
-
-// 	token, err := h.auth.GenerateToken(kid, claims)
-// 	if err != nil {
-// 		return fmt.Errorf("generatetoken: %w", err)
-// 	}
-
-// 	return web.Respond(ctx, w, toToken(token), http.StatusOK)
-// }
+	return toToken(tkn), nil
+}
