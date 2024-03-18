@@ -9,7 +9,6 @@ import (
 	"runtime"
 
 	"github.com/ardanlabs/conf/v3"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/testgrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -29,8 +28,6 @@ type Service struct {
 	db      *sqlx.DB
 	auth    *auth.Auth
 	usrCore *user.Core
-
-	testGrp *testgrp.Handlers
 	usrGrp  *usergrp.Handlers
 }
 
@@ -154,8 +151,6 @@ func initService() (*Service, error) {
 		db:      db,
 		auth:    auth,
 		usrCore: usrCore,
-
-		testGrp: testgrp.New(),
 		usrGrp:  usergrp.New(usrCore, auth),
 	}
 
