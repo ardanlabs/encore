@@ -20,7 +20,7 @@ import (
 // The order matters so be careful when injecting new middleware.
 
 //encore:middleware target=all
-func (s *Service) Context(req middleware.Request, next middleware.Next) middleware.Response {
+func (s *Service) context(req middleware.Request, next middleware.Next) middleware.Response {
 	v := values{
 		TraceID: req.Data().Trace.TraceID,
 	}
@@ -31,7 +31,7 @@ func (s *Service) Context(req middleware.Request, next middleware.Next) middlewa
 }
 
 //encore:middleware target=all
-func (s *Service) Errors(req middleware.Request, next middleware.Next) middleware.Response {
+func (s *Service) errors(req middleware.Request, next middleware.Next) middleware.Response {
 	resp := next(req)
 	if resp.Err == nil {
 		return resp
@@ -71,7 +71,7 @@ func (s *Service) Errors(req middleware.Request, next middleware.Next) middlewar
 // above. These are targeted so the order doesn't matter.
 
 //encore:middleware target=tag:auth_admin_only
-func (s *Service) AuthorizeAdminOnly(req middleware.Request, next middleware.Next) middleware.Response {
+func (s *Service) authorizeAdminOnly(req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	claims := encauth.Data().(*auth.Claims)
 
@@ -84,7 +84,7 @@ func (s *Service) AuthorizeAdminOnly(req middleware.Request, next middleware.Nex
 }
 
 //encore:middleware target=tag:auth_user
-func (s *Service) AuthUser(req middleware.Request, next middleware.Next) middleware.Response {
+func (s *Service) authUser(req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -93,7 +93,7 @@ func (s *Service) AuthUser(req middleware.Request, next middleware.Next) middlew
 
 		userID, err := uuid.Parse(id.Value)
 		if err != nil {
-			return v1.NewErrorResponse(http.StatusBadRequest, ErrInvalidID)
+			return v1.NewErrorResponse(http.StatusBadRequest, errInvalidID)
 		}
 
 		usr, err := s.usrCore.QueryByID(ctx, userID)

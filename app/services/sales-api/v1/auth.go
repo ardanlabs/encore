@@ -17,17 +17,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// Set of error variables for handling auth errors.
-var (
-	ErrInvalidID = errors.New("ID is not in its proper form")
-)
+var errInvalidID = errors.New("ID is not in its proper form")
 
 type authParams struct {
 	Authorization string `header:"Authorization"`
 }
 
 //encore:authhandler
-func (s *Service) AuthHandler(ctx context.Context, ap *authParams) (encauth.UID, *auth.Claims, error) {
+func (s *Service) authHandler(ctx context.Context, ap *authParams) (encauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 	if len(parts) != 2 {
 		return "", nil, v1.NewError(errs.Unauthenticated, "invalid authorization value")
@@ -58,8 +55,8 @@ func (s *Service) processJWT(ctx context.Context, token string) (encauth.UID, *a
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		s.log.Error(ctx, "parsing subject: %s", ErrInvalidID)
-		return "", nil, v1.NewError(errs.InvalidArgument, ErrInvalidID.Error())
+		s.log.Error(ctx, "parsing subject: %s", errInvalidID)
+		return "", nil, v1.NewError(errs.InvalidArgument, errInvalidID.Error())
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil
@@ -94,15 +91,13 @@ func (s *Service) processBasic(ctx context.Context, basic string) (encauth.UID, 
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		s.log.Error(ctx, "parsing subject: %s", ErrInvalidID)
-		return "", nil, v1.NewError(errs.InvalidArgument, ErrInvalidID.Error())
+		s.log.Error(ctx, "parsing subject: %s", errInvalidID)
+		return "", nil, v1.NewError(errs.InvalidArgument, errInvalidID.Error())
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil
 }
 
-// parseBasicAuth parses an HTTP Basic Authentication string.
-// "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" returns ("Aladdin", "open sesame", true).
 func parseBasicAuth(auth string) (string, string, bool) {
 	parts := strings.Split(auth, " ")
 	if len(parts) != 2 || parts[0] != "Basic" {

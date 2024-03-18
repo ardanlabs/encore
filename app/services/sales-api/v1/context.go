@@ -19,17 +19,6 @@ func setValues(req middleware.Request, v *values) middleware.Request {
 	return req.WithContext(ctx)
 }
 
-func getValues(ctx context.Context) *values {
-	v, ok := ctx.Value(key).(*values)
-	if !ok {
-		return &values{
-			TraceID: "00000000-0000-0000-0000-000000000000",
-		}
-	}
-
-	return v
-}
-
 func getTraceID(ctx context.Context) string {
 	v, ok := ctx.Value(key).(*values)
 	if !ok {
