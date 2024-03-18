@@ -10,20 +10,16 @@ type ctxKey int
 
 const key ctxKey = 1
 
-type values struct {
-	TraceID string
-}
-
-func setValues(req middleware.Request, v *values) middleware.Request {
-	ctx := context.WithValue(req.Context(), key, v)
+func setTraceID(req middleware.Request, traceID string) middleware.Request {
+	ctx := context.WithValue(req.Context(), key, traceID)
 	return req.WithContext(ctx)
 }
 
 func getTraceID(ctx context.Context) string {
-	v, ok := ctx.Value(key).(*values)
+	v, ok := ctx.Value(key).(string)
 	if !ok {
 		return "00000000-0000-0000-0000-000000000000"
 	}
 
-	return v.TraceID
+	return v
 }

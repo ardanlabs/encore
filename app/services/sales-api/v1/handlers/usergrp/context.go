@@ -16,6 +16,7 @@ const (
 	userKey
 )
 
+// SetUserID takes the specified userID and stores the value in the context.
 func SetUserID(req middleware.Request, userID uuid.UUID) middleware.Request {
 	ctx := context.WithValue(req.Context(), userIDKey, userID)
 	return req.WithContext(ctx)
@@ -30,6 +31,7 @@ func getUserID(ctx context.Context) (uuid.UUID, error) {
 	return v, nil
 }
 
+// SetUser takes the specified user and stores the value in the context.
 func SetUser(req middleware.Request, usr user.User) middleware.Request {
 	ctx := context.WithValue(req.Context(), userKey, usr)
 	return req.WithContext(ctx)

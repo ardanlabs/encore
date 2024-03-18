@@ -23,6 +23,8 @@ type authParams struct {
 	Authorization string `header:"Authorization"`
 }
 
+// =============================================================================
+
 //encore:authhandler
 func (s *Service) authHandler(ctx context.Context, ap *authParams) (encauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
@@ -97,6 +99,8 @@ func (s *Service) processBasic(ctx context.Context, basic string) (encauth.UID, 
 
 	return encauth.UID(subjectID.String()), &claims, nil
 }
+
+// =============================================================================
 
 func parseBasicAuth(auth string) (string, string, bool) {
 	parts := strings.Split(auth, " ")

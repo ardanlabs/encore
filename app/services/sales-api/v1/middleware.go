@@ -21,11 +21,7 @@ import (
 
 //encore:middleware target=all
 func (s *Service) context(req middleware.Request, next middleware.Next) middleware.Response {
-	v := values{
-		TraceID: req.Data().Trace.TraceID,
-	}
-
-	req = setValues(req, &v)
+	req = setTraceID(req, req.Data().Trace.TraceID)
 
 	return next(req)
 }
