@@ -11,7 +11,7 @@ func (s *Service) TestGrp_Test(ctx context.Context, qp *testgrp.QueryParams) (*t
 	return s.testGrp.Test(ctx, qp)
 }
 
-//encore:api auth method=GET path=/testauth/:userID tag:authuser
+//encore:api auth method=GET path=/testauth/:userID tag:auth_user
 func (s *Service) TestGrp_TestAuth(ctx context.Context, userID string, qp *testgrp.QueryParams) (*testgrp.Status, error) {
 	return s.testGrp.TestAuth(ctx, qp)
 }

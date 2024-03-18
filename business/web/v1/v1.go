@@ -6,27 +6,14 @@ import (
 
 	"encore.dev/beta/errs"
 	"encore.dev/middleware"
+	"github.com/ardanlabs/encore/foundation/validate"
 )
-
-// ErrorResponse is the form used for API responses from failures in the API.
-type ErrorResponse struct {
-	Err    string            `json:"error"`
-	Fields map[string]string `json:"fields,omitempty"`
-}
-
-// ErrDetails implements the encore ErrDetails interface.
-func (er ErrorResponse) ErrDetails() {}
-
-// =============================================================================
 
 // NewError constructs an encore error based on an app error.
 func NewError(code errs.ErrCode, err string) *errs.Error {
 	return &errs.Error{
 		Code:    code,
 		Message: err,
-		Details: ErrorResponse{
-			Err: err,
-		},
 	}
 }
 
@@ -36,11 +23,8 @@ func NewErrorResponse(status int, err error) middleware.Response {
 	return middleware.Response{
 		HTTPStatus: status,
 		Err: &errs.Error{
-			Code:    errs.Internal,
+			Code:    errs.Aborted,
 			Message: err.Error(),
-			Details: ErrorResponse{
-				Err: err.Error(),
-			},
 		},
 	}
 }
@@ -51,27 +35,21 @@ func NewErrorResponseWithMessage(status int, message string) middleware.Response
 	return middleware.Response{
 		HTTPStatus: status,
 		Err: &errs.Error{
-			Code:    errs.Internal,
+			Code:    errs.Aborted,
 			Message: message,
-			Details: ErrorResponse{
-				Err: message,
-			},
 		},
 	}
 }
 
 // NewErrorResponseWithFields constructs an encore middleware response
 // with an error and fields.
-func NewErrorResponseWithFields(status int, message string, fields map[string]string) middleware.Response {
+func NewErrorResponseWithFields(status int, message string, fields validate.FieldErrors) middleware.Response {
 	return middleware.Response{
 		HTTPStatus: status,
 		Err: &errs.Error{
-			Code:    errs.Internal,
+			Code:    errs.Aborted,
 			Message: message,
-			Details: ErrorResponse{
-				Err:    message,
-				Fields: fields,
-			},
+			Details: fields,
 		},
 	}
 }

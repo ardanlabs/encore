@@ -15,10 +15,10 @@ import (
 // We are declaring the existence of a database for this system. It MUST
 // be declared at a package level with the Service type.
 var ebdDB = edb.NewDatabase("url", edb.DatabaseConfig{
-	Migrations: "./v1/migrations",
+	Migrations: "./migrations",
 })
 
-//go:embed v1/seeds/seed.sql
+//go:embed seeds/seed.sql
 var seedDoc string
 
 func seedDatabase(ctx context.Context, db *sqlx.DB) (err error) {

@@ -5,26 +5,19 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
-	"net/http"
 	"os"
-	"os/signal"
 	"runtime"
-	"syscall"
-	"time"
 
 	"github.com/ardanlabs/conf/v3"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/build/all"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/testgrp"
+	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
-	"github.com/ardanlabs/encore/business/web/v1/debug"
-	"github.com/ardanlabs/encore/business/web/v1/mux"
 	"github.com/ardanlabs/encore/foundation/keystore"
 	"github.com/ardanlabs/encore/foundation/logger"
-	"github.com/ardanlabs/encore/foundation/web"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -32,14 +25,13 @@ var build = "develop"
 
 //encore:service
 type Service struct {
-	log      *logger.Logger
-	db       *sqlx.DB
-	api      *http.Server
-	auth     *auth.Auth
-	usrCore  *user.Core
-	shutdown time.Duration
+	log     *logger.Logger
+	db      *sqlx.DB
+	auth    *auth.Auth
+	usrCore *user.Core
 
 	testGrp *testgrp.Handlers
+	usrGrp  *usergrp.Handlers
 }
 
 // initService is called by Encore to initialize the service.
@@ -58,7 +50,7 @@ func initService() (*Service, error) {
 	}
 
 	traceIDFn := func(ctx context.Context) string {
-		return web.GetTraceID(ctx)
+		return getTraceID(ctx)
 	}
 
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "SALES-API", traceIDFn, events)
@@ -73,15 +65,6 @@ func initService() (*Service, error) {
 
 	cfg := struct {
 		conf.Version
-		Web struct {
-			ReadTimeout        time.Duration `conf:"default:5s"`
-			WriteTimeout       time.Duration `conf:"default:10s"`
-			IdleTimeout        time.Duration `conf:"default:120s"`
-			ShutdownTimeout    time.Duration `conf:"default:20s"`
-			APIHost            string        `conf:"default:0.0.0.0:3000"`
-			DebugHost          string        `conf:"default:0.0.0.0:4000"`
-			CORSAllowedOrigins []string      `conf:"default:*"`
-		}
 		Auth struct {
 			KeysFolder string `conf:"default:zarf/keys/"`
 			ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
@@ -164,63 +147,16 @@ func initService() (*Service, error) {
 		return nil, fmt.Errorf("constructing auth: %w", err)
 	}
 
-	// -------------------------------------------------------------------------
-	// Start Debug Service
-
-	go func() {
-		log.Info(ctx, "startup", "status", "debug v1 router started", "host", cfg.Web.DebugHost)
-
-		if err := http.ListenAndServe(cfg.Web.DebugHost, debug.Mux()); err != nil {
-			log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Web.DebugHost, "msg", err)
-		}
-	}()
-
-	// -------------------------------------------------------------------------
-	// Start API Service
-
-	log.Info(ctx, "startup", "status", "initializing V1 API support")
-
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-
-	cfgMux := mux.Config{
-		Build:    build,
-		Shutdown: shutdown,
-		Log:      log,
-		Delegate: delegate.New(log),
-		Auth:     auth,
-		DB:       db,
-	}
-
-	api := http.Server{
-		Addr:         cfg.Web.APIHost,
-		Handler:      mux.WebAPI(cfgMux, all.Routes(), mux.WithCORS(cfg.Web.CORSAllowedOrigins)),
-		ReadTimeout:  cfg.Web.ReadTimeout,
-		WriteTimeout: cfg.Web.WriteTimeout,
-		IdleTimeout:  cfg.Web.IdleTimeout,
-		ErrorLog:     logger.NewStdLogger(log, logger.LevelError),
-	}
-
-	serverErrors := make(chan error, 1)
-
-	go func() {
-		log.Info(ctx, "startup", "status", "api router started", "host", api.Addr)
-		serverErrors <- api.ListenAndServe()
-	}()
-
-	// -------------------------------------------------------------------------
-
 	usrCore := user.NewCore(log, delegate.New(log), userdb.NewStore(log, db))
 
 	s := Service{
-		log:      log,
-		db:       db,
-		api:      &api,
-		auth:     auth,
-		usrCore:  usrCore,
-		shutdown: cfg.Web.ShutdownTimeout,
+		log:     log,
+		db:      db,
+		auth:    auth,
+		usrCore: usrCore,
 
 		testGrp: testgrp.New(),
+		usrGrp:  usergrp.New(usrCore, auth),
 	}
 
 	return &s, nil
@@ -229,23 +165,8 @@ func initService() (*Service, error) {
 // Shutdown implements a function that will be called by encore when the service
 // is signaled to shutdown.
 func (s *Service) Shutdown(force context.Context) {
-	s.log.Info(force, "shutdown", "status", "shutdown complete")
-
-	ctx, cancel := context.WithTimeout(force, s.shutdown)
-	defer cancel()
-
-	if err := s.api.Shutdown(ctx); err != nil {
-		s.api.Close()
-		s.log.Info(force, "shutdown", "could not stop server gracefully: %w", err)
-	}
+	defer s.log.Info(force, "shutdown", "status", "shutdown complete")
 
 	s.log.Info(force, "shutdown", "status", "stopping database support")
 	s.db.Close()
-}
-
-// Route all requests to the existing HTTP router if no other endpoint matches.
-//
-//encore:api public raw path=/!fallback
-func (s *Service) Fallback(w http.ResponseWriter, req *http.Request) {
-	s.api.Handler.ServeHTTP(w, req)
 }

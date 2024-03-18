@@ -13,7 +13,6 @@ import (
 	v1 "github.com/ardanlabs/encore/business/web/v1"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
 	"github.com/ardanlabs/encore/foundation/validate"
-	"github.com/ardanlabs/encore/foundation/web"
 	"github.com/google/uuid"
 )
 
@@ -54,7 +53,7 @@ func (s *Service) Logger(req middleware.Request, next middleware.Next) middlewar
 	resp := next(req)
 
 	s.log.Info(ctx, "request completed", "endpoint", er.Endpoint, "path", path,
-		"statuscode", resp.HTTPStatus, "since", time.Since(web.GetTime(ctx)).String())
+		"statuscode", resp.HTTPStatus, "since", time.Since(getTime(ctx)).String())
 
 	return resp
 }
@@ -78,7 +77,7 @@ func (s *Service) Errors(req middleware.Request, next middleware.Next) middlewar
 
 		if validate.IsFieldErrors(trsErr.Err) {
 			fieldErrors := validate.GetFieldErrors(trsErr.Err)
-			midResp = v1.NewErrorResponseWithFields(trsErr.Status, "data validation error", fieldErrors.Fields())
+			midResp = v1.NewErrorResponseWithFields(trsErr.Status, "data validation error", fieldErrors)
 			break
 		}
 
@@ -94,7 +93,20 @@ func (s *Service) Errors(req middleware.Request, next middleware.Next) middlewar
 	return midResp
 }
 
-//encore:middleware target=tag:authuser
+//encore:middleware target=tag:auth_admin_only
+func (s *Service) AuthorizeAdminOnly(req middleware.Request, next middleware.Next) middleware.Response {
+	ctx := req.Context()
+	claims := encauth.Data().(*auth.Claims)
+
+	if err := s.auth.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAdminOnly); err != nil {
+		authErr := auth.NewAuthError("authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOnly, err)
+		return v1.NewErrorResponse(http.StatusBadRequest, authErr)
+	}
+
+	return next(req)
+}
+
+//encore:middleware target=tag:auth_user
 func (s *Service) AuthUser(req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	var userID uuid.UUID

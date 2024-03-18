@@ -42,7 +42,7 @@ users:
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
 
 pgcli:
-	pgcli $(shell encore db conn-uri url | sed -e 's/localhost/127.0.0.1/g')
+	pgcli $(shell encore db conn-uri url)
 
 curl:
 	curl -il "http://127.0.0.1:4000/test?limit=2&offset=2"
@@ -56,3 +56,8 @@ curl:
 auth:
 	curl -il \
 	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/testauth/5cf37266-3473-4006-984f-9325122678b7?limit=2&offset=2"
+
+create:
+	curl -il -X POST \
+	-d '{"name": "bill", "email": "bill@ardanlabs.com", "roles": ["ADMIN"], "department": "IT", "password": "123", "passwordConfirm": "123"}' \
+	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users"

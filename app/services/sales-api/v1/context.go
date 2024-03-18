@@ -13,15 +13,13 @@ type ctxKey int
 
 const key ctxKey = 1
 
-// Values represent state for each request.
 type values struct {
 	TraceID    string
 	Now        time.Time
 	StatusCode int
 }
 
-// GetValues returns the values from the context.
-func GetValues(ctx context.Context) *values {
+func getValues(ctx context.Context) *values {
 	v, ok := ctx.Value(key).(*values)
 	if !ok {
 		return &values{
@@ -33,8 +31,7 @@ func GetValues(ctx context.Context) *values {
 	return v
 }
 
-// GetTraceID returns the trace id from the context.
-func GetTraceID(ctx context.Context) string {
+func getTraceID(ctx context.Context) string {
 	v, ok := ctx.Value(key).(*values)
 	if !ok {
 		return "00000000-0000-0000-0000-000000000000"
@@ -43,8 +40,7 @@ func GetTraceID(ctx context.Context) string {
 	return v.TraceID
 }
 
-// GetTime returns the time from the context.
-func GetTime(ctx context.Context) time.Time {
+func getTime(ctx context.Context) time.Time {
 	v, ok := ctx.Value(key).(*values)
 	if !ok {
 		return time.Now()
@@ -67,8 +63,7 @@ const (
 	userKey
 )
 
-// GetUserID returns the claims from the context.
-func GetUserID(ctx context.Context) uuid.UUID {
+func getUserID(ctx context.Context) uuid.UUID {
 	v, ok := ctx.Value(userIDKey).(uuid.UUID)
 	if !ok {
 		return uuid.UUID{}
@@ -77,8 +72,7 @@ func GetUserID(ctx context.Context) uuid.UUID {
 	return v
 }
 
-// GetUser returns the user from the context.
-func GetUser(ctx context.Context) user.User {
+func getUser(ctx context.Context) user.User {
 	v, ok := ctx.Value(userKey).(user.User)
 	if !ok {
 		return user.User{}
