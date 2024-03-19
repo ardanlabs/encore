@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -40,6 +41,50 @@ type Config struct {
 // Open knows how to open a database connection based on the configuration.
 func Open(cfg Config) (*sqlx.DB, error) {
 	db := sqlx.NewDb(cfg.EDB.Stdlib(), "pgx")
+	db.SetMaxIdleConns(cfg.MaxIdleConns)
+	db.SetMaxOpenConns(cfg.MaxOpenConns)
+
+	return db, nil
+}
+
+// ConfigTest is the required properties to use the database.
+type ConfigTest struct {
+	User         string
+	Password     string
+	HostPort     string
+	Name         string
+	Schema       string
+	MaxIdleConns int
+	MaxOpenConns int
+	DisableTLS   bool
+}
+
+// OpenTest knows how to open a database connection based on the configuration.
+func OpenTest(cfg ConfigTest) (*sqlx.DB, error) {
+	sslMode := "require"
+	if cfg.DisableTLS {
+		sslMode = "disable"
+	}
+
+	q := make(url.Values)
+	q.Set("sslmode", sslMode)
+	q.Set("timezone", "utc")
+	if cfg.Schema != "" {
+		q.Set("search_path", cfg.Schema)
+	}
+
+	u := url.URL{
+		Scheme:   "postgres",
+		User:     url.UserPassword(cfg.User, cfg.Password),
+		Host:     cfg.HostPort,
+		Path:     cfg.Name,
+		RawQuery: q.Encode(),
+	}
+
+	db, err := sqlx.Open("pgx", u.String())
+	if err != nil {
+		return nil, err
+	}
 	db.SetMaxIdleConns(cfg.MaxIdleConns)
 	db.SetMaxOpenConns(cfg.MaxOpenConns)
 

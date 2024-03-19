@@ -10,7 +10,7 @@ import (
 
 	edb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/database"
+	"github.com/ardanlabs/encore/app/services/sales-api/v1/database/migrate"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -121,7 +121,7 @@ func New(ebdDB *edb.Database) (*Service, error) {
 
 	// TODO: I don't like this here because it's more of an ops thing, but
 	// for now I will leave it as I learn more.
-	database.Seed(ctx, db)
+	migrate.Seed(ctx, db)
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support

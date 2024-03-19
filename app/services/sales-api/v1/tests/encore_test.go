@@ -3,7 +3,7 @@ package tests
 import (
 	"context"
 
-	edb "encore.dev/storage/sqldb"
+	"github.com/ardanlabs/encore/app/services/sales-api/v1/database"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/service"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -11,12 +11,6 @@ import (
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
 )
-
-// We are declaring the existence of a database for this system. It MUST
-// be declared at a package level with the Service type.
-var ebdDB = edb.NewDatabase("name", edb.DatabaseConfig{
-	Migrations: "../database/migrations",
-})
 
 //encore:service
 type Service struct {
@@ -29,7 +23,7 @@ type Service struct {
 
 // initService is called by Encore to initialize the service.
 func initService() (*Service, error) {
-	s, err := service.New(ebdDB)
+	s, err := service.New(database.EDB)
 	if err != nil {
 		return nil, err
 	}

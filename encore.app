@@ -1,3 +1,3 @@
 {
-	"id": "encore-app"
+	"id": ""
 }
