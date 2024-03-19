@@ -125,7 +125,7 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (v1.PageDocument[A
 func (h *Handlers) QueryByID(ctx context.Context) (AppUser, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return AppUser{}, fmt.Errorf("user missing in context: %w", err)
+		return AppUser{}, fmt.Errorf("querybyid: %w", err)
 	}
 
 	return toAppUser(usr), nil

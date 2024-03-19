@@ -1,4 +1,4 @@
-package encore
+package database
 
 import (
 	"context"
@@ -14,14 +14,15 @@ import (
 
 // We are declaring the existence of a database for this system. It MUST
 // be declared at a package level with the Service type.
-var ebdDB = edb.NewDatabase("url", edb.DatabaseConfig{
+var EDB = edb.NewDatabase("prod", edb.DatabaseConfig{
 	Migrations: "./migrations",
 })
 
 //go:embed seeds/seed.sql
 var seedDoc string
 
-func seedDatabase(ctx context.Context, db *sqlx.DB) (err error) {
+// Seed will insert data needed for a new database.
+func Seed(ctx context.Context, db *sqlx.DB) (err error) {
 	if err := sqldb.StatusCheck(ctx, db); err != nil {
 		return fmt.Errorf("status check database: %w", err)
 	}

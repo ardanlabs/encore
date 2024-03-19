@@ -1,4 +1,4 @@
-package encore
+package service
 
 import (
 	"context"
@@ -8,7 +8,9 @@ import (
 	"os"
 	"runtime"
 
+	edb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
+	"github.com/ardanlabs/encore/app/services/sales-api/v1/database"
 	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -23,17 +25,17 @@ import (
 
 var build = "develop"
 
-//encore:service
+// Service provides information for the encore service.
 type Service struct {
-	log     *logger.Logger
-	db      *sqlx.DB
-	auth    *auth.Auth
-	usrCore *user.Core
-	usrGrp  *usergrp.Handlers
+	Log     *logger.Logger
+	DB      *sqlx.DB
+	Auth    *auth.Auth
+	UsrCore *user.Core
+	UsrGrp  *usergrp.Handlers
 }
 
-// initService is called by Encore to initialize the service.
-func initService() (*Service, error) {
+// New is called by Encore to initialize the service.
+func New(ebdDB *edb.Database) (*Service, error) {
 	ctx := context.Background()
 
 	// -------------------------------------------------------------------------
@@ -119,7 +121,7 @@ func initService() (*Service, error) {
 
 	// TODO: I don't like this here because it's more of an ops thing, but
 	// for now I will leave it as I learn more.
-	seedDatabase(ctx, db)
+	database.Seed(ctx, db)
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
@@ -148,21 +150,12 @@ func initService() (*Service, error) {
 	usrCore := user.NewCore(log, delegate.New(log), userdb.NewStore(log, db))
 
 	s := Service{
-		log:     log,
-		db:      db,
-		auth:    auth,
-		usrCore: usrCore,
-		usrGrp:  usergrp.New(usrCore, auth),
+		Log:     log,
+		DB:      db,
+		Auth:    auth,
+		UsrCore: usrCore,
+		UsrGrp:  usergrp.New(usrCore, auth),
 	}
 
 	return &s, nil
-}
-
-// Shutdown implements a function that will be called by encore when the service
-// is signaled to shutdown.
-func (s *Service) Shutdown(force context.Context) {
-	defer s.log.Info(force, "shutdown", "status", "shutdown complete")
-
-	s.log.Info(force, "shutdown", "status", "stopping database support")
-	s.db.Close()
 }

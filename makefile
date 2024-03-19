@@ -69,7 +69,7 @@ delete:
 
 queryid:
 	curl -il -X GET \
-	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/3a60a6f5-cc42-4f5c-aabd-e86f8ab11057"
+	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/8561801a-e5be-4834-b835-eece402fa6aa"
 
 query:
 	curl -il -X GET \
