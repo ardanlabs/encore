@@ -1,4 +1,4 @@
-package encore
+package mid
 
 import (
 	"context"
@@ -11,22 +11,26 @@ import (
 
 	encauth "encore.dev/beta/auth"
 	"encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/business/core/crud/user"
 	v1 "github.com/ardanlabs/encore/business/web/v1"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
-var errInvalidID = errors.New("ID is not in its proper form")
+// ErrInvalidID represents a condition where the id is not a uuid.
+var ErrInvalidID = errors.New("ID is not in its proper form")
 
-type authParams struct {
+// AuthParams is used to unmarshal the authorization string from the request.
+type AuthParams struct {
 	Authorization string `header:"Authorization"`
 }
 
 // =============================================================================
 
-//encore:authhandler
-func (s *Service) authHandler(ctx context.Context, ap *authParams) (encauth.UID, *auth.Claims, error) {
+// AuthHandler is used to provide initial auth for JWT's and basic user:password.
+func AuthHandler(ctx context.Context, log *logger.Logger, a *auth.Auth, usrCore *user.Core, ap *AuthParams) (encauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 	if len(parts) != 2 {
 		return "", nil, v1.NewError(errs.Unauthenticated, "invalid authorization value")
@@ -34,38 +38,39 @@ func (s *Service) authHandler(ctx context.Context, ap *authParams) (encauth.UID,
 
 	switch parts[0] {
 	case "Bearer":
-		return s.processJWT(ctx, ap.Authorization)
+		return processJWT(ctx, log, a, ap.Authorization)
 
 	case "Basic":
-		return s.processBasic(ctx, ap.Authorization)
+		return processBasic(ctx, log, usrCore, ap.Authorization)
 	}
 
 	return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
 }
 
-func (s *Service) processJWT(ctx context.Context, token string) (encauth.UID, *auth.Claims, error) {
-	claims, err := s.auth.Authenticate(ctx, token)
+// =============================================================================
+
+func processJWT(ctx context.Context, log *logger.Logger, a *auth.Auth, token string) (encauth.UID, *auth.Claims, error) {
+	claims, err := a.Authenticate(ctx, token)
 	if err != nil {
-		s.log.Error(ctx, "authenticate: failed", "ERROR", err)
+		log.Error(ctx, "authenticate: failed", "ERROR", err)
 		return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
 	}
 
 	if claims.Subject == "" {
-		s.log.Error(ctx, "authorize: you are not authorized for that action, no claims")
+		log.Error(ctx, "authorize: you are not authorized for that action, no claims")
 		return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
 	}
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		s.log.Error(ctx, "parsing subject: %s", errInvalidID)
-		return "", nil, v1.NewError(errs.InvalidArgument, errInvalidID.Error())
+		log.Error(ctx, "parsing subject: %s", ErrInvalidID)
+		return "", nil, v1.NewError(errs.InvalidArgument, ErrInvalidID.Error())
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil
-
 }
 
-func (s *Service) processBasic(ctx context.Context, basic string) (encauth.UID, *auth.Claims, error) {
+func processBasic(ctx context.Context, log *logger.Logger, usrCore *user.Core, basic string) (encauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(basic)
 	if !ok {
 		return "", nil, v1.NewError(errs.Unauthenticated, "invalid Basic auth")
@@ -76,7 +81,7 @@ func (s *Service) processBasic(ctx context.Context, basic string) (encauth.UID, 
 		return "", nil, v1.NewError(errs.Unauthenticated, "invalid email format")
 	}
 
-	usr, err := s.usrCore.Authenticate(ctx, *addr, pass)
+	usr, err := usrCore.Authenticate(ctx, *addr, pass)
 	if err != nil {
 		return "", nil, v1.NewError(errs.Unauthenticated, err.Error())
 	}
@@ -93,14 +98,12 @@ func (s *Service) processBasic(ctx context.Context, basic string) (encauth.UID, 
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		s.log.Error(ctx, "parsing subject: %s", errInvalidID)
-		return "", nil, v1.NewError(errs.InvalidArgument, errInvalidID.Error())
+		log.Error(ctx, "parsing subject: %s", ErrInvalidID)
+		return "", nil, v1.NewError(errs.InvalidArgument, ErrInvalidID.Error())
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil
 }
-
-// =============================================================================
 
 func parseBasicAuth(auth string) (string, string, bool) {
 	parts := strings.Split(auth, " ")

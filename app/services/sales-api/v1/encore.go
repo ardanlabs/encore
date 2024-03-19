@@ -15,6 +15,7 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
+	"github.com/ardanlabs/encore/business/web/v1/mid"
 	"github.com/ardanlabs/encore/foundation/keystore"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
@@ -47,7 +48,7 @@ func initService() (*Service, error) {
 	}
 
 	traceIDFn := func(ctx context.Context) string {
-		return getTraceID(ctx)
+		return mid.GetTraceID(ctx)
 	}
 
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "SALES-API", traceIDFn, events)

@@ -11,6 +11,7 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	v1 "github.com/ardanlabs/encore/business/web/v1"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
+	"github.com/ardanlabs/encore/business/web/v1/mid"
 )
 
 // Handlers manages the set of handler functions for this domain.
@@ -64,7 +65,7 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser)
 		return AppUser{}, v1.NewTrustedError(err, http.StatusBadRequest)
 	}
 
-	usr, err := getUser(ctx)
+	usr, err := mid.GetUser(ctx)
 	if err != nil {
 		return AppUser{}, fmt.Errorf("user missing in context: %w", err)
 	}
@@ -79,7 +80,7 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser)
 
 // Delete removes a user from the system.
 func (h *Handlers) Delete(ctx context.Context, userID string) error {
-	usr, err := getUser(ctx)
+	usr, err := mid.GetUser(ctx)
 	if err != nil {
 		return fmt.Errorf("user missing in context: %w", err)
 	}
@@ -122,7 +123,7 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (v1.PageDocument[A
 
 // QueryByID returns a user by its ID.
 func (h *Handlers) QueryByID(ctx context.Context) (AppUser, error) {
-	usr, err := getUser(ctx)
+	usr, err := mid.GetUser(ctx)
 	if err != nil {
 		return AppUser{}, fmt.Errorf("user missing in context: %w", err)
 	}
