@@ -33,8 +33,49 @@ down:
 upgrade:
 	encore version update
 
-test:
-	encore test ./...
+# ==============================================================================
+# Running tests within the local computer
+
+test-race:
+	CGO_ENABLED=1 encore test -race -count=1 ./...
+
+test-only:
+	CGO_ENABLED=0 encore test -count=1 ./...
+
+lint:
+	CGO_ENABLED=0 go vet ./...
+	staticcheck -checks=all ./...
+
+vuln-check:
+	govulncheck ./...
+
+test: test-only vuln-check lint
+
+test-race: test-race vuln-check lint
+
+# ==============================================================================
+# Modules support
+
+deps-reset:
+	git checkout -- go.mod
+	go mod tidy
+
+tidy:
+	go mod tidy
+	go mod vendor
+
+deps-list:
+	go list -m -u -mod=readonly all
+
+deps-upgrade:
+	go get -u -v ./...
+	go mod tidy
+
+deps-cleancache:
+	go clean -modcache
+
+list:
+	go list -mod=mod all
 
 # ==============================================================================
 # Access Project

@@ -1,3 +1,4 @@
+// Package encore represent the encore application.
 package encore
 
 import (
@@ -7,8 +8,8 @@ import (
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/service"
 	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/web/auth"
-	"github.com/ardanlabs/encore/business/web/database"
 	"github.com/ardanlabs/encore/business/web/debug"
 	"github.com/ardanlabs/encore/business/web/metrics"
 	"github.com/ardanlabs/encore/foundation/logger"
@@ -27,8 +28,10 @@ type Service struct {
 }
 
 // initService is called by Encore to initialize the service.
+//
+//lint:ignore U1000 "called by encore"
 func initService() (*Service, error) {
-	s, err := service.New(database.AppDB)
+	s, err := service.New(appdb.AppDB)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +58,7 @@ func (s *Service) Shutdown(force context.Context) {
 	s.DB.Close()
 }
 
-// Debug endpoints will be served from this handler.
+// Fallback is called for the debug enpoints.
 //
 //encore:api public raw path=/!fallback
 func (s *Service) Fallback(w http.ResponseWriter, req *http.Request) {

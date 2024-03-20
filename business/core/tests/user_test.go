@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/database"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -58,7 +58,7 @@ func userCrud(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	test := dbtest.NewTest(t, url, database.DBName, "Test_User/crud")
+	test := dbtest.NewTest(t, url, appdb.DBName, "Test_User/crud")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -204,7 +204,7 @@ func userPaging(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	test := dbtest.NewTest(t, url, database.DBName, "Test_User/paging")
+	test := dbtest.NewTest(t, url, appdb.DBName, "Test_User/paging")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)

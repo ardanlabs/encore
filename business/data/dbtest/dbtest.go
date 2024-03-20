@@ -15,10 +15,10 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
+	"github.com/ardanlabs/encore/business/data/appdb"
+	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/auth"
-	"github.com/ardanlabs/encore/business/web/database"
-	"github.com/ardanlabs/encore/business/web/database/migrate"
 	"github.com/ardanlabs/encore/business/web/mid"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
@@ -28,7 +28,7 @@ import (
 // StartDB retrieves the database information.
 func StartDB() (string, error) {
 	var out bytes.Buffer
-	cmd := exec.Command("encore", "db", "conn-uri", "--test", database.DBName)
+	cmd := exec.Command("encore", "db", "conn-uri", "--test", appdb.DBName)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("could not access the database information: %w", err)

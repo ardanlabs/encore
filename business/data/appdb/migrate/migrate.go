@@ -1,3 +1,5 @@
+// Package migrate provides functions used by the dbtest package to init
+// a database for proper use.
 package migrate
 
 import (

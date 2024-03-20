@@ -1,3 +1,4 @@
+// Package metrics provides support to update metric values.
 package metrics
 
 import (

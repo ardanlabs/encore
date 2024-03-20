@@ -1,3 +1,5 @@
+// Package service provides the actual implementation of the encore service.
+// This is constructed in the initService function inside of the encore package.
 package service
 
 import (
@@ -14,9 +16,9 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
+	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/auth"
-	"github.com/ardanlabs/encore/business/web/database/migrate"
 	"github.com/ardanlabs/encore/business/web/mid"
 	"github.com/ardanlabs/encore/foundation/keystore"
 	"github.com/ardanlabs/encore/foundation/logger"
