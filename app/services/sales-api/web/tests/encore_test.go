@@ -23,7 +23,7 @@ type Service struct {
 
 // initService is called by Encore to initialize the service.
 func initService() (*Service, error) {
-	s, err := service.New(database.EDB)
+	s, err := service.New(database.AppDB)
 	if err != nil {
 		return nil, err
 	}
