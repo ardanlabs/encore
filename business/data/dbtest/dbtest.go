@@ -12,13 +12,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/database/migrate"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
 	"github.com/ardanlabs/encore/business/data/sqldb"
-	"github.com/ardanlabs/encore/business/web/v1/auth"
-	"github.com/ardanlabs/encore/business/web/v1/mid"
+	"github.com/ardanlabs/encore/business/web/auth"
+	"github.com/ardanlabs/encore/business/web/database"
+	"github.com/ardanlabs/encore/business/web/database/migrate"
+	"github.com/ardanlabs/encore/business/web/mid"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/jmoiron/sqlx"
@@ -27,7 +28,7 @@ import (
 // StartDB retrieves the database information.
 func StartDB() (string, error) {
 	var out bytes.Buffer
-	cmd := exec.Command("encore", "db", "conn-uri", "--test", "app")
+	cmd := exec.Command("encore", "db", "conn-uri", "--test", database.DBName)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("could not access the database information: %w", err)
@@ -59,7 +60,7 @@ type Test struct {
 // NewTest creates a test database inside a Docker container. It creates the
 // required table structure but the database is otherwise empty. It returns
 // the database to use as well as a function to call at the end of the test.
-func NewTest(t *testing.T, url string, testName string) *Test {
+func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -86,7 +87,7 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 
 	// -------------------------------------------------------------------------
 
-	url = strings.Replace(url, "app", dbName, 1)
+	url = strings.Replace(url, mainDBName, dbName, 1)
 
 	db, err := sqldb.OpenTest(url)
 	if err != nil {

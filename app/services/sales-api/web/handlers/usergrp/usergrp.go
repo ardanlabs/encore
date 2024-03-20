@@ -9,9 +9,9 @@ import (
 
 	encauth "encore.dev/beta/auth"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	v1 "github.com/ardanlabs/encore/business/web/v1"
-	"github.com/ardanlabs/encore/business/web/v1/auth"
-	"github.com/ardanlabs/encore/business/web/v1/mid"
+	"github.com/ardanlabs/encore/business/web"
+	"github.com/ardanlabs/encore/business/web/auth"
+	"github.com/ardanlabs/encore/business/web/mid"
 )
 
 // Handlers manages the set of handler functions for this domain.
@@ -44,13 +44,13 @@ func (h *Handlers) Token(ctx context.Context, kid string) (Token, error) {
 func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) {
 	nc, err := toCoreNewUser(app)
 	if err != nil {
-		return AppUser{}, v1.NewError(http.StatusBadRequest, err)
+		return AppUser{}, web.NewError(http.StatusBadRequest, err)
 	}
 
 	usr, err := h.user.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
-			return AppUser{}, v1.NewError(http.StatusConflict, user.ErrUniqueEmail)
+			return AppUser{}, web.NewError(http.StatusConflict, user.ErrUniqueEmail)
 		}
 		return AppUser{}, fmt.Errorf("create: usr[%+v]: %w", usr, err)
 	}
@@ -62,7 +62,7 @@ func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) 
 func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser) (AppUser, error) {
 	uu, err := toCoreUpdateUser(app)
 	if err != nil {
-		return AppUser{}, v1.NewError(http.StatusBadRequest, err)
+		return AppUser{}, web.NewError(http.StatusBadRequest, err)
 	}
 
 	usr, err := mid.GetUser(ctx)
@@ -93,32 +93,32 @@ func (h *Handlers) Delete(ctx context.Context, userID string) error {
 }
 
 // Query returns a list of users with paging.
-func (h *Handlers) Query(ctx context.Context, qp QueryParams) (v1.PageDocument[AppUser], error) {
+func (h *Handlers) Query(ctx context.Context, qp QueryParams) (web.PageDocument[AppUser], error) {
 	if err := validatePaging(qp); err != nil {
-		return v1.PageDocument[AppUser]{}, err
+		return web.PageDocument[AppUser]{}, err
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return v1.PageDocument[AppUser]{}, err
+		return web.PageDocument[AppUser]{}, err
 	}
 
 	orderBy, err := parseOrder(qp)
 	if err != nil {
-		return v1.PageDocument[AppUser]{}, err
+		return web.PageDocument[AppUser]{}, err
 	}
 
 	users, err := h.user.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
-		return v1.PageDocument[AppUser]{}, fmt.Errorf("query: %w", err)
+		return web.PageDocument[AppUser]{}, fmt.Errorf("query: %w", err)
 	}
 
 	total, err := h.user.Count(ctx, filter)
 	if err != nil {
-		return v1.PageDocument[AppUser]{}, fmt.Errorf("count: %w", err)
+		return web.PageDocument[AppUser]{}, fmt.Errorf("count: %w", err)
 	}
 
-	return v1.NewPageDocument(toAppUsers(users), total, qp.Page, qp.Rows), nil
+	return web.NewPageDocument(toAppUsers(users), total, qp.Page, qp.Rows), nil
 }
 
 // QueryByID returns a user by its ID.

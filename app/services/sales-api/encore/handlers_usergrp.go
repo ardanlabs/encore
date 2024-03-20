@@ -3,8 +3,8 @@ package encore
 import (
 	"context"
 
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
-	v1 "github.com/ardanlabs/encore/business/web/v1"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
+	"github.com/ardanlabs/encore/business/web"
 )
 
 //encore:api auth method=GET path=/v1/token/:kid
@@ -28,7 +28,7 @@ func (s *Service) userGrp_Delete(ctx context.Context, userID string) error {
 }
 
 //encore:api auth method=GET path=/v1/users tag:authorize_admin_only
-func (s *Service) userGrp_Query(ctx context.Context, qp usergrp.QueryParams) (v1.PageDocument[usergrp.AppUser], error) {
+func (s *Service) userGrp_Query(ctx context.Context, qp usergrp.QueryParams) (web.PageDocument[usergrp.AppUser], error) {
 	return s.UsrGrp.Query(ctx, qp)
 }
 

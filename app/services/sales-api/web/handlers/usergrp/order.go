@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/v1/order"
+	"github.com/ardanlabs/encore/business/web/order"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 

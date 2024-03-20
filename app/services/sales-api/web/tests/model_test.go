@@ -3,7 +3,7 @@ package tests
 import (
 	"time"
 
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 

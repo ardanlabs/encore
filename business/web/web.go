@@ -1,5 +1,5 @@
-// Package v1 provides types and support related to web v1 functionality.
-package v1
+// Package web provides types and support related to web functionality.
+package web
 
 import (
 	"net/http"

@@ -9,8 +9,8 @@ import (
 	encauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	v1 "github.com/ardanlabs/encore/business/web/v1"
-	"github.com/ardanlabs/encore/business/web/v1/auth"
+	"github.com/ardanlabs/encore/business/web"
+	"github.com/ardanlabs/encore/business/web/auth"
 	"github.com/google/uuid"
 )
 
@@ -60,7 +60,7 @@ func AuthorizeAdminOnly(a *auth.Auth, req middleware.Request, next middleware.Ne
 
 	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAdminOnly); err != nil {
 		authErr := auth.NewAuthError("authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOnly, err)
-		return v1.NewErrorResponse(http.StatusBadRequest, authErr)
+		return web.NewErrorResponse(http.StatusBadRequest, authErr)
 	}
 
 	return next(req)
@@ -77,17 +77,17 @@ func AuthorizeUser(a *auth.Auth, usrCore *user.Core, req middleware.Request, nex
 
 		userID, err := uuid.Parse(id.Value)
 		if err != nil {
-			return v1.NewErrorResponse(http.StatusBadRequest, ErrInvalidID)
+			return web.NewErrorResponse(http.StatusBadRequest, ErrInvalidID)
 		}
 
 		usr, err := usrCore.QueryByID(ctx, userID)
 		if err != nil {
 			switch {
 			case errors.Is(err, user.ErrNotFound):
-				return v1.NewErrorResponse(http.StatusBadRequest, err)
+				return web.NewErrorResponse(http.StatusBadRequest, err)
 
 			default:
-				return v1.NewErrorResponse(http.StatusInternalServerError, fmt.Errorf("querybyid: userID[%s]: %w", userID, err))
+				return web.NewErrorResponse(http.StatusInternalServerError, fmt.Errorf("querybyid: userID[%s]: %w", userID, err))
 			}
 		}
 
@@ -98,7 +98,7 @@ func AuthorizeUser(a *auth.Auth, usrCore *user.Core, req middleware.Request, nex
 
 	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
 		authErr := auth.NewAuthError("authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
-		return v1.NewErrorResponse(http.StatusBadRequest, authErr)
+		return web.NewErrorResponse(http.StatusBadRequest, authErr)
 	}
 
 	return next(req)

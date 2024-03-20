@@ -3,11 +3,11 @@ package tests
 import (
 	"context"
 
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/database"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/service"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/service"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/v1/auth"
+	"github.com/ardanlabs/encore/business/web/auth"
+	"github.com/ardanlabs/encore/business/web/database"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
 )

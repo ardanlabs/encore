@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"encore.dev/beta/errs"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )

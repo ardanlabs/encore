@@ -4,12 +4,13 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/database"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/handlers/usergrp"
-	"github.com/ardanlabs/encore/app/services/sales-api/v1/service"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/service"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/v1/auth"
-	"github.com/ardanlabs/encore/business/web/v1/debug"
+	"github.com/ardanlabs/encore/business/web/auth"
+	"github.com/ardanlabs/encore/business/web/database"
+	"github.com/ardanlabs/encore/business/web/debug"
+	"github.com/ardanlabs/encore/business/web/metrics"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
 )
@@ -17,6 +18,7 @@ import (
 //encore:service
 type Service struct {
 	Log     *logger.Logger
+	Metrics *metrics.Values
 	DB      *sqlx.DB
 	Auth    *auth.Auth
 	UsrCore *user.Core
@@ -33,6 +35,7 @@ func initService() (*Service, error) {
 
 	es := Service{
 		Log:     s.Log,
+		Metrics: newMetrics(),
 		DB:      s.DB,
 		Auth:    s.Auth,
 		UsrCore: s.UsrCore,

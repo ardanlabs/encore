@@ -12,7 +12,7 @@ import (
 
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/data/transaction"
-	"github.com/ardanlabs/encore/business/web/v1/order"
+	"github.com/ardanlabs/encore/business/web/order"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"

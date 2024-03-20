@@ -33,6 +33,9 @@ down:
 upgrade:
 	encore version update
 
+test:
+	encore test ./...
+
 # ==============================================================================
 # Access Project
 
@@ -41,7 +44,7 @@ users:
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
 
 pgcli:
-	pgcli $(shell encore db conn-uri app)
+	pgcli $(shell encore db conn-uri v1)
 
 curl:
 	curl -il "http://127.0.0.1:4000/test?limit=2&offset=2"

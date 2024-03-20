@@ -5,8 +5,8 @@ import (
 
 	encauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/business/web/v1/auth"
-	"github.com/ardanlabs/encore/business/web/v1/mid"
+	"github.com/ardanlabs/encore/business/web/auth"
+	"github.com/ardanlabs/encore/business/web/mid"
 )
 
 // =============================================================================
@@ -24,6 +24,11 @@ func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.
 //encore:middleware target=all
 func (s *Service) context(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.Context(req, next)
+}
+
+//encore:middleware target=all
+func (s *Service) metrics(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.Metrics(s.Metrics, req, next)
 }
 
 // =============================================================================
