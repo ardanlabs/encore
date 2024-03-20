@@ -6,10 +6,9 @@ import (
 	"testing"
 
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/foundation/docker"
 )
 
-var c *docker.Container
+var url string
 
 func TestMain(m *testing.M) {
 	code, err := run(m)
@@ -20,14 +19,17 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func run(m *testing.M) (int, error) {
-	var err error
-
-	c, err = dbtest.StartDB()
+func run(m *testing.M) (code int, err error) {
+	url, err = dbtest.StartDB()
 	if err != nil {
 		return 1, err
 	}
-	defer dbtest.StopDB(c)
+
+	defer func() {
+		err = dbtest.StopDB()
+	}()
+
+	fmt.Println("URL:", url)
 
 	return m.Run(), nil
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"math/rand"
 	"net/mail"
+	"os/exec"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,35 +19,29 @@ import (
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
 	"github.com/ardanlabs/encore/business/web/v1/mid"
-	"github.com/ardanlabs/encore/foundation/docker"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/jmoiron/sqlx"
 )
 
-// StartDB starts a database instance.
-func StartDB() (*docker.Container, error) {
-	image := "postgres:16.2"
-	port := "5432"
-	dockerArgs := []string{"-e", "POSTGRES_PASSWORD=postgres"}
-	appArgs := []string{"-c", "log_statement=all"}
-
-	c, err := docker.StartContainer(image, port, dockerArgs, appArgs)
-	if err != nil {
-		return nil, fmt.Errorf("starting container: %w", err)
+// StartDB retrieves the database information.
+func StartDB() (string, error) {
+	var out bytes.Buffer
+	cmd := exec.Command("encore", "db", "conn-uri", "--test", "app")
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("could not access the database information: %w", err)
 	}
 
-	fmt.Printf("Image:       %s\n", image)
-	fmt.Printf("ContainerID: %s\n", c.ID)
-	fmt.Printf("HostPort:    %s\n", c.HostPort)
+	url := out.String()
+	url = strings.Trim(url, "\n")
 
-	return c, nil
+	return url, nil
 }
 
 // StopDB stops a running database instance.
-func StopDB(c *docker.Container) {
-	docker.StopContainer(c.ID)
-	fmt.Println("Stopped:", c.ID)
+func StopDB() error {
+	return nil
 }
 
 // Test owns state for running and shutting down tests.
@@ -63,17 +59,11 @@ type Test struct {
 // NewTest creates a test database inside a Docker container. It creates the
 // required table structure but the database is otherwise empty. It returns
 // the database to use as well as a function to call at the end of the test.
-func NewTest(t *testing.T, c *docker.Container, testName string) *Test {
+func NewTest(t *testing.T, url string, testName string) *Test {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	dbM, err := sqldb.OpenTest(sqldb.ConfigTest{
-		User:       "postgres",
-		Password:   "postgres",
-		HostPort:   c.HostPort,
-		Name:       "postgres",
-		DisableTLS: true,
-	})
+	dbM, err := sqldb.OpenTest(url)
 	if err != nil {
 		t.Fatalf("Opening database connection: %v", err)
 	}
@@ -96,24 +86,18 @@ func NewTest(t *testing.T, c *docker.Container, testName string) *Test {
 
 	// -------------------------------------------------------------------------
 
-	db, err := sqldb.OpenTest(sqldb.ConfigTest{
-		User:       "postgres",
-		Password:   "postgres",
-		HostPort:   c.HostPort,
-		Name:       dbName,
-		DisableTLS: true,
-	})
+	url = strings.Replace(url, "app", dbName, 1)
+
+	db, err := sqldb.OpenTest(url)
 	if err != nil {
 		t.Fatalf("Opening database connection: %v", err)
 	}
 
 	if err := migrate.Migrate(ctx, db); err != nil {
-		t.Logf("Logs for %s\n%s:", c.ID, docker.DumpContainerLogs(c.ID))
 		t.Fatalf("Migrating error: %s", err)
 	}
 
 	if err := migrate.Seed(ctx, db); err != nil {
-		t.Logf("Logs for %s\n%s:", c.ID, docker.DumpContainerLogs(c.ID))
 		t.Fatalf("Seeding error: %s", err)
 	}
 

@@ -30,6 +30,9 @@ down:
 	docker stop $(MY_ID)
 	docker rm $(MY_ID) -v
 
+upgrade:
+	encore version update
+
 # ==============================================================================
 # Access Project
 
@@ -38,7 +41,7 @@ users:
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
 
 pgcli:
-	pgcli $(shell encore db conn-uri url)
+	pgcli $(shell encore db conn-uri app)
 
 curl:
 	curl -il "http://127.0.0.1:4000/test?limit=2&offset=2"
