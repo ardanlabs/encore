@@ -4,17 +4,16 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/mail"
 	"strings"
 	"time"
 
 	encauth "encore.dev/beta/auth"
-	"encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	v1 "github.com/ardanlabs/encore/business/web/v1"
 	"github.com/ardanlabs/encore/business/web/v1/auth"
-	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -30,60 +29,57 @@ type AuthParams struct {
 // =============================================================================
 
 // AuthHandler is used to provide initial auth for JWT's and basic user:password.
-func AuthHandler(ctx context.Context, log *logger.Logger, a *auth.Auth, usrCore *user.Core, ap *AuthParams) (encauth.UID, *auth.Claims, error) {
+func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *AuthParams) (encauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 	if len(parts) != 2 {
-		return "", nil, v1.NewError(errs.Unauthenticated, "invalid authorization value")
+		return "", nil, v1.NewError(http.StatusUnauthorized, errors.New("invalid authorization value"))
 	}
 
 	switch parts[0] {
 	case "Bearer":
-		return processJWT(ctx, log, a, ap.Authorization)
+		return processJWT(ctx, a, ap.Authorization)
 
 	case "Basic":
-		return processBasic(ctx, log, usrCore, ap.Authorization)
+		return processBasic(ctx, usrCore, ap.Authorization)
 	}
 
-	return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
+	return "", nil, v1.NewErrorWithMessage(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 }
 
 // =============================================================================
 
-func processJWT(ctx context.Context, log *logger.Logger, a *auth.Auth, token string) (encauth.UID, *auth.Claims, error) {
+func processJWT(ctx context.Context, a *auth.Auth, token string) (encauth.UID, *auth.Claims, error) {
 	claims, err := a.Authenticate(ctx, token)
 	if err != nil {
-		log.Error(ctx, "authenticate: failed", "ERROR", err)
-		return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
+		return "", nil, v1.NewError(http.StatusUnauthorized, err)
 	}
 
 	if claims.Subject == "" {
-		log.Error(ctx, "authorize: you are not authorized for that action, no claims")
-		return "", nil, v1.NewError(errs.Unauthenticated, http.StatusText(http.StatusUnauthorized))
+		return "", nil, v1.NewErrorWithMessage(http.StatusUnauthorized, "authorize: you are not authorized for that action, no claims")
 	}
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		log.Error(ctx, "parsing subject: %s", ErrInvalidID)
-		return "", nil, v1.NewError(errs.InvalidArgument, ErrInvalidID.Error())
+		return "", nil, v1.NewError(http.StatusUnauthorized, fmt.Errorf("parsing subject: %w", err))
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil
 }
 
-func processBasic(ctx context.Context, log *logger.Logger, usrCore *user.Core, basic string) (encauth.UID, *auth.Claims, error) {
+func processBasic(ctx context.Context, usrCore *user.Core, basic string) (encauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(basic)
 	if !ok {
-		return "", nil, v1.NewError(errs.Unauthenticated, "invalid Basic auth")
+		return "", nil, v1.NewErrorWithMessage(http.StatusUnauthorized, "invalid Basic auth")
 	}
 
 	addr, err := mail.ParseAddress(email)
 	if err != nil {
-		return "", nil, v1.NewError(errs.Unauthenticated, "invalid email format")
+		return "", nil, v1.NewError(http.StatusUnauthorized, err)
 	}
 
 	usr, err := usrCore.Authenticate(ctx, *addr, pass)
 	if err != nil {
-		return "", nil, v1.NewError(errs.Unauthenticated, err.Error())
+		return "", nil, v1.NewError(http.StatusUnauthorized, err)
 	}
 
 	claims := auth.Claims{
@@ -98,8 +94,7 @@ func processBasic(ctx context.Context, log *logger.Logger, usrCore *user.Core, b
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		log.Error(ctx, "parsing subject: %s", ErrInvalidID)
-		return "", nil, v1.NewError(errs.InvalidArgument, ErrInvalidID.Error())
+		return "", nil, v1.NewError(http.StatusUnauthorized, fmt.Errorf("parsing subject: %w", err))
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil

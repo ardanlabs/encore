@@ -84,7 +84,7 @@ func AuthorizeUser(a *auth.Auth, usrCore *user.Core, req middleware.Request, nex
 		if err != nil {
 			switch {
 			case errors.Is(err, user.ErrNotFound):
-				return v1.NewErrorResponse(http.StatusNoContent, err)
+				return v1.NewErrorResponse(http.StatusBadRequest, err)
 
 			default:
 				return v1.NewErrorResponse(http.StatusInternalServerError, fmt.Errorf("querybyid: userID[%s]: %w", userID, err))

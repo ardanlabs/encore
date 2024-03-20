@@ -64,7 +64,7 @@ token:
 update:
 	curl -il -X PUT \
 	-d '{"name": "jill"}' \
-	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/6e7bcb19-8389-44a2-9bcf-074d9bcd2bb8"
+	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/adac3dca-58b1-4e5f-8472-ca3034ec707e"
 
 delete:
 	curl -il -X DELETE \

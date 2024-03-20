@@ -2,7 +2,7 @@
 package v1
 
 import (
-	"errors"
+	"net/http"
 
 	"encore.dev/beta/errs"
 	"encore.dev/middleware"
@@ -10,85 +10,76 @@ import (
 )
 
 // NewError constructs an encore error based on an app error.
-func NewError(code errs.ErrCode, err string) *errs.Error {
+func NewError(status int, err error) *errs.Error {
 	return &errs.Error{
-		Code:    code,
-		Message: err,
+		Code:    errMap[status],
+		Message: err.Error(),
 	}
 }
 
+// NewErrorWithMessage constructs an encore error based on a error message.
+func NewErrorWithMessage(status int, message string) *errs.Error {
+	return &errs.Error{
+		Code:    errMap[status],
+		Message: message,
+	}
+}
+
+type extraDetails struct {
+	HTTPStatusCode int                  `json:"httpStatusCode"`
+	HTTPStatus     string               `json:"httpStatus"`
+	Fields         validate.FieldErrors `json:"fields,omitempty"`
+}
+
+func (extraDetails) ErrDetails() {}
+
 // NewErrorResponse constructs an encore middleware response with
 // a Go error.
-func NewErrorResponse(status int, err error) middleware.Response {
+func NewErrorResponse(httpStatus int, err error) middleware.Response {
 	return middleware.Response{
-		HTTPStatus: status,
+		HTTPStatus: httpStatus,
 		Err: &errs.Error{
-			Code:    errs.Aborted,
+			Code:    errMap[httpStatus],
 			Message: err.Error(),
+			Details: extraDetails{
+				HTTPStatusCode: httpStatus,
+				HTTPStatus:     http.StatusText(httpStatus),
+			},
 		},
 	}
 }
 
 // NewErrorResponseWithMessage constructs an encore middleware response
 // with a message.
-func NewErrorResponseWithMessage(status int, message string) middleware.Response {
+func NewErrorResponseWithMessage(httpStatus int, message string) middleware.Response {
 	return middleware.Response{
-		HTTPStatus: status,
+		HTTPStatus: httpStatus,
 		Err: &errs.Error{
-			Code:    errs.Aborted,
+			Code:    errMap[httpStatus],
 			Message: message,
+			Details: extraDetails{
+				HTTPStatusCode: httpStatus,
+				HTTPStatus:     http.StatusText(httpStatus),
+			},
 		},
 	}
 }
 
 // NewErrorResponseWithFields constructs an encore middleware response
 // with an error and fields.
-func NewErrorResponseWithFields(status int, message string, fields validate.FieldErrors) middleware.Response {
+func NewErrorResponseWithFields(httpStatus int, message string, fields validate.FieldErrors) middleware.Response {
 	return middleware.Response{
-		HTTPStatus: status,
+		HTTPStatus: httpStatus,
 		Err: &errs.Error{
-			Code:    errs.Aborted,
+			Code:    errMap[httpStatus],
 			Message: message,
-			Details: fields,
+			Details: extraDetails{
+				HTTPStatusCode: httpStatus,
+				HTTPStatus:     http.StatusText(httpStatus),
+				Fields:         fields,
+			},
 		},
 	}
-}
-
-// =============================================================================
-
-// TrustedError is used to pass an error during the request through the
-// application with web specific context.
-type TrustedError struct {
-	Err    error
-	Status int
-}
-
-// NewTrustedError wraps a provided error with an HTTP status code. This
-// function should be used when handlers encounter expected errors.
-func NewTrustedError(err error, status int) error {
-	return &TrustedError{err, status}
-}
-
-// Error implements the error interface. It uses the default message of the
-// wrapped error. This is what will be shown in the services' logs.
-func (te *TrustedError) Error() string {
-	return te.Err.Error()
-}
-
-// IsTrustedError checks if an error of type TrustedError exists.
-func IsTrustedError(err error) bool {
-	var te *TrustedError
-	return errors.As(err, &te)
-}
-
-// GetTrustedError returns a copy of the TrustedError pointer.
-func GetTrustedError(err error) *TrustedError {
-	var te *TrustedError
-	if !errors.As(err, &te) {
-		return nil
-	}
-
-	return te
 }
 
 // =============================================================================
@@ -109,4 +100,20 @@ func NewPageDocument[T any](items []T, total int, page int, rowsPerPage int) Pag
 		Page:        page,
 		RowsPerPage: rowsPerPage,
 	}
+}
+
+// =============================================================================
+
+var errMap = map[int]errs.ErrCode{
+	http.StatusOK:                  errs.OK,
+	http.StatusInternalServerError: errs.Internal,
+	http.StatusBadRequest:          errs.FailedPrecondition,
+	http.StatusGatewayTimeout:      errs.DeadlineExceeded,
+	http.StatusNotFound:            errs.NotFound,
+	http.StatusConflict:            errs.Aborted,
+	http.StatusForbidden:           errs.PermissionDenied,
+	http.StatusTooManyRequests:     errs.ResourceExhausted,
+	http.StatusNotImplemented:      errs.Unimplemented,
+	http.StatusServiceUnavailable:  errs.Unavailable,
+	http.StatusUnauthorized:        errs.Unauthenticated,
 }

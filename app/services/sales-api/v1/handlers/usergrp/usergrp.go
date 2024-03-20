@@ -44,13 +44,13 @@ func (h *Handlers) Token(ctx context.Context, kid string) (Token, error) {
 func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) {
 	nc, err := toCoreNewUser(app)
 	if err != nil {
-		return AppUser{}, v1.NewTrustedError(err, http.StatusBadRequest)
+		return AppUser{}, v1.NewError(http.StatusBadRequest, err)
 	}
 
 	usr, err := h.user.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
-			return AppUser{}, v1.NewTrustedError(user.ErrUniqueEmail, http.StatusConflict)
+			return AppUser{}, v1.NewError(http.StatusConflict, user.ErrUniqueEmail)
 		}
 		return AppUser{}, fmt.Errorf("create: usr[%+v]: %w", usr, err)
 	}
@@ -62,7 +62,7 @@ func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) 
 func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser) (AppUser, error) {
 	uu, err := toCoreUpdateUser(app)
 	if err != nil {
-		return AppUser{}, v1.NewTrustedError(err, http.StatusBadRequest)
+		return AppUser{}, v1.NewError(http.StatusBadRequest, err)
 	}
 
 	usr, err := mid.GetUser(ctx)

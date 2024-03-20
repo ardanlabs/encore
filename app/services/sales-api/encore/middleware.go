@@ -14,7 +14,7 @@ import (
 
 //encore:authhandler
 func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.UID, *auth.Claims, error) {
-	return mid.AuthHandler(ctx, s.Log, s.Auth, s.UsrCore, ap)
+	return mid.AuthHandler(ctx, s.Auth, s.UsrCore, ap)
 }
 
 // =============================================================================
@@ -24,11 +24,6 @@ func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.
 //encore:middleware target=all
 func (s *Service) context(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.Context(req, next)
-}
-
-//encore:middleware target=all
-func (s *Service) errors(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.Errors(s.Log, req, next)
 }
 
 // =============================================================================

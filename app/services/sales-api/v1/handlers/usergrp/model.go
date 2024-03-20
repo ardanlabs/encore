@@ -2,10 +2,10 @@ package usergrp
 
 import (
 	"fmt"
+	"net/http"
 	"net/mail"
 	"time"
 
-	"encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	v1 "github.com/ardanlabs/encore/business/web/v1"
 	"github.com/ardanlabs/encore/foundation/validate"
@@ -104,7 +104,7 @@ func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 // Validate checks the data in the model is considered clean.
 func (app AppNewUser) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return v1.NewError(errs.InvalidArgument, fmt.Errorf("validate: %w", err).Error())
+		return v1.NewError(http.StatusBadRequest, fmt.Errorf("validate: %w", err))
 	}
 
 	return nil
@@ -159,7 +159,7 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 // Validate checks the data in the model is considered clean.
 func (app AppUpdateUser) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return v1.NewError(errs.InvalidArgument, fmt.Errorf("validate: %w", err).Error())
+		return v1.NewError(http.StatusBadRequest, fmt.Errorf("validate: %w", err))
 	}
 
 	return nil

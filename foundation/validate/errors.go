@@ -25,9 +25,6 @@ func NewFieldsError(field string, err error) error {
 	}
 }
 
-// ErrDetails implements an encore interface.
-func (er FieldErrors) ErrDetails() {}
-
 // Error implements the error interface.
 func (fe FieldErrors) Error() string {
 	d, err := json.Marshal(fe)
