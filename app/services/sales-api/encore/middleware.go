@@ -10,7 +10,7 @@ import (
 )
 
 // =============================================================================
-// JWT or Basic Authorization handling
+// JWT or Basic Athentication handling
 
 //lint:ignore U1000 "called by encore"
 //encore:authhandler
@@ -35,7 +35,7 @@ func (s *Service) metrics(req middleware.Request, next middleware.Next) middlewa
 }
 
 // =============================================================================
-// Authorize related middleware
+// Authorization related middleware
 // These middleware functions must come after the global middleware functions
 // above. These are targeted so the order doesn't matter.
 
