@@ -37,9 +37,11 @@ upgrade:
 # Running tests within the local computer
 
 test-race:
+	encore daemon
 	CGO_ENABLED=1 encore test -race -count=1 ./...
 
 test-only:
+	encore daemon
 	CGO_ENABLED=0 encore test -count=1 ./...
 
 lint:

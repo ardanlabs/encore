@@ -1,10 +1,11 @@
-package tests
+package user_test
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"net/mail"
+	"os"
 	"runtime/debug"
 	"testing"
 	"time"
@@ -14,6 +15,32 @@ import (
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
+
+var url string
+
+func TestMain(m *testing.M) {
+	code, err := run(m)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	os.Exit(code)
+}
+
+func run(m *testing.M) (code int, err error) {
+	url, err = dbtest.StartDB()
+	if err != nil {
+		return 1, err
+	}
+
+	defer func() {
+		err = dbtest.StopDB()
+	}()
+
+	fmt.Println("URL:", url)
+
+	return m.Run(), nil
+}
 
 func Test_User(t *testing.T) {
 	t.Run("crud", userCrud)
@@ -72,7 +99,7 @@ func userCrud(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	t.Log("Go seeding ...")
+	t.Log("Seeding database")
 
 	usrs, err := seed(ctx, api.User)
 	if err != nil {

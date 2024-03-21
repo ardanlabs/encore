@@ -80,10 +80,11 @@ func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test
 	}
 	dbName := string(b)
 
+	t.Logf("Creating database: %s", dbName)
+
 	if _, err := dbM.ExecContext(context.Background(), "CREATE DATABASE "+dbName); err != nil {
 		t.Fatalf("creating database %s: %v", dbName, err)
 	}
-	dbM.Close()
 
 	// -------------------------------------------------------------------------
 
@@ -128,6 +129,14 @@ func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test
 	teardown := func() {
 		t.Helper()
 		db.Close()
+
+		t.Logf("Dropping database: %s", dbName)
+
+		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
+			fmt.Printf("dropping database %s: %v", dbName, err)
+		}
+
+		dbM.Close()
 
 		fmt.Printf("******************** LOGS (%s) ********************\n", testName)
 		fmt.Print(buf.String())
