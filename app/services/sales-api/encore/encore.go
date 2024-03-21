@@ -14,6 +14,7 @@ import (
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/homegrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/productgrp"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/trangrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/home"
@@ -45,6 +46,7 @@ type Service struct {
 	UsrGrp  *usergrp.Handlers
 	PrdGrp  *productgrp.Handlers
 	HmeGrp  *homegrp.Handlers
+	TrnGrp  *trangrp.Handlers
 	debug   http.Handler
 }
 
@@ -159,6 +161,7 @@ func initService() (*Service, error) {
 		UsrGrp:  usergrp.New(usrCore, auth),
 		PrdGrp:  productgrp.New(prdCore),
 		HmeGrp:  homegrp.New(hmeCore),
+		TrnGrp:  trangrp.New(usrCore, prdCore),
 		debug:   debug.Mux(),
 	}
 

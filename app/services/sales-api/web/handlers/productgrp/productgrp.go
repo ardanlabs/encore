@@ -29,7 +29,7 @@ func New(product *product.Core) *Handlers {
 	}
 }
 
-// create adds a new product to the system.
+// Create adds a new product to the system.
 func (h *Handlers) Create(ctx context.Context, app AppNewProduct) (AppProduct, error) {
 	np, err := toCoreNewProduct(ctx, app)
 	if err != nil {
