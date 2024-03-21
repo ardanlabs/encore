@@ -82,7 +82,7 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser)
 func (h *Handlers) Delete(ctx context.Context, userID string) error {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return errs.Newf(http.StatusInternalServerError, "user missing in context: %s", err)
+		return errs.Newf(http.StatusInternalServerError, "user [%s] missing in context: %s", userID, err)
 	}
 
 	if err := h.user.Delete(ctx, usr); err != nil {
@@ -122,10 +122,10 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[App
 }
 
 // QueryByID returns a user by its ID.
-func (h *Handlers) QueryByID(ctx context.Context) (AppUser, error) {
+func (h *Handlers) QueryByID(ctx context.Context, userID string) (AppUser, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return AppUser{}, errs.Newf(http.StatusInternalServerError, "querybyid: %s", err)
+		return AppUser{}, errs.Newf(http.StatusInternalServerError, "querybyid: userID[%s]: %s", userID, err)
 	}
 
 	return toAppUser(usr), nil

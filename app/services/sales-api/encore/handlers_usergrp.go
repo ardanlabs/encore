@@ -40,5 +40,5 @@ func (s *Service) userGrpQuery(ctx context.Context, qp usergrp.QueryParams) (pag
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/users/:userID tag:authorize_user
 func (s *Service) userGrpQueryByID(ctx context.Context, userID string) (usergrp.AppUser, error) {
-	return s.UsrGrp.QueryByID(ctx)
+	return s.UsrGrp.QueryByID(ctx, userID)
 }

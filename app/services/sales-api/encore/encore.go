@@ -12,8 +12,11 @@ import (
 
 	"encore.dev/rlog"
 	"github.com/ardanlabs/conf/v3"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/productgrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
+	"github.com/ardanlabs/encore/business/core/crud/product"
+	"github.com/ardanlabs/encore/business/core/crud/product/stores/productdb"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
 	"github.com/ardanlabs/encore/business/data/appdb"
@@ -34,7 +37,9 @@ type Service struct {
 	DB      *sqlx.DB
 	Auth    *auth.Auth
 	UsrCore *user.Core
+	PrdCore *product.Core
 	UsrGrp  *usergrp.Handlers
+	PrdGrp  *productgrp.Handlers
 	debug   http.Handler
 }
 
@@ -136,13 +141,16 @@ func initService() (*Service, error) {
 	}
 
 	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
+	prdCore := product.NewCore(usrCore, delegate.New(), productdb.NewStore(db))
 
 	s := Service{
 		Metrics: newMetrics(),
 		DB:      db,
 		Auth:    auth,
 		UsrCore: usrCore,
+		PrdCore: prdCore,
 		UsrGrp:  usergrp.New(usrCore, auth),
+		PrdGrp:  productgrp.New(prdCore, usrCore),
 		debug:   debug.Mux(),
 	}
 

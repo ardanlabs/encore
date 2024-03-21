@@ -44,3 +44,9 @@ func (s *Service) authorizeAdminOnly(req middleware.Request, next middleware.Nex
 func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.AuthorizeUser(s.Auth, s.UsrCore, req, next)
 }
+
+//lint:ignore U1000 "called by encore"
+//encore:middleware target=tag:authorize_product
+func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.AuthorizeProduct(s.Auth, s.PrdCore, req, next)
+}
