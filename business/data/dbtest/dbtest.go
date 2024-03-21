@@ -13,8 +13,14 @@ import (
 	"time"
 
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
+	"github.com/ardanlabs/encore/business/core/crud/home"
+	"github.com/ardanlabs/encore/business/core/crud/home/stores/homedb"
+	"github.com/ardanlabs/encore/business/core/crud/product"
+	"github.com/ardanlabs/encore/business/core/crud/product/stores/productdb"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
+	"github.com/ardanlabs/encore/business/core/views/vproduct"
+	"github.com/ardanlabs/encore/business/core/views/vproduct/stores/vproductdb"
 	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -57,7 +63,7 @@ type Test struct {
 // NewTest creates a test database inside a Docker container. It creates the
 // required table structure but the database is otherwise empty. It returns
 // the database to use as well as a function to call at the end of the test.
-func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test {
+func NewTest(t *testing.T, url string, testName string) *Test {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -85,7 +91,7 @@ func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test
 
 	// -------------------------------------------------------------------------
 
-	url = strings.Replace(url, mainDBName, dbName, 1)
+	url = strings.Replace(url, appdb.DBName, dbName, 1)
 
 	db, err := sqldb.OpenTest(url)
 	if err != nil {
@@ -200,15 +206,24 @@ func FloatPointer(f float64) *float64 {
 type CoreAPIs struct {
 	Delegate *delegate.Delegate
 	User     *user.Core
+	Product  *product.Core
+	Home     *home.Core
+	VProduct *vproduct.Core
 }
 
 func newCoreAPIs(db *sqlx.DB) CoreAPIs {
 	delegate := delegate.New()
 	usrCore := user.NewCore(delegate, userdb.NewStore(db))
+	prdCore := product.NewCore(usrCore, delegate, productdb.NewStore(db))
+	hmeCore := home.NewCore(usrCore, delegate, homedb.NewStore(db))
+	vPrdCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	return CoreAPIs{
 		Delegate: delegate,
 		User:     usrCore,
+		Product:  prdCore,
+		Home:     hmeCore,
+		VProduct: vPrdCore,
 	}
 }
 
