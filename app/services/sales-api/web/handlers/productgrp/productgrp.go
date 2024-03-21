@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/business/web/mid"
 	"github.com/ardanlabs/encore/business/web/page"
@@ -21,14 +20,12 @@ var (
 // Handlers manages the set of handler functions for this domain.
 type Handlers struct {
 	product *product.Core
-	user    *user.Core
 }
 
 // New constructs a Handlers for use.
-func New(product *product.Core, user *user.Core) *Handlers {
+func New(product *product.Core) *Handlers {
 	return &Handlers{
 		product: product,
-		user:    user,
 	}
 }
 
@@ -47,7 +44,7 @@ func (h *Handlers) Create(ctx context.Context, app AppNewProduct) (AppProduct, e
 	return toAppProduct(prd), nil
 }
 
-// Update updates an existing user.
+// Update updates an existing product.
 func (h *Handlers) Update(ctx context.Context, productID string, app AppUpdateProduct) (AppProduct, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
@@ -62,11 +59,11 @@ func (h *Handlers) Update(ctx context.Context, productID string, app AppUpdatePr
 	return toAppProduct(updPrd), nil
 }
 
-// Delete removes a user from the system.
+// Delete removes a product from the system.
 func (h *Handlers) Delete(ctx context.Context, productID string) error {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
-		return errs.Newf(http.StatusInternalServerError, "product [%s] missing in context: %s", productID, err)
+		return errs.Newf(http.StatusInternalServerError, "productID[%s] missing in context: %s", productID, err)
 	}
 
 	if err := h.product.Delete(ctx, prd); err != nil {
@@ -76,7 +73,7 @@ func (h *Handlers) Delete(ctx context.Context, productID string) error {
 	return nil
 }
 
-// Query returns a list of users with paging.
+// Query returns a list of products with paging.
 func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[AppProduct], error) {
 	if err := validatePaging(qp); err != nil {
 		return page.Document[AppProduct]{}, err
@@ -105,7 +102,7 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[App
 	return page.NewDocument(toAppProducts(prds), total, qp.Page, qp.Rows), nil
 }
 
-// QueryByID returns a user by its ID.
+// QueryByID returns a product by its ID.
 func (h *Handlers) QueryByID(ctx context.Context, productID string) (AppProduct, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {

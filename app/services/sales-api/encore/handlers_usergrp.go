@@ -15,14 +15,14 @@ func (s *Service) userGrpToken(ctx context.Context, kid string) (usergrp.Token, 
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=POST path=/v1/users tag:authorize_admin_only
-func (s *Service) userGrpCreate(ctx context.Context, anu usergrp.AppNewUser) (usergrp.AppUser, error) {
-	return s.UsrGrp.Create(ctx, anu)
+func (s *Service) userGrpCreate(ctx context.Context, app usergrp.AppNewUser) (usergrp.AppUser, error) {
+	return s.UsrGrp.Create(ctx, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=PUT path=/v1/users/:userID tag:authorize_user
-func (s *Service) userGrpUpdate(ctx context.Context, userID string, auu usergrp.AppUpdateUser) (usergrp.AppUser, error) {
-	return s.UsrGrp.Update(ctx, userID, auu)
+func (s *Service) userGrpUpdate(ctx context.Context, userID string, app usergrp.AppUpdateUser) (usergrp.AppUser, error) {
+	return s.UsrGrp.Update(ctx, userID, app)
 }
 
 //lint:ignore U1000 "called by encore"

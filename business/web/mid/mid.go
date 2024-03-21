@@ -6,18 +6,19 @@ import (
 	"errors"
 
 	"encore.dev/middleware"
+	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/google/uuid"
 )
 
-type ctxUserKey int
-type ctxProductKey int
+type ctxKey int
 
 const (
-	userIDKey  ctxUserKey    = 1
-	userKey    ctxUserKey    = 2
-	productKey ctxProductKey = 1
+	userIDKey ctxKey = iota + 1
+	userKey
+	productKey
+	homeKey
 )
 
 func setUserID(req middleware.Request, userID uuid.UUID) middleware.Request {
@@ -50,6 +51,10 @@ func GetUser(ctx context.Context) (user.User, error) {
 	return v, nil
 }
 
+func setProduct(ctx context.Context, prd product.Product) context.Context {
+	return context.WithValue(ctx, productKey, prd)
+}
+
 // GetProduct returns the product from the context.
 func GetProduct(ctx context.Context) (product.Product, error) {
 	v, ok := ctx.Value(productKey).(product.Product)
@@ -60,6 +65,16 @@ func GetProduct(ctx context.Context) (product.Product, error) {
 	return v, nil
 }
 
-func setProduct(ctx context.Context, prd product.Product) context.Context {
-	return context.WithValue(ctx, productKey, prd)
+func setHome(ctx context.Context, hme home.Home) context.Context {
+	return context.WithValue(ctx, homeKey, hme)
+}
+
+// GetHome returns the home from the context.
+func GetHome(ctx context.Context) (home.Home, error) {
+	v, ok := ctx.Value(homeKey).(home.Home)
+	if !ok {
+		return home.Home{}, errors.New("home not found in context")
+	}
+
+	return v, nil
 }

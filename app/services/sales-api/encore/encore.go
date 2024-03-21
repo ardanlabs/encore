@@ -12,9 +12,12 @@ import (
 
 	"encore.dev/rlog"
 	"github.com/ardanlabs/conf/v3"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/homegrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/productgrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
+	"github.com/ardanlabs/encore/business/core/crud/home"
+	"github.com/ardanlabs/encore/business/core/crud/home/stores/homedb"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/product/stores/productdb"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -38,8 +41,10 @@ type Service struct {
 	Auth    *auth.Auth
 	UsrCore *user.Core
 	PrdCore *product.Core
+	HmeCore *home.Core
 	UsrGrp  *usergrp.Handlers
 	PrdGrp  *productgrp.Handlers
+	HmeGrp  *homegrp.Handlers
 	debug   http.Handler
 }
 
@@ -142,6 +147,7 @@ func initService() (*Service, error) {
 
 	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
 	prdCore := product.NewCore(usrCore, delegate.New(), productdb.NewStore(db))
+	hmeCore := home.NewCore(usrCore, delegate.New(), homedb.NewStore(db))
 
 	s := Service{
 		Metrics: newMetrics(),
@@ -149,8 +155,10 @@ func initService() (*Service, error) {
 		Auth:    auth,
 		UsrCore: usrCore,
 		PrdCore: prdCore,
+		HmeCore: hmeCore,
 		UsrGrp:  usergrp.New(usrCore, auth),
-		PrdGrp:  productgrp.New(prdCore, usrCore),
+		PrdGrp:  productgrp.New(prdCore),
+		HmeGrp:  homegrp.New(hmeCore),
 		debug:   debug.Mux(),
 	}
 

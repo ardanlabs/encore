@@ -34,9 +34,21 @@ func (s *Service) metrics(req middleware.Request, next middleware.Next) middlewa
 // above. These are targeted so the order doesn't matter.
 
 //lint:ignore U1000 "called by encore"
+//encore:middleware target=tag:authorize_any
+func (s *Service) authorizeAny(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.AuthorizeAny(s.Auth, req, next)
+}
+
+//lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_admin_only
 func (s *Service) authorizeAdminOnly(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.AuthorizeAdminOnly(s.Auth, req, next)
+}
+
+//lint:ignore U1000 "called by encore"
+//encore:middleware target=tag:authorize_user_only
+func (s *Service) authorizeUserOnly(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.AuthorizeUserOnly(s.Auth, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
@@ -49,4 +61,10 @@ func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) mi
 //encore:middleware target=tag:authorize_product
 func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.AuthorizeProduct(s.Auth, s.PrdCore, req, next)
+}
+
+//lint:ignore U1000 "called by encore"
+//encore:middleware target=tag:authorize_home
+func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.AuthorizeHome(s.Auth, s.HmeCore, req, next)
 }
