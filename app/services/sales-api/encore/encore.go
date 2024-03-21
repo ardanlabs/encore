@@ -16,6 +16,7 @@ import (
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/productgrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/trangrp"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
+	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/vproductgrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/home/stores/homedb"
@@ -23,6 +24,8 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/product/stores/productdb"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
+	"github.com/ardanlabs/encore/business/core/views/vproduct"
+	"github.com/ardanlabs/encore/business/core/views/vproduct/stores/vproductdb"
 	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -37,16 +40,17 @@ var build = "develop"
 
 //encore:service
 type Service struct {
-	Metrics *metrics.Values
-	DB      *sqlx.DB
-	Auth    *auth.Auth
-	UsrCore *user.Core
-	PrdCore *product.Core
-	HmeCore *home.Core
-	UsrGrp  *usergrp.Handlers
-	PrdGrp  *productgrp.Handlers
-	HmeGrp  *homegrp.Handlers
-	TrnGrp  *trangrp.Handlers
+	mtrcs   *metrics.Values
+	db      *sqlx.DB
+	auth    *auth.Auth
+	usrCore *user.Core
+	prdCore *product.Core
+	hmeCore *home.Core
+	usrGrp  *usergrp.Handlers
+	prdGrp  *productgrp.Handlers
+	hmeGrp  *homegrp.Handlers
+	trnGrp  *trangrp.Handlers
+	vprdGrp *vproductgrp.Handlers
 	debug   http.Handler
 }
 
@@ -150,19 +154,22 @@ func initService() (*Service, error) {
 	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
 	prdCore := product.NewCore(usrCore, delegate.New(), productdb.NewStore(db))
 	hmeCore := home.NewCore(usrCore, delegate.New(), homedb.NewStore(db))
+	vprdCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	s := Service{
-		Metrics: newMetrics(),
-		DB:      db,
-		Auth:    auth,
-		UsrCore: usrCore,
-		PrdCore: prdCore,
-		HmeCore: hmeCore,
-		UsrGrp:  usergrp.New(usrCore, auth),
-		PrdGrp:  productgrp.New(prdCore),
-		HmeGrp:  homegrp.New(hmeCore),
-		TrnGrp:  trangrp.New(usrCore, prdCore),
-		debug:   debug.Mux(),
+		mtrcs:   newMetrics(),
+		db:      db,
+		auth:    auth,
+		usrCore: usrCore,
+		prdCore: prdCore,
+		hmeCore: hmeCore,
+		usrGrp:  usergrp.New(usrCore, auth),
+		prdGrp:  productgrp.New(prdCore),
+		hmeGrp:  homegrp.New(hmeCore),
+		trnGrp:  trangrp.New(usrCore, prdCore),
+		vprdGrp: vproductgrp.New(vprdCore),
+
+		debug: debug.Mux(),
 	}
 
 	return &s, nil
@@ -174,7 +181,7 @@ func (s *Service) Shutdown(force context.Context) {
 	defer rlog.Info("shutdown", "status", "shutdown complete")
 
 	rlog.Info("shutdown", "status", "stopping database support")
-	s.DB.Close()
+	s.db.Close()
 }
 
 // Fallback is called for the debug enpoints.

@@ -15,7 +15,7 @@ import (
 //lint:ignore U1000 "called by encore"
 //encore:authhandler
 func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.UID, *auth.Claims, error) {
-	return mid.AuthHandler(ctx, s.Auth, s.UsrCore, ap)
+	return mid.AuthHandler(ctx, s.auth, s.usrCore, ap)
 }
 
 // =============================================================================
@@ -25,7 +25,7 @@ func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=all
 func (s *Service) metrics(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.Metrics(s.Metrics, req, next)
+	return mid.Metrics(s.mtrcs, req, next)
 }
 
 // =============================================================================
@@ -36,35 +36,35 @@ func (s *Service) metrics(req middleware.Request, next middleware.Next) middlewa
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_any
 func (s *Service) authorizeAny(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeAny(s.Auth, req, next)
+	return mid.AuthorizeAny(s.auth, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_admin_only
 func (s *Service) authorizeAdminOnly(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeAdminOnly(s.Auth, req, next)
+	return mid.AuthorizeAdminOnly(s.auth, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_user_only
 func (s *Service) authorizeUserOnly(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeUserOnly(s.Auth, req, next)
+	return mid.AuthorizeUserOnly(s.auth, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_user
 func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeUser(s.Auth, s.UsrCore, req, next)
+	return mid.AuthorizeUser(s.auth, s.usrCore, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_product
 func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeProduct(s.Auth, s.PrdCore, req, next)
+	return mid.AuthorizeProduct(s.auth, s.prdCore, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_home
 func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeHome(s.Auth, s.HmeCore, req, next)
+	return mid.AuthorizeHome(s.auth, s.hmeCore, req, next)
 }
