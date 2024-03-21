@@ -36,6 +36,9 @@ upgrade:
 metrics:
 	expvarmon -ports="localhost:4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
 
+statsviz:
+	open -a "Google Chrome" http://127.0.0.1:4000/debug/statsviz
+
 # ==============================================================================
 # Running tests within the local computer
 
