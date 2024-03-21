@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web"
+	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 
@@ -104,7 +104,7 @@ func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 // Validate checks the data in the model is considered clean.
 func (app AppNewUser) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return web.NewError(http.StatusBadRequest, fmt.Errorf("validate: %w", err))
+		return errs.Newf(http.StatusBadRequest, "validate: %s", err)
 	}
 
 	return nil
@@ -159,7 +159,7 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 // Validate checks the data in the model is considered clean.
 func (app AppUpdateUser) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return web.NewError(http.StatusBadRequest, fmt.Errorf("validate: %w", err))
+		return errs.Newf(http.StatusBadRequest, "validate: %s", err)
 	}
 
 	return nil

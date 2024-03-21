@@ -4,14 +4,14 @@ package usergrp
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	encauth "encore.dev/beta/auth"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web"
 	"github.com/ardanlabs/encore/business/web/auth"
+	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/business/web/mid"
+	"github.com/ardanlabs/encore/business/web/page"
 )
 
 // Handlers manages the set of handler functions for this domain.
@@ -34,7 +34,7 @@ func (h *Handlers) Token(ctx context.Context, kid string) (Token, error) {
 
 	tkn, err := h.auth.GenerateToken(kid, *claims)
 	if err != nil {
-		return Token{}, fmt.Errorf("generatetoken: %w", err)
+		return Token{}, errs.New(http.StatusInternalServerError, err)
 	}
 
 	return toToken(tkn), nil
@@ -44,15 +44,15 @@ func (h *Handlers) Token(ctx context.Context, kid string) (Token, error) {
 func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) {
 	nc, err := toCoreNewUser(app)
 	if err != nil {
-		return AppUser{}, web.NewError(http.StatusBadRequest, err)
+		return AppUser{}, errs.New(http.StatusBadRequest, err)
 	}
 
 	usr, err := h.user.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
-			return AppUser{}, web.NewError(http.StatusConflict, user.ErrUniqueEmail)
+			return AppUser{}, errs.New(http.StatusConflict, user.ErrUniqueEmail)
 		}
-		return AppUser{}, fmt.Errorf("create: usr[%+v]: %w", usr, err)
+		return AppUser{}, errs.Newf(http.StatusInternalServerError, "create: usr[%+v]: %s", usr, err)
 	}
 
 	return toAppUser(usr), nil
@@ -62,17 +62,17 @@ func (h *Handlers) Create(ctx context.Context, app AppNewUser) (AppUser, error) 
 func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser) (AppUser, error) {
 	uu, err := toCoreUpdateUser(app)
 	if err != nil {
-		return AppUser{}, web.NewError(http.StatusBadRequest, err)
+		return AppUser{}, errs.New(http.StatusBadRequest, err)
 	}
 
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return AppUser{}, fmt.Errorf("user missing in context: %w", err)
+		return AppUser{}, errs.Newf(http.StatusInternalServerError, "user missing in context: %s", err)
 	}
 
 	updUsr, err := h.user.Update(ctx, usr, uu)
 	if err != nil {
-		return AppUser{}, fmt.Errorf("update: userID[%s] uu[%+v]: %w", usr.ID, uu, err)
+		return AppUser{}, errs.Newf(http.StatusInternalServerError, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
 
 	return toAppUser(updUsr), nil
@@ -82,50 +82,50 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser)
 func (h *Handlers) Delete(ctx context.Context, userID string) error {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return fmt.Errorf("user missing in context: %w", err)
+		return errs.Newf(http.StatusInternalServerError, "user missing in context: %s", err)
 	}
 
 	if err := h.user.Delete(ctx, usr); err != nil {
-		return fmt.Errorf("delete: userID[%s]: %w", usr.ID, err)
+		return errs.Newf(http.StatusInternalServerError, "delete: userID[%s]: %s", usr.ID, err)
 	}
 
 	return nil
 }
 
 // Query returns a list of users with paging.
-func (h *Handlers) Query(ctx context.Context, qp QueryParams) (web.PageDocument[AppUser], error) {
+func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[AppUser], error) {
 	if err := validatePaging(qp); err != nil {
-		return web.PageDocument[AppUser]{}, err
+		return page.Document[AppUser]{}, err
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return web.PageDocument[AppUser]{}, err
+		return page.Document[AppUser]{}, err
 	}
 
 	orderBy, err := parseOrder(qp)
 	if err != nil {
-		return web.PageDocument[AppUser]{}, err
+		return page.Document[AppUser]{}, err
 	}
 
 	users, err := h.user.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
-		return web.PageDocument[AppUser]{}, fmt.Errorf("query: %w", err)
+		return page.Document[AppUser]{}, errs.Newf(http.StatusInternalServerError, "query: %s", err)
 	}
 
 	total, err := h.user.Count(ctx, filter)
 	if err != nil {
-		return web.PageDocument[AppUser]{}, fmt.Errorf("count: %w", err)
+		return page.Document[AppUser]{}, errs.Newf(http.StatusInternalServerError, "count: %s", err)
 	}
 
-	return web.NewPageDocument(toAppUsers(users), total, qp.Page, qp.Rows), nil
+	return page.NewDocument(toAppUsers(users), total, qp.Page, qp.Rows), nil
 }
 
 // QueryByID returns a user by its ID.
 func (h *Handlers) QueryByID(ctx context.Context) (AppUser, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return AppUser{}, fmt.Errorf("querybyid: %w", err)
+		return AppUser{}, errs.Newf(http.StatusInternalServerError, "querybyid: %s", err)
 	}
 
 	return toAppUser(usr), nil

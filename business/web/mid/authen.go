@@ -12,8 +12,8 @@ import (
 
 	encauth "encore.dev/beta/auth"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web"
 	"github.com/ardanlabs/encore/business/web/auth"
+	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -32,7 +32,7 @@ type AuthParams struct {
 func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *AuthParams) (encauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 	if len(parts) != 2 {
-		return "", nil, web.NewError(http.StatusUnauthorized, errors.New("invalid authorization value"))
+		return "", nil, errs.Newf(http.StatusUnauthorized, "invalid authorization value")
 	}
 
 	switch parts[0] {
@@ -43,7 +43,7 @@ func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *Auth
 		return processBasic(ctx, usrCore, ap.Authorization)
 	}
 
-	return "", nil, web.NewErrorWithMessage(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+	return "", nil, errs.Newf(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 }
 
 // =============================================================================
@@ -51,16 +51,16 @@ func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *Auth
 func processJWT(ctx context.Context, a *auth.Auth, token string) (encauth.UID, *auth.Claims, error) {
 	claims, err := a.Authenticate(ctx, token)
 	if err != nil {
-		return "", nil, web.NewError(http.StatusUnauthorized, err)
+		return "", nil, errs.New(http.StatusUnauthorized, err)
 	}
 
 	if claims.Subject == "" {
-		return "", nil, web.NewErrorWithMessage(http.StatusUnauthorized, "authorize: you are not authorized for that action, no claims")
+		return "", nil, errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, no claims")
 	}
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		return "", nil, web.NewError(http.StatusUnauthorized, fmt.Errorf("parsing subject: %w", err))
+		return "", nil, errs.New(http.StatusUnauthorized, fmt.Errorf("parsing subject: %w", err))
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil
@@ -69,17 +69,17 @@ func processJWT(ctx context.Context, a *auth.Auth, token string) (encauth.UID, *
 func processBasic(ctx context.Context, usrCore *user.Core, basic string) (encauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(basic)
 	if !ok {
-		return "", nil, web.NewErrorWithMessage(http.StatusUnauthorized, "invalid Basic auth")
+		return "", nil, errs.Newf(http.StatusUnauthorized, "invalid Basic auth")
 	}
 
 	addr, err := mail.ParseAddress(email)
 	if err != nil {
-		return "", nil, web.NewError(http.StatusUnauthorized, err)
+		return "", nil, errs.New(http.StatusUnauthorized, err)
 	}
 
 	usr, err := usrCore.Authenticate(ctx, *addr, pass)
 	if err != nil {
-		return "", nil, web.NewError(http.StatusUnauthorized, err)
+		return "", nil, errs.New(http.StatusUnauthorized, err)
 	}
 
 	claims := auth.Claims{
@@ -94,7 +94,7 @@ func processBasic(ctx context.Context, usrCore *user.Core, basic string) (encaut
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		return "", nil, web.NewError(http.StatusUnauthorized, fmt.Errorf("parsing subject: %w", err))
+		return "", nil, errs.Newf(http.StatusUnauthorized, "parsing subject: %s", err)
 	}
 
 	return encauth.UID(subjectID.String()), &claims, nil

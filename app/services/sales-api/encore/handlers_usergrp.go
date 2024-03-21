@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
-	"github.com/ardanlabs/encore/business/web"
+	"github.com/ardanlabs/encore/business/web/page"
 )
 
 //lint:ignore U1000 "called by encore"
@@ -33,7 +33,7 @@ func (s *Service) userGrpDelete(ctx context.Context, userID string) error {
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/users tag:authorize_admin_only
-func (s *Service) userGrpQuery(ctx context.Context, qp usergrp.QueryParams) (web.PageDocument[usergrp.AppUser], error) {
+func (s *Service) userGrpQuery(ctx context.Context, qp usergrp.QueryParams) (page.Document[usergrp.AppUser], error) {
 	return s.UsrGrp.Query(ctx, qp)
 }
 
