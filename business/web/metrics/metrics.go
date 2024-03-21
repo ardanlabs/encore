@@ -5,6 +5,7 @@ import (
 	"expvar"
 	"runtime"
 
+	"encore.dev"
 	emetrics "encore.dev/metrics"
 )
 
@@ -18,11 +19,11 @@ type Config struct {
 
 // Values provides an api to work with metrics.
 type Values struct {
-	goroutines *emetrics.Gauge[uint64]
-	requests   *emetrics.Counter[uint64]
-	failures   *emetrics.Counter[uint64]
-	panics     *emetrics.Counter[uint64]
-
+	devEnv        bool
+	goroutines    *emetrics.Gauge[uint64]
+	requests      *emetrics.Counter[uint64]
+	failures      *emetrics.Counter[uint64]
+	panics        *emetrics.Counter[uint64]
 	devGoroutines *expvar.Int
 	devRequests   *expvar.Int
 	devFailures   *expvar.Int
@@ -32,11 +33,11 @@ type Values struct {
 // New constructs a Values for working with metrics.
 func New(cfg Config) *Values {
 	return &Values{
-		goroutines: cfg.Goroutines,
-		requests:   cfg.Requests,
-		failures:   cfg.Failures,
-		panics:     cfg.Panics,
-
+		devEnv:        encore.Meta().Environment.Type == encore.EnvDevelopment,
+		goroutines:    cfg.Goroutines,
+		requests:      cfg.Requests,
+		failures:      cfg.Failures,
+		panics:        cfg.Panics,
 		devGoroutines: expvar.NewInt("goroutines"),
 		devRequests:   expvar.NewInt("requests"),
 		devFailures:   expvar.NewInt("errors"),
@@ -48,7 +49,10 @@ func New(cfg Config) *Values {
 func (v *Values) SetGoroutines() {
 	n := runtime.NumGoroutine()
 	v.goroutines.Set(uint64(n))
-	v.devGoroutines.Set(int64(n))
+
+	if v.devEnv {
+		v.devGoroutines.Set(int64(n))
+	}
 }
 
 // IncRequests increments the requests by 1.
@@ -62,11 +66,17 @@ func (v *Values) IncRequests() int64 {
 // IncFailures increments the failures by 1.
 func (v *Values) IncFailures() {
 	v.failures.Add(1)
-	v.devFailures.Add(1)
+
+	if v.devEnv {
+		v.devFailures.Add(1)
+	}
 }
 
 // IncPanics increments the panics by 1.
 func (v *Values) IncPanics() {
 	v.panics.Add(1)
-	v.devPanics.Add(1)
+
+	if v.devEnv {
+		v.devPanics.Add(1)
+	}
 }
