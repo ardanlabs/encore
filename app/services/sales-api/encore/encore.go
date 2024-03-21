@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
@@ -21,9 +22,7 @@ import (
 	"github.com/ardanlabs/encore/business/web/auth"
 	"github.com/ardanlabs/encore/business/web/debug"
 	"github.com/ardanlabs/encore/business/web/metrics"
-	"github.com/ardanlabs/encore/business/web/mid"
 	"github.com/ardanlabs/encore/foundation/keystore"
-	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,7 +30,6 @@ var build = "develop"
 
 //encore:service
 type Service struct {
-	Log     *logger.Logger
 	Metrics *metrics.Values
 	DB      *sqlx.DB
 	Auth    *auth.Auth
@@ -47,26 +45,9 @@ func initService() (*Service, error) {
 	ctx := context.Background()
 
 	// -------------------------------------------------------------------------
-	// Logging Starting
-
-	var log *logger.Logger
-
-	events := logger.Events{
-		Error: func(ctx context.Context, r logger.Record) {
-			log.Info(ctx, "******* SEND ALERT ******")
-		},
-	}
-
-	traceIDFn := func(ctx context.Context) string {
-		return mid.GetTraceID(ctx)
-	}
-
-	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "SALES-API", traceIDFn, events)
-
-	// -------------------------------------------------------------------------
 	// GOMAXPROCS
 
-	log.Info(ctx, "startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	rlog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// -------------------------------------------------------------------------
 	// Configuration
@@ -102,21 +83,21 @@ func initService() (*Service, error) {
 	// -------------------------------------------------------------------------
 	// App Starting
 
-	log.Info(ctx, "starting service", "version", build)
-	defer log.Info(ctx, "shutdown complete")
+	rlog.Info("starting service", "version", build)
+	defer rlog.Info("shutdown complete")
 
 	out, err := conf.String(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("generating config for output: %w", err)
 	}
-	log.Info(ctx, "startup", "config", out)
+	rlog.Info("startup", "config", out)
 
 	expvar.NewString("build").Set(build)
 
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	log.Info(ctx, "startup", "status", "initializing database support")
+	rlog.Info("startup", "status", "initializing database support")
 
 	db, err := sqldb.Open(sqldb.Config{
 		EDB:          appdb.AppDB,
@@ -134,7 +115,7 @@ func initService() (*Service, error) {
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
 
-	log.Info(ctx, "startup", "status", "initializing authentication support")
+	rlog.Info("startup", "status", "initializing authentication support")
 
 	// Load the private keys files from disk. We can assume some system like
 	// Vault has created these files already. How that happens is not our
@@ -145,7 +126,6 @@ func initService() (*Service, error) {
 	}
 
 	authCfg := auth.Config{
-		Log:       log,
 		DB:        db,
 		KeyLookup: ks,
 	}
@@ -155,10 +135,9 @@ func initService() (*Service, error) {
 		return nil, fmt.Errorf("constructing auth: %w", err)
 	}
 
-	usrCore := user.NewCore(log, delegate.New(log), userdb.NewStore(log, db))
+	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
 
 	s := Service{
-		Log:     log,
 		Metrics: newMetrics(),
 		DB:      db,
 		Auth:    auth,
@@ -173,9 +152,9 @@ func initService() (*Service, error) {
 // Shutdown implements a function that will be called by encore when the service
 // is signaled to shutdown.
 func (s *Service) Shutdown(force context.Context) {
-	defer s.Log.Info(force, "shutdown", "status", "shutdown complete")
+	defer rlog.Info("shutdown", "status", "shutdown complete")
 
-	s.Log.Info(force, "shutdown", "status", "stopping database support")
+	rlog.Info("shutdown", "status", "stopping database support")
 	s.DB.Close()
 }
 

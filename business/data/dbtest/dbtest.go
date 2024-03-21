@@ -19,8 +19,6 @@ import (
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/web/auth"
-	"github.com/ardanlabs/encore/business/web/mid"
-	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/jmoiron/sqlx"
 )
@@ -48,7 +46,6 @@ func StopDB() error {
 // Test owns state for running and shutting down tests.
 type Test struct {
 	DB       *sqlx.DB
-	Log      *logger.Logger
 	CoreAPIs CoreAPIs
 	Teardown func()
 	t        *testing.T
@@ -105,15 +102,11 @@ func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test
 
 	// -------------------------------------------------------------------------
 
-	var buf bytes.Buffer
-	log := logger.New(&buf, logger.LevelInfo, "TEST", func(context.Context) string { return mid.GetTraceID(ctx) })
-
-	coreAPIs := newCoreAPIs(log, db)
+	coreAPIs := newCoreAPIs(db)
 
 	// -------------------------------------------------------------------------
 
 	cfg := auth.Config{
-		Log:       log,
 		DB:        db,
 		KeyLookup: &keyStore{},
 	}
@@ -137,15 +130,10 @@ func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test
 		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
 			fmt.Printf("dropping database %s: %v", dbName, err)
 		}
-
-		fmt.Printf("******************** LOGS (%s) ********************\n", testName)
-		fmt.Print(buf.String())
-		fmt.Printf("******************** LOGS (%s) ********************\n", testName)
 	}
 
 	test := Test{
 		DB:       db,
-		Log:      log,
 		CoreAPIs: coreAPIs,
 		Teardown: teardown,
 		t:        t,
@@ -163,7 +151,7 @@ func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test
 func (test *Test) TokenV1(email string, pass string) string {
 	addr, _ := mail.ParseAddress(email)
 
-	store := userdb.NewStore(test.Log, test.DB)
+	store := userdb.NewStore(test.DB)
 	dbUsr, err := store.QueryByEmail(context.Background(), *addr)
 	if err != nil {
 		return ""
@@ -214,9 +202,9 @@ type CoreAPIs struct {
 	User     *user.Core
 }
 
-func newCoreAPIs(log *logger.Logger, db *sqlx.DB) CoreAPIs {
-	delegate := delegate.New(log)
-	usrCore := user.NewCore(log, delegate, userdb.NewStore(log, db))
+func newCoreAPIs(db *sqlx.DB) CoreAPIs {
+	delegate := delegate.New()
+	usrCore := user.NewCore(delegate, userdb.NewStore(db))
 
 	return CoreAPIs{
 		Delegate: delegate,

@@ -11,7 +11,6 @@ import (
 
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
-	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -47,7 +46,6 @@ type KeyLookup interface {
 
 // Config represents information required to initialize auth.
 type Config struct {
-	Log       *logger.Logger
 	DB        *sqlx.DB
 	KeyLookup KeyLookup
 	Issuer    string
@@ -70,7 +68,7 @@ func New(cfg Config) (*Auth, error) {
 	// user enabled check.
 	var usrCore *user.Core
 	if cfg.DB != nil {
-		usrCore = user.NewCore(cfg.Log, nil, userdb.NewStore(cfg.Log, cfg.DB))
+		usrCore = user.NewCore(nil, userdb.NewStore(cfg.DB))
 	}
 
 	a := Auth{

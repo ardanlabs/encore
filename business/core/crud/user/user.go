@@ -13,7 +13,6 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/data/transaction"
 	"github.com/ardanlabs/encore/business/web/order"
-	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -41,15 +40,13 @@ type Storer interface {
 
 // Core manages the set of APIs for user access.
 type Core struct {
-	log      *logger.Logger
 	storer   Storer
 	delegate *delegate.Delegate
 }
 
 // NewCore constructs a user core API for use.
-func NewCore(log *logger.Logger, delegate *delegate.Delegate, storer Storer) *Core {
+func NewCore(delegate *delegate.Delegate, storer Storer) *Core {
 	return &Core{
-		log:      log,
 		delegate: delegate,
 		storer:   storer,
 	}
@@ -64,7 +61,6 @@ func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error
 	}
 
 	core := Core{
-		log:      c.log,
 		delegate: c.delegate,
 		storer:   trS,
 	}
