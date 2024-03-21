@@ -24,12 +24,6 @@ func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=all
-func (s *Service) context(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.Context(req, next)
-}
-
-//lint:ignore U1000 "called by encore"
-//encore:middleware target=all
 func (s *Service) metrics(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.Metrics(s.Metrics, req, next)
 }
