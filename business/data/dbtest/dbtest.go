@@ -128,15 +128,15 @@ func NewTest(t *testing.T, url string, mainDBName string, testName string) *Test
 	// with the database.
 	teardown := func() {
 		t.Helper()
-		db.Close()
 
 		t.Logf("Dropping database: %s", dbName)
+
+		db.Close()
+		defer dbM.Close()
 
 		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
 			fmt.Printf("dropping database %s: %v", dbName, err)
 		}
-
-		dbM.Close()
 
 		fmt.Printf("******************** LOGS (%s) ********************\n", testName)
 		fmt.Print(buf.String())
