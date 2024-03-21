@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"encore.dev/beta/errs"
+	"encore.dev/middleware"
+	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -37,10 +38,8 @@ func userDelete401(sd seedData) []tableData {
 			token:      "",
 			method:     http.MethodDelete,
 			statusCode: http.StatusUnauthorized,
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				//Error: "Unauthorized",
-			},
+			resp:       &middleware.Response{},
+			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
@@ -51,10 +50,8 @@ func userDelete401(sd seedData) []tableData {
 			token:      sd.users[0].token + "A",
 			method:     http.MethodDelete,
 			statusCode: http.StatusUnauthorized,
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				//Error: "Unauthorized",
-			},
+			resp:       &middleware.Response{},
+			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
@@ -65,10 +62,8 @@ func userDelete401(sd seedData) []tableData {
 			token:      sd.users[1].token,
 			method:     http.MethodDelete,
 			statusCode: http.StatusUnauthorized,
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				//Error: "Unauthorized",
-			},
+			resp:       &middleware.Response{},
+			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},

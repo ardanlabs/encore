@@ -7,7 +7,6 @@ import (
 
 	"encore.dev/beta/errs"
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/foundation/validate"
 )
 
 var errMap = map[int]errs.ErrCode{
@@ -25,9 +24,8 @@ var errMap = map[int]errs.ErrCode{
 }
 
 type extraDetails struct {
-	HTTPStatusCode int                  `json:"httpStatusCode"`
-	HTTPStatus     string               `json:"httpStatus"`
-	Fields         validate.FieldErrors `json:"fields,omitempty"`
+	HTTPStatusCode int    `json:"httpStatusCode"`
+	HTTPStatus     string `json:"httpStatus"`
 }
 
 func (extraDetails) ErrDetails() {}

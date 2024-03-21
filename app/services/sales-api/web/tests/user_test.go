@@ -1,20 +1,23 @@
 package tests
 
 import (
+	"runtime/debug"
 	"testing"
+
+	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
 func Test_User(t *testing.T) {
 	t.Parallel()
 
-	// dbTest := dbtest.NewTest(t, ebdDB, "Test_User")
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		t.Log(r)
-	// 		t.Error(string(debug.Stack()))
-	// 	}
-	// 	dbTest.Teardown()
-	// }()
+	dbTest := dbtest.NewTest(t, url, "Test_User")
+	defer func() {
+		if r := recover(); r != nil {
+			t.Log(r)
+			t.Error(string(debug.Stack()))
+		}
+		dbTest.Teardown()
+	}()
 
 	// app := appTest{
 	// 	Handler: mux.WebAPI(mux.Config{
@@ -28,14 +31,14 @@ func Test_User(t *testing.T) {
 	// 	adminToken: dbTest.TokenV1("admin@example.com", "gophers"),
 	// }
 
-	// // -------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	// sd, err := createUserSeed(dbTest)
 	// if err != nil {
 	// 	t.Fatalf("Seeding error: %s", err)
 	// }
 
-	// // -------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	// app.test(t, userQuery200(sd), "user-query-200")
 	// app.test(t, userQueryByID200(sd), "user-querybyid-200")

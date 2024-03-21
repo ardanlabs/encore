@@ -3,8 +3,10 @@ package tests
 import (
 	"net/http"
 
-	"encore.dev/beta/errs"
+	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/services/sales-api/web/handlers/usergrp"
+	"github.com/ardanlabs/encore/business/web/errs"
+	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )
@@ -70,11 +72,13 @@ func userCreate400(sd seedData) []tableData {
 			method:     http.MethodPost,
 			statusCode: http.StatusBadRequest,
 			model:      &usergrp.AppNewUser{},
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				// Error:  "data validation error",
-				// Fields: map[string]string{"email": "email is a required field", "name": "name is a required field", "password": "password is a required field", "roles": "roles is a required field"},
-			},
+			resp:       &middleware.Response{},
+			expResp: toPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
+				validate.FieldError{Field: "email", Err: "email is a required field"},
+				validate.FieldError{Field: "name", Err: "name is a required field"},
+				validate.FieldError{Field: "password", Err: "password is a required field"},
+				validate.FieldError{Field: "roles", Err: "roles is a required field"},
+			})),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
@@ -93,10 +97,8 @@ func userCreate400(sd seedData) []tableData {
 				Password:        "123",
 				PasswordConfirm: "123",
 			},
-			resp:    &errs.Error{},
-			expResp: &errs.Error{
-				//Error: "parse: invalid role \"BAD ROLE\"",
-			},
+			resp:    &middleware.Response{},
+			expResp: toPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid role \"BAD ROLE\"`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
@@ -114,10 +116,8 @@ func userCreate401(sd seedData) []tableData {
 			token:      "",
 			method:     http.MethodPost,
 			statusCode: http.StatusUnauthorized,
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				//Error: "Unauthorized",
-			},
+			resp:       &middleware.Response{},
+			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
@@ -128,10 +128,8 @@ func userCreate401(sd seedData) []tableData {
 			token:      sd.admins[0].token[:10],
 			method:     http.MethodPost,
 			statusCode: http.StatusUnauthorized,
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				//Error: "Unauthorized",
-			},
+			resp:       &middleware.Response{},
+			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
@@ -142,10 +140,8 @@ func userCreate401(sd seedData) []tableData {
 			token:      sd.admins[0].token + "A",
 			method:     http.MethodPost,
 			statusCode: http.StatusUnauthorized,
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				//Error: "Unauthorized",
-			},
+			resp:       &middleware.Response{},
+			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
@@ -156,10 +152,8 @@ func userCreate401(sd seedData) []tableData {
 			token:      sd.users[0].token,
 			method:     http.MethodPost,
 			statusCode: http.StatusUnauthorized,
-			resp:       &errs.Error{},
-			expResp:    &errs.Error{
-				//Error: "Unauthorized",
-			},
+			resp:       &middleware.Response{},
+			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
