@@ -23,7 +23,7 @@ func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.
 // The order matters so be careful when injecting new middleware.
 
 //lint:ignore U1000 "called by encore"
-//encore:middleware target=all
+//encore:middleware target=tag:metrics
 func (s *Service) metrics(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.Metrics(s.mtrcs, req, next)
 }

@@ -183,10 +183,3 @@ func (s *Service) Shutdown(force context.Context) {
 	rlog.Info("shutdown", "status", "stopping database support")
 	s.db.Close()
 }
-
-// Fallback is called for the debug enpoints.
-//
-//encore:api public raw path=/!fallback
-func (s *Service) Fallback(w http.ResponseWriter, req *http.Request) {
-	s.debug.ServeHTTP(w, req)
-}

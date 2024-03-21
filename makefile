@@ -20,7 +20,7 @@ brew:
 # Run Project
 
 up:
-	encore run -v
+	encore run -v --browser never
 
 GENERATE_ID = $(shell docker ps | grep encoredotdev | cut -c1-12)
 SET_ID = $(eval MY_ID=$(GENERATE_ID))
@@ -32,6 +32,9 @@ down:
 
 upgrade:
 	encore version update
+
+metrics:
+	expvarmon -ports="localhost:4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
 
 # ==============================================================================
 # Running tests within the local computer
@@ -64,7 +67,6 @@ deps-reset:
 
 tidy:
 	go mod tidy
-	go mod vendor
 
 deps-list:
 	go list -m -u -mod=readonly all
