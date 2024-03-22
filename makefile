@@ -50,6 +50,10 @@ down: down-daemon down-db
 upgrade:
 	encore version update
 
+resetdb:
+	encore db reset app
+	encore db reset test-app
+
 metrics:
 	expvarmon -ports="localhost:4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
 
@@ -109,7 +113,7 @@ users:
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
 
 pgcli:
-	pgcli $(shell encore db conn-uri v1)
+	pgcli $(shell encore db conn-uri app)
 
 curl:
 	curl -il "http://127.0.0.1:4000/test?limit=2&offset=2"
@@ -122,7 +126,7 @@ curl:
 
 create:
 	curl -il -X POST \
-	-d '{"name": "bill", "email": "bill3@ardanlabs.com", "roles": ["ADMIN"], "department": "IT", "password": "123", "passwordConfirm": "123"}' \
+	-d '{"name": "bill", "email": "bill4@ardanlabs.com", "roles": ["ADMIN"], "department": "IT", "password": "123", "passwordConfirm": "123"}' \
 	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users"
 
 token:
@@ -140,7 +144,7 @@ delete:
 
 queryid:
 	curl -il -X GET \
-	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/8561801a-e5be-4834-b835-eece402fa6aa"
+	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/fa957dd5-c712-48aa-89c9-d46e1045ee3b"
 
 query:
 	curl -il -X GET \

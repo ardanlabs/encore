@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime"
 
+	"encore.dev"
 	"encore.dev/rlog"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/homegrp"
@@ -35,8 +36,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var build = "develop"
-
 //encore:service
 type Service struct {
 	mtrcs   *metrics.Values
@@ -57,18 +56,20 @@ type Service struct {
 //
 //lint:ignore U1000 "called by encore"
 func initService() (*Service, error) {
-	return InitService(nil, nil)
+	db, auth, err := startup()
+	if err != nil {
+		return nil, err
+	}
+
+	return NewService(db, auth)
 }
 
-// InitService is called automagically be encore via the initService function
-// and tests need to call this function.
-func InitService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
-	ctx := context.Background()
+func startup() (*sqlx.DB, *auth.Auth, error) {
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
 
-	rlog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	rlog.Info("InitService", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// -------------------------------------------------------------------------
 	// Configuration
@@ -86,7 +87,7 @@ func InitService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 		}
 	}{
 		Version: conf.Version{
-			Build: build,
+			Build: encore.Meta().Environment.Name,
 			Desc:  "Service Project",
 		},
 	}
@@ -96,75 +97,71 @@ func InitService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	if err != nil {
 		if errors.Is(err, conf.ErrHelpWanted) {
 			fmt.Println(help)
-			return nil, err
+			return nil, nil, err
 		}
-		return nil, fmt.Errorf("parsing config: %w", err)
+		return nil, nil, fmt.Errorf("parsing config: %w", err)
 	}
 
 	// -------------------------------------------------------------------------
 	// App Starting
 
-	rlog.Info("starting service", "version", build)
-	defer rlog.Info("shutdown complete")
+	rlog.Info("startup", "environment", encore.Meta().Environment.Name)
 
-	if db == nil {
-		out, err := conf.String(&cfg)
-		if err != nil {
-			return nil, fmt.Errorf("generating config for output: %w", err)
-		}
-		rlog.Info("startup", "config", out)
+	out, err := conf.String(&cfg)
+	if err != nil {
+		return nil, nil, fmt.Errorf("generating config for output: %w", err)
 	}
+	rlog.Info("startup", "config", out)
 
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	if db == nil {
-		rlog.Info("startup", "status", "initializing database support")
+	rlog.Info("startup", "status", "initializing database support")
 
-		dbApp, err := sqldb.Open(sqldb.Config{
-			EDB:          appdb.AppDB,
-			MaxIdleConns: cfg.DB.MaxIdleConns,
-			MaxOpenConns: cfg.DB.MaxOpenConns,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("connecting to db: %w", err)
-		}
-
-		db = dbApp
+	db, err := sqldb.Open(sqldb.Config{
+		EDB:          appdb.AppDB,
+		MaxIdleConns: cfg.DB.MaxIdleConns,
+		MaxOpenConns: cfg.DB.MaxOpenConns,
+	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("connecting to db: %w", err)
 	}
 
 	// TODO: I don't like this here because it's more of an ops thing, but
 	// for now I will leave it as I learn more.
-	migrate.Seed(ctx, db)
-
-	// -------------------------------------------------------------------------
-	// Initialize authentication support
-
-	if ath == nil {
-		rlog.Info("startup", "status", "initializing authentication support")
-
-		// Load the private keys files from disk. We can assume some system like
-		// Vault has created these files already. How that happens is not our
-		// concern.
-
-		ks := keystore.New()
-		if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
-			return nil, fmt.Errorf("reading keys: %w", err)
-		}
-
-		authCfg := auth.Config{
-			DB:        db,
-			KeyLookup: ks,
-		}
-
-		auth, err := auth.New(authCfg)
-		if err != nil {
-			return nil, fmt.Errorf("constructing auth: %w", err)
-		}
-
-		ath = auth
+	if err := migrate.Seed(context.Background(), db); err != nil {
+		return nil, nil, fmt.Errorf("seeding db: %w", err)
 	}
 
+	// -------------------------------------------------------------------------
+	// Auth Support
+
+	rlog.Info("startup", "status", "initializing authentication support")
+
+	// Load the private keys files from disk. We can assume some system like
+	// Vault has created these files already. How that happens is not our
+	// concern.
+
+	ks := keystore.New()
+	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+		return nil, nil, fmt.Errorf("reading keys: %w", err)
+	}
+
+	authCfg := auth.Config{
+		DB:        db,
+		KeyLookup: ks,
+	}
+
+	auth, err := auth.New(authCfg)
+	if err != nil {
+		return nil, nil, fmt.Errorf("constructing auth: %w", err)
+	}
+
+	return db, auth, nil
+}
+
+// NewService is called to create a new encore Service.
+func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
 	prdCore := product.NewCore(usrCore, delegate.New(), productdb.NewStore(db))
 	hmeCore := home.NewCore(usrCore, delegate.New(), homedb.NewStore(db))
@@ -182,8 +179,7 @@ func InitService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 		hmeGrp:  homegrp.New(hmeCore),
 		trnGrp:  trangrp.New(usrCore, prdCore),
 		vprdGrp: vproductgrp.New(vprdCore),
-
-		debug: debug.Mux(),
+		debug:   debug.Mux(),
 	}
 
 	return &s, nil

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
@@ -14,7 +13,7 @@ type tableData struct {
 	name    string
 	token   string
 	expResp any
-	excFunc func(ctx context.Context, s *salesapi.Service) any
+	excFunc func(ctx context.Context) any
 	cmpFunc func(x any, y any) string
 }
 

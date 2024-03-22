@@ -24,7 +24,7 @@ func Test_User(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	service, err := salesapi.InitService(dbTest.DB, dbTest.Auth)
+	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}
@@ -75,6 +75,7 @@ func (at *appTest) test(t *testing.T, table []tableData, testName string) {
 
 	for _, tt := range table {
 		f := func(t *testing.T) {
+			t.Log("Calling authHandler")
 			ctx, err := at.authHandler(context.Background(), tt.token)
 			if err != nil {
 				diff := tt.cmpFunc(err, tt.expResp)
@@ -84,7 +85,8 @@ func (at *appTest) test(t *testing.T, table []tableData, testName string) {
 				return
 			}
 
-			got := tt.excFunc(ctx, at.service)
+			t.Log("Calling excFunc")
+			got := tt.excFunc(ctx)
 
 			diff := tt.cmpFunc(got, tt.expResp)
 			if diff != "" {

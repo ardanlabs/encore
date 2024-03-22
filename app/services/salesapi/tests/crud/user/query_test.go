@@ -36,7 +36,7 @@ func userQuery200(sd seedData) []tableData {
 				Total:       len(usrs),
 				Items:       toAppUsers(usrs),
 			},
-			excFunc: func(ctx context.Context, s *salesapi.Service) any {
+			excFunc: func(ctx context.Context) any {
 				qp := usergrp.QueryParams{
 					Page:    1,
 					Rows:    10,
@@ -44,7 +44,7 @@ func userQuery200(sd seedData) []tableData {
 					Name:    "Name",
 				}
 
-				resp, err := s.UserGrpQuery(ctx, qp)
+				resp, err := salesapi.UserGrpQuery(ctx, qp)
 				if err != nil {
 					return err
 				}
@@ -87,8 +87,8 @@ func userQueryByID200(sd seedData) []tableData {
 			name:    "basic",
 			token:   sd.users[0].token,
 			expResp: toAppUserPtr(sd.users[0].User),
-			excFunc: func(ctx context.Context, s *salesapi.Service) any {
-				resp, err := s.UserGrpQueryByID(ctx, sd.users[0].ID.String())
+			excFunc: func(ctx context.Context) any {
+				resp, err := salesapi.UserGrpQueryByID(ctx, sd.users[0].ID.String())
 				if err != nil {
 					return err
 				}
