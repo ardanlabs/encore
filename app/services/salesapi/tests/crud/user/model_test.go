@@ -13,7 +13,6 @@ import (
 type tableData struct {
 	name    string
 	token   string
-	model   any
 	expResp any
 	excFunc func(ctx context.Context, s *salesapi.Service) any
 	cmpFunc func(x any, y any) string
@@ -44,7 +43,7 @@ func toAppUser(usr user.User) usergrp.AppUser {
 		Name:         usr.Name,
 		Email:        usr.Email.Address,
 		Roles:        roles,
-		PasswordHash: nil, // This field is not marshalled.
+		PasswordHash: nil,
 		Department:   usr.Department,
 		Enabled:      usr.Enabled,
 		DateCreated:  usr.DateCreated.Format(time.RFC3339),

@@ -28,7 +28,7 @@ func userQuery200(sd seedData) []tableData {
 
 	table := []tableData{
 		{
-			name:  "basic",
+			name:  "query",
 			token: sd.admins[0].token,
 			expResp: page.Document[usergrp.AppUser]{
 				Page:        1,
@@ -51,17 +51,17 @@ func userQuery200(sd seedData) []tableData {
 
 				return resp
 			},
-			cmpFunc: func(x any, y any) string {
-				if errs, exists := x.(*errs.Error); exists {
+			cmpFunc: func(got any, exp any) string {
+				if errs, exists := got.(*errs.Error); exists {
 					return errs.Message
 				}
 
-				resp := x.(page.Document[usergrp.AppUser])
-				exp := y.(page.Document[usergrp.AppUser])
+				gotResp := got.(page.Document[usergrp.AppUser])
+				expResp := exp.(page.Document[usergrp.AppUser])
 
 				var found int
-				for _, r := range resp.Items {
-					for _, e := range exp.Items {
+				for _, r := range gotResp.Items {
+					for _, e := range expResp.Items {
 						if e.ID == r.ID {
 							found++
 							break
@@ -84,13 +84,17 @@ func userQuery200(sd seedData) []tableData {
 func userQueryByID200(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name: "basic",
-			// url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			// token:      sd.users[0].token,
-			// statusCode: http.StatusOK,
-			// method:     http.MethodGet,
-			// resp:       &usergrp.AppUser{},
+			name:    "basic",
+			token:   sd.users[0].token,
 			expResp: toAppUserPtr(sd.users[0].User),
+			excFunc: func(ctx context.Context, s *salesapi.Service) any {
+				resp, err := s.UserGrpQueryByID(ctx, sd.users[0].ID.String())
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
 			cmpFunc: func(x any, y any) string {
 				return cmp.Diff(x, y)
 			},

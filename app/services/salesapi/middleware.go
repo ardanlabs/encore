@@ -2,6 +2,7 @@ package salesapi
 
 import (
 	"context"
+	"fmt"
 
 	encauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
@@ -21,6 +22,12 @@ func (s *Service) AuthHandler(ctx context.Context, ap *mid.AuthParams) (encauth.
 // =============================================================================
 // Global middleware functions
 // The order matters so be careful when injecting new middleware.
+
+//lint:ignore U1000 "called by encore"
+//encore:middleware target=all
+func (s *Service) panics(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.Panics(s.mtrcs, req, next)
+}
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:metrics
@@ -54,6 +61,7 @@ func (s *Service) authorizeUserOnly(req middleware.Request, next middleware.Next
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_user
 func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) middleware.Response {
+	fmt.Println("***********> authorizeUser")
 	return mid.AuthorizeUser(s.auth, s.usrCore, req, next)
 }
 

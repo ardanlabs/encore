@@ -17,14 +17,14 @@ func userCreate200(sd seedData) []tableData {
 			//url:        "/v1/users",
 			token: sd.admins[0].token,
 			//statusCode: http.StatusCreated,
-			model: &usergrp.AppNewUser{
-				Name:            "Bill Kennedy",
-				Email:           "bill@ardanlabs.com",
-				Roles:           []string{"ADMIN"},
-				Department:      "IT",
-				Password:        "123",
-				PasswordConfirm: "123",
-			},
+			// model: &usergrp.AppNewUser{
+			// 	Name:            "Bill Kennedy",
+			// 	Email:           "bill@ardanlabs.com",
+			// 	Roles:           []string{"ADMIN"},
+			// 	Department:      "IT",
+			// 	Password:        "123",
+			// 	PasswordConfirm: "123",
+			// },
 			expResp: &usergrp.AppUser{
 				Name:       "Bill Kennedy",
 				Email:      "bill@ardanlabs.com",
@@ -68,7 +68,7 @@ func userCreate400(sd seedData) []tableData {
 			token: sd.admins[0].token,
 			//method:     http.MethodPost,
 			//statusCode: http.StatusBadRequest,
-			model: &usergrp.AppNewUser{},
+			//model: &usergrp.AppNewUser{},
 			expResp: toPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
 				validate.FieldError{Field: "email", Err: "email is a required field"},
 				validate.FieldError{Field: "name", Err: "name is a required field"},
@@ -85,14 +85,14 @@ func userCreate400(sd seedData) []tableData {
 			token: sd.admins[0].token,
 			//method:     http.MethodPost,
 			//statusCode: http.StatusBadRequest,
-			model: &usergrp.AppNewUser{
-				Name:            "Bill Kennedy",
-				Email:           "bill@ardanlabs.com",
-				Roles:           []string{"BAD ROLE"},
-				Department:      "IT",
-				Password:        "123",
-				PasswordConfirm: "123",
-			},
+			// model: &usergrp.AppNewUser{
+			// 	Name:            "Bill Kennedy",
+			// 	Email:           "bill@ardanlabs.com",
+			// 	Roles:           []string{"BAD ROLE"},
+			// 	Department:      "IT",
+			// 	Password:        "123",
+			// 	PasswordConfirm: "123",
+			// },
 			expResp: toPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid role \"BAD ROLE\"`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)

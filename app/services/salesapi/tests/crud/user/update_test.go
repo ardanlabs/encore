@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/usergrp"
-	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
@@ -19,14 +18,14 @@ func userUpdate200(sd seedData) []tableData {
 			token: sd.users[0].token,
 			//method:     http.MethodPut,
 			//statusCode: http.StatusOK,
-			model: &usergrp.AppUpdateUser{
-				Name:            dbtest.StringPointer("Jack Kennedy"),
-				Email:           dbtest.StringPointer("jack@ardanlabs.com"),
-				Roles:           []string{"ADMIN"},
-				Department:      dbtest.StringPointer("IT"),
-				Password:        dbtest.StringPointer("123"),
-				PasswordConfirm: dbtest.StringPointer("123"),
-			},
+			// model: &usergrp.AppUpdateUser{
+			// 	Name:            dbtest.StringPointer("Jack Kennedy"),
+			// 	Email:           dbtest.StringPointer("jack@ardanlabs.com"),
+			// 	Roles:           []string{"ADMIN"},
+			// 	Department:      dbtest.StringPointer("IT"),
+			// 	Password:        dbtest.StringPointer("123"),
+			// 	PasswordConfirm: dbtest.StringPointer("123"),
+			// },
 			//resp: &usergrp.AppUser{},
 			expResp: &usergrp.AppUser{
 				Name:       "Jack Kennedy",
@@ -71,10 +70,10 @@ func userUpdate400(sd seedData) []tableData {
 			token: sd.users[0].token,
 			//method:     http.MethodPut,
 			//statusCode: http.StatusBadRequest,
-			model: &usergrp.AppUpdateUser{
-				Email:           dbtest.StringPointer("bill@"),
-				PasswordConfirm: dbtest.StringPointer("jack"),
-			},
+			// model: &usergrp.AppUpdateUser{
+			// 	Email:           dbtest.StringPointer("bill@"),
+			// 	PasswordConfirm: dbtest.StringPointer("jack"),
+			// },
 			//resp: &middleware.Response{},
 			expResp: toPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
 				validate.FieldError{Field: "email", Err: "email must be a valid email address"},
@@ -90,9 +89,9 @@ func userUpdate400(sd seedData) []tableData {
 			token: sd.users[0].token,
 			//method:     http.MethodPut,
 			//statusCode: http.StatusBadRequest,
-			model: &usergrp.AppUpdateUser{
-				Roles: []string{"BAD ROLE"},
-			},
+			// model: &usergrp.AppUpdateUser{
+			// 	Roles: []string{"BAD ROLE"},
+			// },
 			//resp:    &middleware.Response{},
 			expResp: toPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid role \"BAD ROLE\"`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
@@ -134,14 +133,14 @@ func userUpdate401(sd seedData) []tableData {
 			token: sd.users[0].token,
 			//method:     http.MethodPut,
 			//statusCode: http.StatusUnauthorized,
-			model: &usergrp.AppUpdateUser{
-				Name:            dbtest.StringPointer("Bill Kennedy"),
-				Email:           dbtest.StringPointer("bill@ardanlabs.com"),
-				Roles:           []string{"ADMIN"},
-				Department:      dbtest.StringPointer("IT"),
-				Password:        dbtest.StringPointer("123"),
-				PasswordConfirm: dbtest.StringPointer("123"),
-			},
+			// model: &usergrp.AppUpdateUser{
+			// 	Name:            dbtest.StringPointer("Bill Kennedy"),
+			// 	Email:           dbtest.StringPointer("bill@ardanlabs.com"),
+			// 	Roles:           []string{"ADMIN"},
+			// 	Department:      dbtest.StringPointer("IT"),
+			// 	Password:        dbtest.StringPointer("123"),
+			// 	PasswordConfirm: dbtest.StringPointer("123"),
+			// },
 			//resp:    &middleware.Response{},
 			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
