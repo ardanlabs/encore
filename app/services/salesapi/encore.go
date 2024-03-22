@@ -52,6 +52,42 @@ type Service struct {
 	debug   http.Handler
 }
 
+// NewService is called to create a new encore Service.
+func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
+	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
+	prdCore := product.NewCore(usrCore, delegate.New(), productdb.NewStore(db))
+	hmeCore := home.NewCore(usrCore, delegate.New(), homedb.NewStore(db))
+	vprdCore := vproduct.NewCore(vproductdb.NewStore(db))
+
+	s := Service{
+		mtrcs:   newMetrics(),
+		db:      db,
+		auth:    ath,
+		usrCore: usrCore,
+		prdCore: prdCore,
+		hmeCore: hmeCore,
+		usrGrp:  usergrp.New(usrCore, ath),
+		prdGrp:  productgrp.New(prdCore),
+		hmeGrp:  homegrp.New(hmeCore),
+		trnGrp:  trangrp.New(usrCore, prdCore),
+		vprdGrp: vproductgrp.New(vprdCore),
+		debug:   debug.Mux(),
+	}
+
+	return &s, nil
+}
+
+// Shutdown implements a function that will be called by encore when the service
+// is signaled to shutdown.
+func (s *Service) Shutdown(force context.Context) {
+	defer rlog.Info("shutdown", "status", "shutdown complete")
+
+	rlog.Info("shutdown", "status", "stopping database support")
+	s.db.Close()
+}
+
+// =============================================================================
+
 // initService is called by Encore to initialize the service.
 //
 //lint:ignore U1000 "called by encore"
@@ -158,38 +194,4 @@ func startup() (*sqlx.DB, *auth.Auth, error) {
 	}
 
 	return db, auth, nil
-}
-
-// NewService is called to create a new encore Service.
-func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
-	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
-	prdCore := product.NewCore(usrCore, delegate.New(), productdb.NewStore(db))
-	hmeCore := home.NewCore(usrCore, delegate.New(), homedb.NewStore(db))
-	vprdCore := vproduct.NewCore(vproductdb.NewStore(db))
-
-	s := Service{
-		mtrcs:   newMetrics(),
-		db:      db,
-		auth:    ath,
-		usrCore: usrCore,
-		prdCore: prdCore,
-		hmeCore: hmeCore,
-		usrGrp:  usergrp.New(usrCore, ath),
-		prdGrp:  productgrp.New(prdCore),
-		hmeGrp:  homegrp.New(hmeCore),
-		trnGrp:  trangrp.New(usrCore, prdCore),
-		vprdGrp: vproductgrp.New(vprdCore),
-		debug:   debug.Mux(),
-	}
-
-	return &s, nil
-}
-
-// Shutdown implements a function that will be called by encore when the service
-// is signaled to shutdown.
-func (s *Service) Shutdown(force context.Context) {
-	defer rlog.Info("shutdown", "status", "shutdown complete")
-
-	rlog.Info("shutdown", "status", "stopping database support")
-	s.db.Close()
 }
