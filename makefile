@@ -17,10 +17,7 @@ brew:
 	brew list encore || brew install encoredev/tap/encore
 
 # ==============================================================================
-# Run Project
-
-up:
-	encore run -v --browser never
+# Manage Project
 
 FIND_DB = $(shell docker ps | grep encoredotdev | cut -c1-12)
 SET_DB = $(eval DB_ID=$(FIND_DB))
@@ -28,12 +25,27 @@ SET_DB = $(eval DB_ID=$(FIND_DB))
 FIND_DAEMON = $(shell ps | grep 'encore daemon' | grep -v 'grep' | cut -d " " -f 1)
 SET_DAEMON = $(eval DAEMON_ID=$(FIND_DAEMON))
 
-down:
-	$(SET_DAEMON)
-	kill -SIGTERM $(DAEMON_ID)
+up:
+	encore run -v --browser never
+
+down-db:
 	$(SET_DB)
-	docker stop $(DB_ID)
-	docker rm $(DB_ID) -v
+	if [ -z "$(DB_ID)" ]; then \
+		echo "db not running"; \
+    else \
+		docker stop $(DB_ID); \
+		docker rm $(DB_ID) -v; \
+    fi
+
+down-daemon:
+	$(SET_DAEMON)
+	if [ -z "$(DAEMON_ID)" ]; then \
+		echo "daemon not running"; \
+    else \
+		kill -SIGTERM $(DAEMON_ID); \
+    fi
+
+down: down-daemon down-db
 
 upgrade:
 	encore version update
@@ -47,24 +59,24 @@ statsviz:
 # ==============================================================================
 # Running tests within the local computer
 
-test-race:
-	encore daemon
-	CGO_ENABLED=1 encore test -race -count=1 ./...
+test-r:
+	-CGO_ENABLED=1 encore test -race -count=1 ./...
 
 test-only:
-	encore daemon
-	CGO_ENABLED=0 encore test -count=1 ./...
+	-CGO_ENABLED=0 encore test -count=1 ./...
 
 lint:
-	CGO_ENABLED=0 go vet ./...
-	staticcheck -checks=all ./...
+	-CGO_ENABLED=0 go vet ./...
+	-staticcheck -checks=all ./...
 
 vuln-check:
-	govulncheck ./...
+	-govulncheck ./...
 
 test: test-only vuln-check lint
 
-test-race: test-race vuln-check lint
+test-down: test-only vuln-check lint down
+
+test-race: test-r vuln-check lint
 
 # ==============================================================================
 # Modules support
