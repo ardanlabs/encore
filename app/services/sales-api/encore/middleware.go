@@ -14,7 +14,7 @@ import (
 
 //lint:ignore U1000 "called by encore"
 //encore:authhandler
-func (s *Service) authHandler(ctx context.Context, ap *mid.AuthParams) (encauth.UID, *auth.Claims, error) {
+func (s *Service) AuthHandler(ctx context.Context, ap *mid.AuthParams) (encauth.UID, *auth.Claims, error) {
 	return mid.AuthHandler(ctx, s.auth, s.usrCore, ap)
 }
 

@@ -4,6 +4,8 @@ import (
 	"runtime/debug"
 	"testing"
 
+	"encore.dev/et"
+	"github.com/ardanlabs/encore/app/services/sales-api/encore"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
@@ -19,28 +21,28 @@ func Test_User(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	// app := appTest{
-	// 	Handler: mux.WebAPI(mux.Config{
-	// 		Shutdown: make(chan os.Signal, 1),
-	// 		Log:      dbTest.Log,
-	// 		Delegate: dbTest.CoreAPIs.Delegate,
-	// 		Auth:     dbTest.V1.Auth,
-	// 		DB:       dbTest.DB,
-	// 	}, all.Routes()),
-	// 	userToken:  dbTest.TokenV1("user@example.com", "gophers"),
-	// 	adminToken: dbTest.TokenV1("admin@example.com", "gophers"),
-	// }
+	service, err := encore.InitService(dbTest.DB, "../../../../../zarf/keys")
+	if err != nil {
+		t.Fatalf("Service init error: %s", err)
+	}
+	et.MockService("encore", service)
+
+	app := appTest{
+		service:    service,
+		userToken:  dbTest.TokenV1("user@example.com", "gophers"),
+		adminToken: dbTest.TokenV1("admin@example.com", "gophers"),
+	}
 
 	// -------------------------------------------------------------------------
 
-	// sd, err := createUserSeed(dbTest)
-	// if err != nil {
-	// 	t.Fatalf("Seeding error: %s", err)
-	// }
+	sd, err := createUserSeed(dbTest)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
 
 	// -------------------------------------------------------------------------
 
-	// app.test(t, userQuery200(sd), "user-query-200")
+	app.test(t, userQuery200(sd), "user-query-200")
 	// app.test(t, userQueryByID200(sd), "user-querybyid-200")
 
 	// app.test(t, userCreate200(sd), "user-create-200")

@@ -9,6 +9,11 @@ import (
 	emetrics "encore.dev/metrics"
 )
 
+var devGoroutines = expvar.NewInt("goroutines")
+var devRequests = expvar.NewInt("requests")
+var devFailures = expvar.NewInt("errors")
+var devPanics = expvar.NewInt("panics")
+
 // Config lists the set of metrics that is tracked.
 type Config struct {
 	Goroutines *emetrics.Gauge[uint64]
@@ -38,10 +43,10 @@ func New(cfg Config) *Values {
 		requests:      cfg.Requests,
 		failures:      cfg.Failures,
 		panics:        cfg.Panics,
-		devGoroutines: expvar.NewInt("goroutines"),
-		devRequests:   expvar.NewInt("requests"),
-		devFailures:   expvar.NewInt("errors"),
-		devPanics:     expvar.NewInt("panics"),
+		devGoroutines: devGoroutines,
+		devRequests:   devRequests,
+		devFailures:   devFailures,
+		devPanics:     devPanics,
 	}
 }
 

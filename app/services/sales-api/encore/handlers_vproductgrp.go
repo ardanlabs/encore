@@ -9,6 +9,6 @@ import (
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/vproducts tag:metrics tag:authorize_admin_only
-func (s *Service) vproductGrpQuery(ctx context.Context, qp vproductgrp.QueryParams) (page.Document[vproductgrp.AppProduct], error) {
+func (s *Service) VProductGrpQuery(ctx context.Context, qp vproductgrp.QueryParams) (page.Document[vproductgrp.AppProduct], error) {
 	return s.vprdGrp.Query(ctx, qp)
 }

@@ -4,6 +4,8 @@ import (
 	"runtime/debug"
 	"testing"
 
+	"encore.dev/et"
+	"github.com/ardanlabs/encore/app/services/sales-api/encore"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
@@ -19,16 +21,11 @@ func Test_VProduct(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	// app := appTest{
-	// 	Handler: mux.WebAPI(mux.Config{
-	// 		Shutdown: make(chan os.Signal, 1),
-	// 		Log:      dbTest.Log,
-	// 		Auth:     dbTest.V1.Auth,
-	// 		DB:       dbTest.DB,
-	// 	}, all.Routes()),
-	// 	userToken:  dbTest.TokenV1("user@example.com", "gophers"),
-	// 	adminToken: dbTest.TokenV1("admin@example.com", "gophers"),
-	// }
+	service, err := encore.InitService(dbTest.DB, "../../../../../zarf/keys")
+	if err != nil {
+		t.Fatalf("Service init error: %s", err)
+	}
+	et.MockService("encore", service)
 
 	// -------------------------------------------------------------------------
 

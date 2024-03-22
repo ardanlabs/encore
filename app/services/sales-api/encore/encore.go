@@ -4,7 +4,6 @@ package encore
 import (
 	"context"
 	"errors"
-	"expvar"
 	"fmt"
 	"net/http"
 	"os"
@@ -58,7 +57,17 @@ type Service struct {
 //
 //lint:ignore U1000 "called by encore"
 func initService() (*Service, error) {
+	return InitService(nil, "")
+}
+
+// InitService is called automagically be encore via the initService function
+// and tests need to call this function.
+func InitService(db *sqlx.DB, keysFolder string) (*Service, error) {
 	ctx := context.Background()
+
+	if db != nil {
+		rlog.Info("startup", "mode", "test mode")
+	}
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
@@ -96,6 +105,10 @@ func initService() (*Service, error) {
 		return nil, fmt.Errorf("parsing config: %w", err)
 	}
 
+	if keysFolder != "" {
+		cfg.Auth.KeysFolder = keysFolder
+	}
+
 	// -------------------------------------------------------------------------
 	// App Starting
 
@@ -108,20 +121,22 @@ func initService() (*Service, error) {
 	}
 	rlog.Info("startup", "config", out)
 
-	expvar.NewString("build").Set(build)
-
 	// -------------------------------------------------------------------------
 	// Database Support
 
 	rlog.Info("startup", "status", "initializing database support")
 
-	db, err := sqldb.Open(sqldb.Config{
-		EDB:          appdb.AppDB,
-		MaxIdleConns: cfg.DB.MaxIdleConns,
-		MaxOpenConns: cfg.DB.MaxOpenConns,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("connecting to db: %w", err)
+	if db == nil {
+		dbApp, err := sqldb.Open(sqldb.Config{
+			EDB:          appdb.AppDB,
+			MaxIdleConns: cfg.DB.MaxIdleConns,
+			MaxOpenConns: cfg.DB.MaxOpenConns,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("connecting to db: %w", err)
+		}
+
+		db = dbApp
 	}
 
 	// TODO: I don't like this here because it's more of an ops thing, but
@@ -137,7 +152,12 @@ func initService() (*Service, error) {
 	// Vault has created these files already. How that happens is not our
 	// concern.
 	ks := keystore.New()
-	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+
+	if keysFolder == "" {
+		keysFolder = cfg.Auth.KeysFolder
+	}
+
+	if err := ks.LoadRSAKeys(os.DirFS(keysFolder)); err != nil {
 		return nil, fmt.Errorf("reading keys: %w", err)
 	}
 
