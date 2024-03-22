@@ -91,6 +91,8 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 
 	// -------------------------------------------------------------------------
 
+	// This is changing out the base dbname with the new one on
+	// the connection string.
 	url = strings.Replace(url, appdb.DBName, dbName, 1)
 
 	db, err := sqldb.OpenTest(url)
@@ -98,9 +100,13 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 		t.Fatalf("Opening database connection: %v", err)
 	}
 
+	t.Logf("Migrating database: %s", dbName)
+
 	if err := migrate.Migrate(ctx, db); err != nil {
 		t.Fatalf("Migrating error: %s", err)
 	}
+
+	t.Logf("Seeding database: %s", dbName)
 
 	if err := migrate.Seed(ctx, db); err != nil {
 		t.Fatalf("Seeding error: %s", err)
@@ -108,15 +114,10 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 
 	// -------------------------------------------------------------------------
 
-	coreAPIs := newCoreAPIs(db)
-
-	// -------------------------------------------------------------------------
-
-	cfg := auth.Config{
+	a, err := auth.New(auth.Config{
 		DB:        db,
 		KeyLookup: &keyStore{},
-	}
-	a, err := auth.New(cfg)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,10 +129,10 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 	teardown := func() {
 		t.Helper()
 
-		t.Logf("Dropping database: %s", dbName)
-
 		db.Close()
 		defer dbM.Close()
+
+		t.Logf("Dropping database: %s", dbName)
 
 		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
 			fmt.Printf("dropping database %s: %v", dbName, err)
@@ -141,7 +142,7 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 	test := Test{
 		DB:       db,
 		Auth:     a,
-		CoreAPIs: coreAPIs,
+		CoreAPIs: newCoreAPIs(db),
 		Teardown: teardown,
 		t:        t,
 	}
