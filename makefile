@@ -22,13 +22,18 @@ brew:
 up:
 	encore run -v --browser never
 
-GENERATE_ID = $(shell docker ps | grep encoredotdev | cut -c1-12)
-SET_ID = $(eval MY_ID=$(GENERATE_ID))
+FIND_DB = $(shell docker ps | grep encoredotdev | cut -c1-12)
+SET_DB = $(eval DB_ID=$(FIND_DB))
+
+FIND_DAEMON = $(shell ps | grep 'encore daemon' | grep -v 'grep' | cut -d " " -f 1)
+SET_DAEMON = $(eval DAEMON_ID=$(FIND_DAEMON))
 
 down:
-	$(SET_ID)
-	docker stop $(MY_ID)
-	docker rm $(MY_ID) -v
+	$(SET_DAEMON)
+	kill -SIGTERM $(DAEMON_ID)
+	$(SET_DB)
+	docker stop $(DB_ID)
+	docker rm $(DB_ID) -v
 
 upgrade:
 	encore version update
