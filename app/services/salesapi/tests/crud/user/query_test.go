@@ -2,9 +2,8 @@ package user_test
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 
+	"encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -29,40 +28,36 @@ func userQuery200(sd seedData) []tableData {
 
 	table := []tableData{
 		{
-			name:       "basic",
-			statusCode: http.StatusOK,
-			resp:       &page.Document[usergrp.AppUser]{},
-			expResp: &page.Document[usergrp.AppUser]{
+			name:  "basic",
+			token: sd.admins[0].token,
+			expResp: page.Document[usergrp.AppUser]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(usrs),
 				Items:       toAppUsers(usrs),
 			},
-			excFunc: func(s *salesapi.Service) any {
-				ctx := context.Background()
-
-				ctx, err := authHandler(ctx, s, sd.admins[0].token)
-				if err != nil {
-					return err
-				}
-
+			excFunc: func(ctx context.Context, s *salesapi.Service) any {
 				qp := usergrp.QueryParams{
 					Page:    1,
-					Rows:    1,
-					OrderBy: "user_id.ASC",
+					Rows:    10,
+					OrderBy: "user_id,ASC",
 					Name:    "Name",
 				}
 
-				resp, err := salesapi.UserGrpQuery(ctx, qp)
+				resp, err := s.UserGrpQuery(ctx, qp)
 				if err != nil {
 					return err
 				}
 
 				return resp
 			},
-			cmpFunc: func(x interface{}, y interface{}) string {
-				resp := x.(*page.Document[usergrp.AppUser])
-				exp := y.(*page.Document[usergrp.AppUser])
+			cmpFunc: func(x any, y any) string {
+				if errs, exists := x.(*errs.Error); exists {
+					return errs.Message
+				}
+
+				resp := x.(page.Document[usergrp.AppUser])
+				exp := y.(page.Document[usergrp.AppUser])
 
 				var found int
 				for _, r := range resp.Items {
@@ -89,14 +84,14 @@ func userQuery200(sd seedData) []tableData {
 func userQueryByID200(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name:       "basic",
-			url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			token:      sd.users[0].token,
-			statusCode: http.StatusOK,
-			method:     http.MethodGet,
-			resp:       &usergrp.AppUser{},
-			expResp:    toAppUserPtr(sd.users[0].User),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			name: "basic",
+			// url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
+			// token:      sd.users[0].token,
+			// statusCode: http.StatusOK,
+			// method:     http.MethodGet,
+			// resp:       &usergrp.AppUser{},
+			expResp: toAppUserPtr(sd.users[0].User),
+			cmpFunc: func(x any, y any) string {
 				return cmp.Diff(x, y)
 			},
 		},

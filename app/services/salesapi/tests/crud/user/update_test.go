@@ -1,10 +1,8 @@
 package user_test
 
 import (
-	"fmt"
 	"net/http"
 
-	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/usergrp"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/web/errs"
@@ -16,11 +14,11 @@ import (
 func userUpdate200(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name:       "basic",
-			url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusOK,
+			name: "basic",
+			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
+			token: sd.users[0].token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusOK,
 			model: &usergrp.AppUpdateUser{
 				Name:            dbtest.StringPointer("Jack Kennedy"),
 				Email:           dbtest.StringPointer("jack@ardanlabs.com"),
@@ -29,7 +27,7 @@ func userUpdate200(sd seedData) []tableData {
 				Password:        dbtest.StringPointer("123"),
 				PasswordConfirm: dbtest.StringPointer("123"),
 			},
-			resp: &usergrp.AppUser{},
+			//resp: &usergrp.AppUser{},
 			expResp: &usergrp.AppUser{
 				Name:       "Jack Kennedy",
 				Email:      "jack@ardanlabs.com",
@@ -68,16 +66,16 @@ func userUpdate200(sd seedData) []tableData {
 func userUpdate400(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name:       "bad-input",
-			url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusBadRequest,
+			name: "bad-input",
+			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
+			token: sd.users[0].token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusBadRequest,
 			model: &usergrp.AppUpdateUser{
 				Email:           dbtest.StringPointer("bill@"),
 				PasswordConfirm: dbtest.StringPointer("jack"),
 			},
-			resp: &middleware.Response{},
+			//resp: &middleware.Response{},
 			expResp: toPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
 				validate.FieldError{Field: "email", Err: "email must be a valid email address"},
 				validate.FieldError{Field: "passwordConfirm", Err: "passwordConfirm must be equal to Password"},
@@ -87,15 +85,15 @@ func userUpdate400(sd seedData) []tableData {
 			},
 		},
 		{
-			name:       "bad-role",
-			url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusBadRequest,
+			name: "bad-role",
+			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
+			token: sd.users[0].token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusBadRequest,
 			model: &usergrp.AppUpdateUser{
 				Roles: []string{"BAD ROLE"},
 			},
-			resp:    &middleware.Response{},
+			//resp:    &middleware.Response{},
 			expResp: toPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid role \"BAD ROLE\"`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
@@ -109,33 +107,33 @@ func userUpdate400(sd seedData) []tableData {
 func userUpdate401(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name:       "emptytoken",
-			url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			token:      "",
-			method:     http.MethodPut,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
+			name: "emptytoken",
+			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
+			token: "",
+			//method:     http.MethodPut,
+			////statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "badsig",
-			url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			token:      sd.users[0].token + "A",
-			method:     http.MethodPut,
-			statusCode: http.StatusUnauthorized,
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			name: "badsig",
+			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
+			token: sd.users[0].token + "A",
+			//method:     http.MethodPut,
+			//statusCode: http.StatusUnauthorized,
+			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "wronguser",
-			url:        fmt.Sprintf("/v1/users/%s", sd.admins[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusUnauthorized,
+			name: "wronguser",
+			//url:        fmt.Sprintf("/v1/users/%s", sd.admins[0].ID),
+			token: sd.users[0].token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusUnauthorized,
 			model: &usergrp.AppUpdateUser{
 				Name:            dbtest.StringPointer("Bill Kennedy"),
 				Email:           dbtest.StringPointer("bill@ardanlabs.com"),
@@ -144,7 +142,7 @@ func userUpdate401(sd seedData) []tableData {
 				Password:        dbtest.StringPointer("123"),
 				PasswordConfirm: dbtest.StringPointer("123"),
 			},
-			resp:    &middleware.Response{},
+			//resp:    &middleware.Response{},
 			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)

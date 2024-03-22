@@ -3,7 +3,6 @@ package user_test
 import (
 	"net/http"
 
-	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/usergrp"
 	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/foundation/validate"
@@ -14,11 +13,10 @@ import (
 func userCreate200(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name:       "basic",
-			url:        "/v1/users",
-			token:      sd.admins[0].token,
-			method:     http.MethodPost,
-			statusCode: http.StatusCreated,
+			name: "basic",
+			//url:        "/v1/users",
+			token: sd.admins[0].token,
+			//statusCode: http.StatusCreated,
 			model: &usergrp.AppNewUser{
 				Name:            "Bill Kennedy",
 				Email:           "bill@ardanlabs.com",
@@ -27,7 +25,6 @@ func userCreate200(sd seedData) []tableData {
 				Password:        "123",
 				PasswordConfirm: "123",
 			},
-			resp: &usergrp.AppUser{},
 			expResp: &usergrp.AppUser{
 				Name:       "Bill Kennedy",
 				Email:      "bill@ardanlabs.com",
@@ -66,13 +63,12 @@ func userCreate200(sd seedData) []tableData {
 func userCreate400(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name:       "missing-input",
-			url:        "/v1/users",
-			token:      sd.admins[0].token,
-			method:     http.MethodPost,
-			statusCode: http.StatusBadRequest,
-			model:      &usergrp.AppNewUser{},
-			resp:       &middleware.Response{},
+			name: "missing-input",
+			//url:        "/v1/users",
+			token: sd.admins[0].token,
+			//method:     http.MethodPost,
+			//statusCode: http.StatusBadRequest,
+			model: &usergrp.AppNewUser{},
 			expResp: toPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
 				validate.FieldError{Field: "email", Err: "email is a required field"},
 				validate.FieldError{Field: "name", Err: "name is a required field"},
@@ -84,11 +80,11 @@ func userCreate400(sd seedData) []tableData {
 			},
 		},
 		{
-			name:       "bad-role",
-			url:        "/v1/users",
-			token:      sd.admins[0].token,
-			method:     http.MethodPost,
-			statusCode: http.StatusBadRequest,
+			name: "bad-role",
+			//url:        "/v1/users",
+			token: sd.admins[0].token,
+			//method:     http.MethodPost,
+			//statusCode: http.StatusBadRequest,
 			model: &usergrp.AppNewUser{
 				Name:            "Bill Kennedy",
 				Email:           "bill@ardanlabs.com",
@@ -97,7 +93,6 @@ func userCreate400(sd seedData) []tableData {
 				Password:        "123",
 				PasswordConfirm: "123",
 			},
-			resp:    &middleware.Response{},
 			expResp: toPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid role \"BAD ROLE\"`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
@@ -111,49 +106,47 @@ func userCreate400(sd seedData) []tableData {
 func userCreate401(sd seedData) []tableData {
 	table := []tableData{
 		{
-			name:       "emptytoken",
-			url:        "/v1/users",
-			token:      "",
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			name: "emptytoken",
+			//url:        "/v1/users",
+			token: "",
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "badtoken",
-			url:        "/v1/users",
-			token:      sd.admins[0].token[:10],
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			name: "badtoken",
+			//url:        "/v1/users",
+			token: sd.admins[0].token[:10],
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "badsig",
-			url:        "/v1/users",
-			token:      sd.admins[0].token + "A",
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			name: "badsig",
+			//url:        "/v1/users",
+			token: sd.admins[0].token + "A",
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "wronguser",
-			url:        "/v1/users",
-			token:      sd.users[0].token,
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			name: "wronguser",
+			//url:        "/v1/users",
+			token: sd.users[0].token,
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
 			cmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},

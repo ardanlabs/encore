@@ -57,17 +57,13 @@ type Service struct {
 //
 //lint:ignore U1000 "called by encore"
 func initService() (*Service, error) {
-	return InitService(nil, "")
+	return InitService(nil, nil)
 }
 
 // InitService is called automagically be encore via the initService function
 // and tests need to call this function.
-func InitService(db *sqlx.DB, keysFolder string) (*Service, error) {
+func InitService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	ctx := context.Background()
-
-	if db != nil {
-		rlog.Info("startup", "mode", "test mode")
-	}
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
@@ -105,28 +101,26 @@ func InitService(db *sqlx.DB, keysFolder string) (*Service, error) {
 		return nil, fmt.Errorf("parsing config: %w", err)
 	}
 
-	if keysFolder != "" {
-		cfg.Auth.KeysFolder = keysFolder
-	}
-
 	// -------------------------------------------------------------------------
 	// App Starting
 
 	rlog.Info("starting service", "version", build)
 	defer rlog.Info("shutdown complete")
 
-	out, err := conf.String(&cfg)
-	if err != nil {
-		return nil, fmt.Errorf("generating config for output: %w", err)
+	if db == nil {
+		out, err := conf.String(&cfg)
+		if err != nil {
+			return nil, fmt.Errorf("generating config for output: %w", err)
+		}
+		rlog.Info("startup", "config", out)
 	}
-	rlog.Info("startup", "config", out)
 
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	rlog.Info("startup", "status", "initializing database support")
-
 	if db == nil {
+		rlog.Info("startup", "status", "initializing database support")
+
 		dbApp, err := sqldb.Open(sqldb.Config{
 			EDB:          appdb.AppDB,
 			MaxIdleConns: cfg.DB.MaxIdleConns,
@@ -146,29 +140,29 @@ func InitService(db *sqlx.DB, keysFolder string) (*Service, error) {
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
 
-	rlog.Info("startup", "status", "initializing authentication support")
+	if ath == nil {
+		rlog.Info("startup", "status", "initializing authentication support")
 
-	// Load the private keys files from disk. We can assume some system like
-	// Vault has created these files already. How that happens is not our
-	// concern.
-	ks := keystore.New()
+		// Load the private keys files from disk. We can assume some system like
+		// Vault has created these files already. How that happens is not our
+		// concern.
 
-	if keysFolder == "" {
-		keysFolder = cfg.Auth.KeysFolder
-	}
+		ks := keystore.New()
+		if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+			return nil, fmt.Errorf("reading keys: %w", err)
+		}
 
-	if err := ks.LoadRSAKeys(os.DirFS(keysFolder)); err != nil {
-		return nil, fmt.Errorf("reading keys: %w", err)
-	}
+		authCfg := auth.Config{
+			DB:        db,
+			KeyLookup: ks,
+		}
 
-	authCfg := auth.Config{
-		DB:        db,
-		KeyLookup: ks,
-	}
+		auth, err := auth.New(authCfg)
+		if err != nil {
+			return nil, fmt.Errorf("constructing auth: %w", err)
+		}
 
-	auth, err := auth.New(authCfg)
-	if err != nil {
-		return nil, fmt.Errorf("constructing auth: %w", err)
+		ath = auth
 	}
 
 	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
@@ -179,11 +173,11 @@ func InitService(db *sqlx.DB, keysFolder string) (*Service, error) {
 	s := Service{
 		mtrcs:   newMetrics(),
 		db:      db,
-		auth:    auth,
+		auth:    ath,
 		usrCore: usrCore,
 		prdCore: prdCore,
 		hmeCore: hmeCore,
-		usrGrp:  usergrp.New(usrCore, auth),
+		usrGrp:  usergrp.New(usrCore, ath),
 		prdGrp:  productgrp.New(prdCore),
 		hmeGrp:  homegrp.New(hmeCore),
 		trnGrp:  trangrp.New(usrCore, prdCore),

@@ -21,16 +21,14 @@ func Test_User(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	service, err := salesapi.InitService(dbTest.DB, "../../../../../../zarf/keys")
+	service, err := salesapi.InitService(dbTest.DB, dbTest.Auth)
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}
 	et.MockService("salesapi", service)
 
 	app := appTest{
-		service:    service,
-		userToken:  dbTest.TokenV1("user@example.com", "gophers"),
-		adminToken: dbTest.TokenV1("admin@example.com", "gophers"),
+		service: service,
 	}
 
 	// -------------------------------------------------------------------------

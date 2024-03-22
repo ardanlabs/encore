@@ -36,29 +36,38 @@ func run(m *testing.M) (code int, err error) {
 		err = dbtest.StopDB()
 	}()
 
-	fmt.Println("URL:", url)
-
 	return m.Run(), nil
 }
 
 type appTest struct {
-	service    *salesapi.Service
-	userToken  string
-	adminToken string
+	service *salesapi.Service
 }
 
 func (at *appTest) test(t *testing.T, table []tableData, testName string) {
+	log := func(got any, exp any) {
+		t.Log("GOT")
+		t.Logf("%#v", got)
+		t.Log("EXP")
+		t.Logf("%#v", exp)
+		t.Fatalf("Should get the expected response")
+	}
+
 	for _, tt := range table {
 		f := func(t *testing.T) {
-			resp := tt.excFunc(at.service)
+			ctx, err := authHandler(context.Background(), at.service, tt.token)
+			if err != nil {
+				diff := tt.cmpFunc(err, tt.expResp)
+				if diff != "" {
+					log(err, tt.expResp)
+				}
+				return
+			}
 
-			diff := tt.cmpFunc(resp, tt.expResp)
+			got := tt.excFunc(ctx, at.service)
+
+			diff := tt.cmpFunc(got, tt.expResp)
 			if diff != "" {
-				t.Log("GOT")
-				t.Logf("%#v", tt.resp)
-				t.Log("EXP")
-				t.Logf("%#v", tt.expResp)
-				t.Fatalf("Should get the expected response")
+				log(got, tt.expResp)
 			}
 		}
 

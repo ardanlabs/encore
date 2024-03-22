@@ -41,6 +41,8 @@ func StartDB() (string, error) {
 	url := out.String()
 	url = strings.Trim(url, "\n")
 
+	fmt.Println("=== DB   ", url)
+
 	return url, nil
 }
 

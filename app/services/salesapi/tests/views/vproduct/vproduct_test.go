@@ -21,7 +21,7 @@ func Test_VProduct(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	service, err := salesapi.InitService(dbTest.DB, "../../../../../zarf/keys")
+	service, err := salesapi.InitService(dbTest.DB, dbTest.Auth)
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}

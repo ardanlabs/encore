@@ -130,7 +130,7 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 
 	pem, err := a.keyLookup.PublicKey(kid)
 	if err != nil {
-		return Claims{}, fmt.Errorf("failed to fetch public key: %w", err)
+		return Claims{}, fmt.Errorf("failed to fetch public key: %s: %w", kid, err)
 	}
 
 	input := map[string]any{

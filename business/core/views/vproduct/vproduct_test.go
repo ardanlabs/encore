@@ -35,8 +35,6 @@ func run(m *testing.M) (code int, err error) {
 		err = dbtest.StopDB()
 	}()
 
-	fmt.Println("URL:", url)
-
 	return m.Run(), nil
 }
 

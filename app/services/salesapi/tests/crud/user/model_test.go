@@ -1,6 +1,7 @@
 package user_test
 
 import (
+	"context"
 	"time"
 
 	"encore.dev/middleware"
@@ -10,16 +11,12 @@ import (
 )
 
 type tableData struct {
-	name       string
-	url        string
-	token      string
-	method     string
-	statusCode int
-	model      any
-	resp       any
-	expResp    any
-	excFunc    func(s *salesapi.Service) any
-	cmpFunc    func(x interface{}, y interface{}) string
+	name    string
+	token   string
+	model   any
+	expResp any
+	excFunc func(ctx context.Context, s *salesapi.Service) any
+	cmpFunc func(x any, y any) string
 }
 
 type testUser struct {
