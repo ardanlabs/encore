@@ -10,65 +10,65 @@ import (
 	"github.com/ardanlabs/encore/business/web/order"
 )
 
-func createVProductSeed(dbTest *dbtest.Test) (seedData, error) {
+func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 	usrs, err := dbTest.CoreAPIs.User.Query(context.Background(), user.QueryFilter{}, order.By{Field: user.OrderByName, Direction: order.ASC}, 1, 2)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding users : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
 	// -------------------------------------------------------------------------
 
-	tu1 := testUser{
+	tu1 := dbtest.User{
 		User:  usrs[0],
-		token: dbTest.TokenV1(usrs[0].Email.Address, "gophers"),
+		Token: dbTest.TokenV1(usrs[0].Email.Address, "gophers"),
 	}
 
-	tu2 := testUser{
+	tu2 := dbtest.User{
 		User:  usrs[1],
-		token: dbTest.TokenV1(usrs[1].Email.Address, "gophers"),
+		Token: dbTest.TokenV1(usrs[1].Email.Address, "gophers"),
 	}
 
 	// -------------------------------------------------------------------------
 
 	usrs, err = user.TestGenerateSeedUsers(1, user.RoleUser, dbTest.CoreAPIs.User)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding users : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
 	prds, err := product.TestGenerateSeedProducts(2, dbTest.CoreAPIs.Product, usrs[0].ID)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding products : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding products : %w", err)
 	}
 
-	tu3 := testUser{
+	tu3 := dbtest.User{
 		User:     usrs[0],
-		token:    dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
-		products: prds,
+		Token:    dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Products: prds,
 	}
 
 	// -------------------------------------------------------------------------
 
 	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, dbTest.CoreAPIs.User)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding users : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
 	prds, err = product.TestGenerateSeedProducts(2, dbTest.CoreAPIs.Product, usrs[0].ID)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding products : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding products : %w", err)
 	}
 
-	tu4 := testUser{
+	tu4 := dbtest.User{
 		User:     usrs[0],
-		token:    dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
-		products: prds,
+		Token:    dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Products: prds,
 	}
 
 	// -------------------------------------------------------------------------
 
-	sd := seedData{
-		admins: []testUser{tu1, tu4},
-		users:  []testUser{tu2, tu3},
+	sd := dbtest.SeedData{
+		Admins: []dbtest.User{tu1, tu4},
+		Users:  []dbtest.User{tu2, tu3},
 	}
 
 	return sd, nil

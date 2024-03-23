@@ -1,10 +1,8 @@
 package home_test
 
 import (
-	"fmt"
 	"net/http"
 
-	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/homegrp"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/web/errs"
@@ -13,28 +11,28 @@ import (
 	"github.com/google/uuid"
 )
 
-func homeUpdate200(sd seedData) []tableData {
-	table := []tableData{
+func homeUpdate200(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:       "basic",
-			url:        fmt.Sprintf("/v1/homes/%s", sd.users[0].homes[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusOK,
-			model: &homegrp.AppUpdateHome{
-				Type: dbtest.StringPointer("SINGLE FAMILY"),
-				Address: &homegrp.AppUpdateAddress{
-					Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
-					Address2: dbtest.StringPointer("apt 105"),
-					ZipCode:  dbtest.StringPointer("35810"),
-					City:     dbtest.StringPointer("Huntsville"),
-					State:    dbtest.StringPointer("AL"),
-					Country:  dbtest.StringPointer("US"),
-				},
-			},
-			resp: &homegrp.AppHome{},
-			expResp: &homegrp.AppHome{
-				UserID: sd.users[0].ID.String(),
+			Name: "basic",
+			//url:        fmt.Sprintf("/v1/homes/%s", sd.Users[0].homes[0].ID),
+			Token: sd.Users[0].Token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusOK,
+			// model: &homegrp.AppUpdateHome{
+			// 	Type: dbtest.StringPointer("SINGLE FAMILY"),
+			// 	Address: &homegrp.AppUpdateAddress{
+			// 		Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
+			// 		Address2: dbtest.StringPointer("apt 105"),
+			// 		ZipCode:  dbtest.StringPointer("35810"),
+			// 		City:     dbtest.StringPointer("Huntsville"),
+			// 		State:    dbtest.StringPointer("AL"),
+			// 		Country:  dbtest.StringPointer("US"),
+			// 	},
+			// },
+			//resp: &homegrp.AppHome{},
+			ExpResp: &homegrp.AppHome{
+				UserID: sd.Users[0].ID.String(),
 				Type:   "SINGLE FAMILY",
 				Address: homegrp.AppAddress{
 					Address1: "123 Mocking Bird Lane",
@@ -45,7 +43,7 @@ func homeUpdate200(sd seedData) []tableData {
 					Country:  "US",
 				},
 			},
-			cmpFunc: func(x interface{}, y interface{}) string {
+			CmpFunc: func(x interface{}, y interface{}) string {
 				resp := x.(*homegrp.AppHome)
 				expResp := y.(*homegrp.AppHome)
 
@@ -73,48 +71,48 @@ func homeUpdate200(sd seedData) []tableData {
 	return table
 }
 
-func homeUpdate400(sd seedData) []tableData {
-	table := []tableData{
+func homeUpdate400(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:       "bad-input",
-			url:        fmt.Sprintf("/v1/homes/%s", sd.users[0].homes[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusBadRequest,
-			model: &homegrp.AppUpdateHome{
-				Address: &homegrp.AppUpdateAddress{
-					Address1: dbtest.StringPointer(""),
-					Address2: dbtest.StringPointer(""),
-					ZipCode:  dbtest.StringPointer(""),
-					City:     dbtest.StringPointer(""),
-					State:    dbtest.StringPointer(""),
-					Country:  dbtest.StringPointer(""),
-				},
-			},
-			resp: &middleware.Response{},
-			expResp: toPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
+			Name: "bad-input",
+			//url:        fmt.Sprintf("/v1/homes/%s", sd.Users[0].homes[0].ID),
+			Token: sd.Users[0].Token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusBadRequest,
+			// model: &homegrp.AppUpdateHome{
+			// 	Address: &homegrp.AppUpdateAddress{
+			// 		Address1: dbtest.StringPointer(""),
+			// 		Address2: dbtest.StringPointer(""),
+			// 		ZipCode:  dbtest.StringPointer(""),
+			// 		City:     dbtest.StringPointer(""),
+			// 		State:    dbtest.StringPointer(""),
+			// 		Country:  dbtest.StringPointer(""),
+			// 	},
+			// },
+			//resp: &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
 				validate.FieldError{Field: "address1", Err: "address1 must be at least 1 character in length"},
 				validate.FieldError{Field: "country", Err: "Key: 'AppUpdateHome.address.country' Error:Field validation for 'country' failed on the 'iso3166_1_alpha2' tag"},
 				validate.FieldError{Field: "state", Err: "state must be at least 1 character in length"},
 				validate.FieldError{Field: "zipCode", Err: "zipCode must be a valid numeric value"},
 			})),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "bad-type",
-			url:        fmt.Sprintf("/v1/homes/%s", sd.users[0].homes[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusBadRequest,
-			model: &homegrp.AppUpdateHome{
-				Type:    dbtest.StringPointer("BAD TYPE"),
-				Address: &homegrp.AppUpdateAddress{},
-			},
-			resp:    &middleware.Response{},
-			expResp: toPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid type \"BAD TYPE\"`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "bad-type",
+			//url:        fmt.Sprintf("/v1/homes/%s", sd.Users[0].homes[0].ID),
+			Token: sd.Users[0].Token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusBadRequest,
+			// model: &homegrp.AppUpdateHome{
+			// 	Type:    dbtest.StringPointer("BAD TYPE"),
+			// 	Address: &homegrp.AppUpdateAddress{},
+			// },
+			//resp:    &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid type \"BAD TYPE\"`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
@@ -123,52 +121,52 @@ func homeUpdate400(sd seedData) []tableData {
 	return table
 }
 
-func homeUpdate401(sd seedData) []tableData {
-	table := []tableData{
+func homeUpdate401(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:       "emptytoken",
-			url:        fmt.Sprintf("/v1/homes/%s", sd.users[0].homes[0].ID),
-			token:      "",
-			method:     http.MethodPut,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "emptytoken",
+			//url:        fmt.Sprintf("/v1/homes/%s", sd.Users[0].homes[0].ID),
+			Token: "",
+			//method:     http.MethodPut,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "badsig",
-			url:        fmt.Sprintf("/v1/homes/%s", sd.users[0].homes[0].ID),
-			token:      sd.users[0].token + "A",
-			method:     http.MethodPut,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "badsig",
+			//url:        fmt.Sprintf("/v1/homes/%s", sd.Users[0].homes[0].ID),
+			Token: sd.Users[0].Token + "A",
+			//method:     http.MethodPut,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "wronguser",
-			url:        fmt.Sprintf("/v1/homes/%s", sd.admins[0].homes[0].ID),
-			token:      sd.users[0].token,
-			method:     http.MethodPut,
-			statusCode: http.StatusUnauthorized,
-			model: &homegrp.AppUpdateHome{
-				Type: dbtest.StringPointer("SINGLE FAMILY"),
-				Address: &homegrp.AppUpdateAddress{
-					Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
-					Address2: dbtest.StringPointer("apt 105"),
-					ZipCode:  dbtest.StringPointer("35810"),
-					City:     dbtest.StringPointer("Huntsville"),
-					State:    dbtest.StringPointer("AL"),
-					Country:  dbtest.StringPointer("US"),
-				},
-			},
-			resp:    &middleware.Response{},
-			expResp: toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "wronguser",
+			//url:        fmt.Sprintf("/v1/homes/%s", sd.admins[0].homes[0].ID),
+			Token: sd.Users[0].Token,
+			//method:     http.MethodPut,
+			//statusCode: http.StatusUnauthorized,
+			// model: &homegrp.AppUpdateHome{
+			// 	Type: dbtest.StringPointer("SINGLE FAMILY"),
+			// 	Address: &homegrp.AppUpdateAddress{
+			// 		Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
+			// 		Address2: dbtest.StringPointer("apt 105"),
+			// 		ZipCode:  dbtest.StringPointer("35810"),
+			// 		City:     dbtest.StringPointer("Huntsville"),
+			// 		State:    dbtest.StringPointer("AL"),
+			// 		Country:  dbtest.StringPointer("US"),
+			// 	},
+			// },
+			//resp:    &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},

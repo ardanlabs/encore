@@ -1,13 +1,42 @@
 package product_test
 
 import (
+	"fmt"
+	"os"
 	"runtime/debug"
 	"testing"
 
 	"encore.dev/et"
-	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
+
+var url string
+
+func TestMain(m *testing.M) {
+	code, err := run(m)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	os.Exit(code)
+}
+
+func run(m *testing.M) (code int, err error) {
+	et.EnableServiceInstanceIsolation()
+
+	url, err = dbtest.StartDB()
+	if err != nil {
+		return 1, err
+	}
+
+	defer func() {
+		err = dbtest.StopDB()
+	}()
+
+	return m.Run(), nil
+}
+
+// =============================================================================
 
 func Test_Product(t *testing.T) {
 	t.Parallel()
@@ -21,17 +50,21 @@ func Test_Product(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
-	if err != nil {
-		t.Fatalf("Service init error: %s", err)
-	}
-	et.MockService("salesapi", service)
+	// sd, err := insertSeedData(dbTest)
+	// if err != nil {
+	// 	t.Fatalf("Seeding error: %s", err)
+	// }
 
 	// -------------------------------------------------------------------------
 
-	// sd, err := createProductSeed(dbTest)
+	// service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
 	// if err != nil {
-	// 	t.Fatalf("Seeding error: %s", err)
+	// 	t.Fatalf("Service init error: %s", err)
+	// }
+	// et.MockService("salesapi", service)
+
+	// app := dbtest.AppTest{
+	// 	Service: service,
 	// }
 
 	// -------------------------------------------------------------------------

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	encauth "encore.dev/beta/auth"
+	eauth "encore.dev/beta/auth"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/web/auth"
 	"github.com/ardanlabs/encore/business/web/errs"
@@ -29,7 +29,7 @@ type AuthParams struct {
 // =============================================================================
 
 // AuthHandler is used to provide initial auth for JWT's and basic user:password.
-func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *AuthParams) (encauth.UID, *auth.Claims, error) {
+func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 	if len(parts) != 2 {
 		return "", nil, errs.Newf(http.StatusUnauthorized, "invalid authorization value")
@@ -48,7 +48,7 @@ func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *Auth
 
 // =============================================================================
 
-func processJWT(ctx context.Context, a *auth.Auth, token string) (encauth.UID, *auth.Claims, error) {
+func processJWT(ctx context.Context, a *auth.Auth, token string) (eauth.UID, *auth.Claims, error) {
 	claims, err := a.Authenticate(ctx, token)
 	if err != nil {
 		return "", nil, errs.New(http.StatusUnauthorized, err)
@@ -63,10 +63,10 @@ func processJWT(ctx context.Context, a *auth.Auth, token string) (encauth.UID, *
 		return "", nil, errs.New(http.StatusUnauthorized, fmt.Errorf("parsing subject: %w", err))
 	}
 
-	return encauth.UID(subjectID.String()), &claims, nil
+	return eauth.UID(subjectID.String()), &claims, nil
 }
 
-func processBasic(ctx context.Context, usrCore *user.Core, basic string) (encauth.UID, *auth.Claims, error) {
+func processBasic(ctx context.Context, usrCore *user.Core, basic string) (eauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(basic)
 	if !ok {
 		return "", nil, errs.Newf(http.StatusUnauthorized, "invalid Basic auth")
@@ -97,7 +97,7 @@ func processBasic(ctx context.Context, usrCore *user.Core, basic string) (encaut
 		return "", nil, errs.Newf(http.StatusUnauthorized, "parsing subject: %s", err)
 	}
 
-	return encauth.UID(subjectID.String()), &claims, nil
+	return eauth.UID(subjectID.String()), &claims, nil
 }
 
 func parseBasicAuth(auth string) (string, string, bool) {

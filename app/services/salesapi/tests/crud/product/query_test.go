@@ -1,32 +1,30 @@
 package product_test
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/productgrp"
+	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/web/page"
 	"github.com/google/go-cmp/cmp"
 )
 
-func productQuery200(sd seedData) []tableData {
-	total := len(sd.admins[1].products) + len(sd.users[1].products)
+func productQuery200(sd dbtest.SeedData) []dbtest.AppTable {
+	total := len(sd.Admins[1].Products) + len(sd.Users[1].Products)
 
-	table := []tableData{
+	table := []dbtest.AppTable{
 		{
-			name:       "basic",
-			url:        "/v1/products?page=1&rows=10&orderBy=product_id,DESC",
-			token:      sd.admins[1].token,
-			statusCode: http.StatusOK,
-			method:     http.MethodGet,
-			resp:       &page.Document[productgrp.AppProduct]{},
-			expResp: &page.Document[productgrp.AppProduct]{
+			Name: "basic",
+			//url:        "/v1/products?page=1&rows=10&orderBy=product_id,DESC",
+			Token: sd.Admins[1].Token,
+			//statusCode: http.StatusOK,
+			//method:     http.MethodGet,
+			//resp:       &page.Document[productgrp.AppProduct]{},
+			ExpResp: &page.Document[productgrp.AppProduct]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       total,
-				Items:       toAppProducts(append(sd.admins[1].products, sd.users[1].products...)),
+				Items:       toAppProducts(append(sd.Admins[1].Products, sd.Users[1].Products...)),
 			},
-			cmpFunc: func(x interface{}, y interface{}) string {
+			CmpFunc: func(x interface{}, y interface{}) string {
 				resp := x.(*page.Document[productgrp.AppProduct])
 				exp := y.(*page.Document[productgrp.AppProduct])
 
@@ -52,17 +50,17 @@ func productQuery200(sd seedData) []tableData {
 	return table
 }
 
-func productQueryByID200(sd seedData) []tableData {
-	table := []tableData{
+func productQueryByID200(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:       "basic",
-			url:        fmt.Sprintf("/v1/products/%s", sd.users[1].products[0].ID),
-			token:      sd.users[1].token,
-			statusCode: http.StatusOK,
-			method:     http.MethodGet,
-			resp:       &productgrp.AppProduct{},
-			expResp:    toAppProductPtr(sd.users[1].products[0]),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "basic",
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[0].ID),
+			Token: sd.Users[1].Token,
+			//statusCode: http.StatusOK,
+			//method:     http.MethodGet,
+			//resp:       &productgrp.AppProduct{},
+			ExpResp: toAppProductPtr(sd.Users[1].Products[0]),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},

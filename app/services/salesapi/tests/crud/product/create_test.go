@@ -3,35 +3,35 @@ package product_test
 import (
 	"net/http"
 
-	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/productgrp"
+	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )
 
-func productCreate200(sd seedData) []tableData {
-	table := []tableData{
+func productCreate200(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:       "basic",
-			url:        "/v1/products",
-			token:      sd.users[0].token,
-			method:     http.MethodPost,
-			statusCode: http.StatusCreated,
-			model: &productgrp.AppNewProduct{
+			Name: "basic",
+			//url:        "/v1/products",
+			Token: sd.Users[0].Token,
+			//method:     http.MethodPost,
+			//statusCode: http.StatusCreated,
+			// model: &productgrp.AppNewProduct{
+			// 	Name:     "Guitar",
+			// 	Cost:     10.34,
+			// 	Quantity: 10,
+			// },
+			//resp: &productgrp.AppProduct{},
+			ExpResp: &productgrp.AppProduct{
 				Name:     "Guitar",
+				UserID:   sd.Users[0].ID.String(),
 				Cost:     10.34,
 				Quantity: 10,
 			},
-			resp: &productgrp.AppProduct{},
-			expResp: &productgrp.AppProduct{
-				Name:     "Guitar",
-				UserID:   sd.users[0].ID.String(),
-				Cost:     10.34,
-				Quantity: 10,
-			},
-			cmpFunc: func(x interface{}, y interface{}) string {
+			CmpFunc: func(x interface{}, y interface{}) string {
 				resp := x.(*productgrp.AppProduct)
 				expResp := y.(*productgrp.AppProduct)
 
@@ -59,22 +59,22 @@ func productCreate200(sd seedData) []tableData {
 	return table
 }
 
-func productCreate400(sd seedData) []tableData {
-	table := []tableData{
+func productCreate400(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:       "missing-input",
-			url:        "/v1/products",
-			token:      sd.users[0].token,
-			method:     http.MethodPost,
-			statusCode: http.StatusBadRequest,
-			model:      &productgrp.AppNewProduct{},
-			resp:       &middleware.Response{},
-			expResp: toPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
+			Name: "missing-input",
+			//url:        "/v1/products",
+			Token: sd.Users[0].Token,
+			//method:     http.MethodPost,
+			//statusCode: http.StatusBadRequest,
+			//model: &productgrp.AppNewProduct{},
+			//resp:       &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
 				validate.FieldError{Field: "cost", Err: "cost is a required field"},
 				validate.FieldError{Field: "name", Err: "name is a required field"},
 				validate.FieldError{Field: "quantity", Err: "quantity is a required field"},
 			})),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
@@ -83,53 +83,53 @@ func productCreate400(sd seedData) []tableData {
 	return table
 }
 
-func productCreate401(sd seedData) []tableData {
-	table := []tableData{
+func productCreate401(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:       "emptytoken",
-			url:        "/v1/products",
-			token:      "",
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "emptytoken",
+			//url:        "/v1/products",
+			Token: "",
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "badtoken",
-			url:        "/v1/products",
-			token:      sd.admins[0].token[:10],
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "badtoken",
+			//url:        "/v1/products",
+			Token: sd.Admins[0].Token[:10],
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "badsig",
-			url:        "/v1/products",
-			token:      sd.admins[0].token + "A",
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "badsig",
+			//url:        "/v1/products",
+			Token: sd.Admins[0].Token + "A",
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},
 		{
-			name:       "wronguser",
-			url:        "/v1/products",
-			token:      sd.admins[0].token,
-			method:     http.MethodPost,
-			statusCode: http.StatusUnauthorized,
-			resp:       &middleware.Response{},
-			expResp:    toPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			cmpFunc: func(x interface{}, y interface{}) string {
+			Name: "wronguser",
+			//url:        "/v1/products",
+			Token: sd.Admins[0].Token,
+			//method:     http.MethodPost,
+			//statusCode: http.StatusUnauthorized,
+			//resp:       &middleware.Response{},
+			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
+			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},
 		},

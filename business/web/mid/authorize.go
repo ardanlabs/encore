@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	encauth "encore.dev/beta/auth"
+	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/product"
@@ -17,7 +17,7 @@ import (
 // AuthorizeAny checks the user making the request is an admin or user.
 func AuthorizeAny(a *auth.Auth, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
-	claims := encauth.Data().(*auth.Claims)
+	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAny); err != nil {
 		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAny, err)
@@ -29,7 +29,7 @@ func AuthorizeAny(a *auth.Auth, req middleware.Request, next middleware.Next) mi
 // AuthorizeUserOnly checks the user making the request is a user.
 func AuthorizeUserOnly(a *auth.Auth, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
-	claims := encauth.Data().(*auth.Claims)
+	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleUserOnly); err != nil {
 		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleUserOnly, err)
@@ -41,7 +41,7 @@ func AuthorizeUserOnly(a *auth.Auth, req middleware.Request, next middleware.Nex
 // AuthorizeAdminOnly checks the user making the request is an admin.
 func AuthorizeAdminOnly(a *auth.Auth, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
-	claims := encauth.Data().(*auth.Claims)
+	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAdminOnly); err != nil {
 		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOnly, err)
@@ -78,7 +78,7 @@ func AuthorizeUser(a *auth.Auth, usrCore *user.Core, req middleware.Request, nex
 		req = setUser(req, usr)
 	}
 
-	claims := encauth.Data().(*auth.Claims)
+	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
 		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
@@ -116,7 +116,7 @@ func AuthorizeProduct(a *auth.Auth, prdCore *product.Core, req middleware.Reques
 		ctx = setProduct(ctx, prd)
 	}
 
-	claims := encauth.Data().(*auth.Claims)
+	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
 		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
@@ -154,7 +154,7 @@ func AuthorizeHome(a *auth.Auth, hmeCore *home.Core, req middleware.Request, nex
 		ctx = setHome(ctx, hme)
 	}
 
-	claims := encauth.Data().(*auth.Claims)
+	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
 		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)

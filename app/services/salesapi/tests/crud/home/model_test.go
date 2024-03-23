@@ -3,39 +3,9 @@ package home_test
 import (
 	"time"
 
-	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/homegrp"
 	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/user"
 )
-
-type tableData struct {
-	name       string
-	url        string
-	token      string
-	method     string
-	statusCode int
-	model      any
-	resp       any
-	expResp    any
-	excFunc    func()
-	cmpFunc    func(x interface{}, y interface{}) string
-}
-
-type testUser struct {
-	user.User
-	token string
-	homes []home.Home
-}
-
-type seedData struct {
-	users  []testUser
-	admins []testUser
-}
-
-func toPointer(r middleware.Response) *middleware.Response {
-	return &r
-}
 
 func toAppHome(hme home.Home) homegrp.AppHome {
 	return homegrp.AppHome{

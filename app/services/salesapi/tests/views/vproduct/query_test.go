@@ -1,33 +1,32 @@
 package vproduct_test
 
 import (
-	"net/http"
-
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/views/vproductgrp"
+	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/web/page"
 )
 
-func vproductQuery200(sd seedData) []tableData {
-	total := len(sd.admins[1].products) + len(sd.users[1].products)
+func vproductQuery200(sd dbtest.SeedData) []dbtest.AppTable {
+	total := len(sd.Admins[1].Products) + len(sd.Users[1].Products)
 
-	allProducts := toAppVProducts(sd.admins[1].User, sd.admins[1].products)
-	allProducts = append(allProducts, toAppVProducts(sd.users[1].User, sd.users[1].products)...)
+	allProducts := toAppVProducts(sd.Admins[1].User, sd.Admins[1].Products)
+	allProducts = append(allProducts, toAppVProducts(sd.Users[1].User, sd.Users[1].Products)...)
 
-	table := []tableData{
+	table := []dbtest.AppTable{
 		{
-			name:       "basic",
-			url:        "/v1/vproducts?page=1&rows=10&orderBy=product_id,DESC",
-			token:      sd.admins[1].token,
-			statusCode: http.StatusOK,
-			method:     http.MethodGet,
-			resp:       &page.Document[vproductgrp.AppProduct]{},
-			expResp: &page.Document[vproductgrp.AppProduct]{
+			Name: "basic",
+			//url:        "/v1/vproducts?page=1&rows=10&orderBy=product_id,DESC",
+			Token: sd.Admins[1].Token,
+			//statusCode: http.StatusOK,
+			//method:     http.MethodGet,
+			//resp:       &page.Document[vproductgrp.AppProduct]{},
+			ExpResp: &page.Document[vproductgrp.AppProduct]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       total,
 				Items:       allProducts,
 			},
-			cmpFunc: func(x interface{}, y interface{}) string {
+			CmpFunc: func(x interface{}, y interface{}) string {
 				resp := x.(*page.Document[vproductgrp.AppProduct])
 				exp := y.(*page.Document[vproductgrp.AppProduct])
 

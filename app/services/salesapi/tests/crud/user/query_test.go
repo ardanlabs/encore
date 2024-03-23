@@ -7,36 +7,37 @@ import (
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/usergrp"
 	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/web/page"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )
 
-func userQuery200(sd seedData) []tableData {
-	usrs := make([]user.User, 0, len(sd.admins)+len(sd.users))
+func userQuery200(sd dbtest.SeedData) []dbtest.AppTable {
+	usrs := make([]user.User, 0, len(sd.Admins)+len(sd.Users))
 	usrsMap := make(map[uuid.UUID]user.User)
 
-	for _, adm := range sd.admins {
+	for _, adm := range sd.Admins {
 		usrsMap[adm.ID] = adm.User
 		usrs = append(usrs, adm.User)
 	}
 
-	for _, usr := range sd.users {
+	for _, usr := range sd.Users {
 		usrsMap[usr.ID] = usr.User
 		usrs = append(usrs, usr.User)
 	}
 
-	table := []tableData{
+	table := []dbtest.AppTable{
 		{
-			name:  "query",
-			token: sd.admins[0].token,
-			expResp: page.Document[usergrp.AppUser]{
+			Name:  "query",
+			Token: sd.Admins[0].Token,
+			ExpResp: page.Document[usergrp.AppUser]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(usrs),
 				Items:       toAppUsers(usrs),
 			},
-			excFunc: func(ctx context.Context) any {
+			ExcFunc: func(ctx context.Context) any {
 				qp := usergrp.QueryParams{
 					Page:    1,
 					Rows:    10,
@@ -51,7 +52,7 @@ func userQuery200(sd seedData) []tableData {
 
 				return resp
 			},
-			cmpFunc: func(got any, exp any) string {
+			CmpFunc: func(got any, exp any) string {
 				if errs, exists := got.(*errs.Error); exists {
 					return errs.Message
 				}
@@ -81,21 +82,21 @@ func userQuery200(sd seedData) []tableData {
 	return table
 }
 
-func userQueryByID200(sd seedData) []tableData {
-	table := []tableData{
+func userQueryByID200(sd dbtest.SeedData) []dbtest.AppTable {
+	table := []dbtest.AppTable{
 		{
-			name:    "basic",
-			token:   sd.users[0].token,
-			expResp: toAppUserPtr(sd.users[0].User),
-			excFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserGrpQueryByID(ctx, sd.users[0].ID.String())
+			Name:    "basic",
+			Token:   sd.Users[0].Token,
+			ExpResp: toAppUserPtr(sd.Users[0].User),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.UserGrpQueryByID(ctx, sd.Users[0].ID.String())
 				if err != nil {
 					return err
 				}
 
 				return resp
 			},
-			cmpFunc: func(x any, y any) string {
+			CmpFunc: func(x any, y any) string {
 				return cmp.Diff(x, y)
 			},
 		},

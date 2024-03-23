@@ -8,70 +8,70 @@ import (
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
-func createHomeSeed(dbTest *dbtest.Test) (seedData, error) {
+func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 	usrs, err := user.TestGenerateSeedUsers(1, user.RoleUser, dbTest.CoreAPIs.User)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding users : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
 	hmes, err := home.TestGenerateSeedHomes(2, dbTest.CoreAPIs.Home, usrs[0].ID)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding homes : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding homes : %w", err)
 	}
 
-	tu1 := testUser{
+	tu1 := dbtest.User{
 		User:  usrs[0],
-		token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
-		homes: hmes,
+		Token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Homes: hmes,
 	}
 
 	// -------------------------------------------------------------------------
 
 	usrs, err = user.TestGenerateSeedUsers(1, user.RoleUser, dbTest.CoreAPIs.User)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding users : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	tu2 := testUser{
+	tu2 := dbtest.User{
 		User:  usrs[0],
-		token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
 	}
 
 	// -------------------------------------------------------------------------
 
 	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, dbTest.CoreAPIs.User)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding users : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
 	hmes, err = home.TestGenerateSeedHomes(2, dbTest.CoreAPIs.Home, usrs[0].ID)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding homes : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding homes : %w", err)
 	}
 
-	tu3 := testUser{
+	tu3 := dbtest.User{
 		User:  usrs[0],
-		token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
-		homes: hmes,
+		Token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Homes: hmes,
 	}
 
 	// -------------------------------------------------------------------------
 
 	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, dbTest.CoreAPIs.User)
 	if err != nil {
-		return seedData{}, fmt.Errorf("seeding users : %w", err)
+		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	tu4 := testUser{
+	tu4 := dbtest.User{
 		User:  usrs[0],
-		token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Token: dbTest.TokenV1(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
 	}
 
 	// -------------------------------------------------------------------------
 
-	sd := seedData{
-		users:  []testUser{tu1, tu2},
-		admins: []testUser{tu3, tu4},
+	sd := dbtest.SeedData{
+		Users:  []dbtest.User{tu1, tu2},
+		Admins: []dbtest.User{tu3, tu4},
 	}
 
 	return sd, nil
