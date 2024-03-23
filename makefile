@@ -19,14 +19,33 @@ brew:
 # ==============================================================================
 # Manage Project
 
+up:
+	encore run -v --browser never
+
+upgrade:
+	encore version update
+
+resetdb:
+	encore db reset app
+	encore db reset test-app
+
+metrics:
+	expvarmon -ports="localhost:4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
+
+statsviz:
+	open -a "Google Chrome" http://127.0.0.1:4000/debug/statsviz
+
+# ==============================================================================
+# Shut Down
+
 FIND_DB = $(shell docker ps | grep encoredotdev | cut -c1-12)
 SET_DB = $(eval DB_ID=$(FIND_DB))
 
 FIND_DAEMON = $(shell ps | grep 'encore daemon' | grep -v 'grep' | cut -d " " -f 1)
 SET_DAEMON = $(eval DAEMON_ID=$(FIND_DAEMON))
 
-up:
-	encore run -v --browser never
+FIND_APP = $(shell ps | grep 'encore_app_out' | grep -v 'grep' | cut -d " " -f 1)
+SET_APP = $(eval APP_ID=$(FIND_APP))
 
 down-db:
 	$(SET_DB)
@@ -45,36 +64,31 @@ down-daemon:
 		kill -SIGTERM $(DAEMON_ID); \
     fi
 
-down: down-daemon down-db
+down-app:
+	$(SET_APP)
+	if [ -z "$(APP_ID)" ]; then \
+		echo "app not running"; \
+    else \
+		kill -SIGTERM $(APP_ID); \
+    fi
 
-upgrade:
-	encore version update
-
-resetdb:
-	encore db reset app
-	encore db reset test-app
-
-metrics:
-	expvarmon -ports="localhost:4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
-
-statsviz:
-	open -a "Google Chrome" http://127.0.0.1:4000/debug/statsviz
+down: down-app down-daemon down-db
 
 # ==============================================================================
 # Running tests within the local computer
 
 test-r:
-	-CGO_ENABLED=1 encore test -race -count=1 ./...
+	CGO_ENABLED=1 encore test -race -count=1 ./...
 
 test-only:
-	-CGO_ENABLED=0 encore test -count=1 ./...
+	CGO_ENABLED=0 encore test -count=1 ./...
 
 lint:
-	-CGO_ENABLED=0 go vet ./...
-	-staticcheck -checks=all ./...
+	CGO_ENABLED=0 go vet ./...
+	staticcheck -checks=all ./...
 
 vuln-check:
-	-govulncheck ./...
+	govulncheck ./...
 
 test: test-only vuln-check lint
 
@@ -106,7 +120,7 @@ list:
 	go list -mod=mod all
 
 # ==============================================================================
-# Access Project
+# Test Project
 
 users:
 	curl -il \
