@@ -29,6 +29,13 @@ resetdb:
 	encore db reset app
 	encore db reset test-app
 
+reset-encore:
+	cd "/Users/bill/Library/Application Support/encore"; \
+	rm encore.db; \
+	rm encore.db-shm; \
+	rm encore.db-wal; \
+	rm onboarding.json;
+
 metrics:
 	expvarmon -ports="localhost:4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
 
@@ -158,7 +165,7 @@ delete:
 
 queryid:
 	curl -il -X GET \
-	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/fa957dd5-c712-48aa-89c9-d46e1045ee3b"
+	-H "Authorization: Bearer ${TOKEN}" "http://127.0.0.1:4000/v1/users/7ec60c45-90f4-4812-91bb-1d15002433a8"
 
 query:
 	curl -il -X GET \
