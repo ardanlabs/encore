@@ -12,11 +12,11 @@ import (
 	"encore.dev"
 	"encore.dev/rlog"
 	"github.com/ardanlabs/conf/v3"
-	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/homegrp"
-	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/productgrp"
-	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/trangrp"
-	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/crud/usergrp"
-	"github.com/ardanlabs/encore/app/services/salesapi/web/handlers/views/vproductgrp"
+	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/tranapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/home/stores/homedb"
@@ -38,40 +38,42 @@ import (
 
 //encore:service
 type Service struct {
-	mtrcs   *metrics.Values
-	db      *sqlx.DB
-	auth    *auth.Auth
-	usrCore *user.Core
-	prdCore *product.Core
-	hmeCore *home.Core
-	usrGrp  *usergrp.Handlers
-	prdGrp  *productgrp.Handlers
-	hmeGrp  *homegrp.Handlers
-	trnGrp  *trangrp.Handlers
-	vprdGrp *vproductgrp.Handlers
-	debug   http.Handler
+	mtrcs *metrics.Values
+	db    *sqlx.DB
+	auth  *auth.Auth
+	api   api
+	core  core
+	debug http.Handler
 }
 
 // NewService is called to create a new encore Service.
 func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
-	usrCore := user.NewCore(delegate.New(), userdb.NewStore(db))
-	prdCore := product.NewCore(usrCore, delegate.New(), productdb.NewStore(db))
-	hmeCore := home.NewCore(usrCore, delegate.New(), homedb.NewStore(db))
-	vprdCore := vproduct.NewCore(vproductdb.NewStore(db))
+	userCore := user.NewCore(delegate.New(), userdb.NewStore(db))
+	productCore := product.NewCore(userCore, delegate.New(), productdb.NewStore(db))
+	homeCore := home.NewCore(userCore, delegate.New(), homedb.NewStore(db))
+	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	s := Service{
-		mtrcs:   newMetrics(),
-		db:      db,
-		auth:    ath,
-		usrCore: usrCore,
-		prdCore: prdCore,
-		hmeCore: hmeCore,
-		usrGrp:  usergrp.New(usrCore, ath),
-		prdGrp:  productgrp.New(prdCore),
-		hmeGrp:  homegrp.New(hmeCore),
-		trnGrp:  trangrp.New(usrCore, prdCore),
-		vprdGrp: vproductgrp.New(vprdCore),
-		debug:   debug.Mux(),
+		mtrcs: newMetrics(),
+		db:    db,
+		auth:  ath,
+		api: api{
+			core: coreAPI{
+				user:    userapi.New(userCore, ath),
+				product: productapi.New(productCore),
+				home:    homeapi.New(homeCore),
+				tran:    tranapi.New(userCore, productCore),
+			},
+			view: viewAPI{
+				product: vproductapi.New(vproductCore),
+			},
+		},
+		core: core{
+			user:    userCore,
+			product: productCore,
+			home:    homeCore,
+		},
+		debug: debug.Mux(),
 	}
 
 	return &s, nil
