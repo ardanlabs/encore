@@ -210,17 +210,17 @@ type CoreAPIs struct {
 
 func newCoreAPIs(db *sqlx.DB) CoreAPIs {
 	delegate := delegate.New()
-	usrCore := user.NewCore(delegate, userdb.NewStore(db))
-	prdCore := product.NewCore(usrCore, delegate, productdb.NewStore(db))
-	hmeCore := home.NewCore(usrCore, delegate, homedb.NewStore(db))
-	vPrdCore := vproduct.NewCore(vproductdb.NewStore(db))
+	userCore := user.NewCore(delegate, userdb.NewStore(db))
+	productCore := product.NewCore(userCore, delegate, productdb.NewStore(db))
+	homeCore := home.NewCore(userCore, delegate, homedb.NewStore(db))
+	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	return CoreAPIs{
 		Delegate: delegate,
-		User:     usrCore,
-		Product:  prdCore,
-		Home:     hmeCore,
-		VProduct: vPrdCore,
+		User:     userCore,
+		Product:  productCore,
+		Home:     homeCore,
+		VProduct: vproductCore,
 	}
 }
 

@@ -45,16 +45,16 @@ func Test_Home(t *testing.T) {
 }
 
 func homeCrud(t *testing.T) {
-	seed := func(ctx context.Context, usrCore *user.Core, hmeCore *home.Core) ([]home.Home, error) {
+	seed := func(ctx context.Context, userCore *user.Core, homeCore *home.Core) ([]home.Home, error) {
 		var filter user.QueryFilter
 		filter.WithName("Admin Gopher")
 
-		usrs, err := usrCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
+		usrs, err := userCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
 		if err != nil {
 			return nil, fmt.Errorf("seeding users : %w", err)
 		}
 
-		hmes, err := home.TestGenerateSeedHomes(1, hmeCore, usrs[0].ID)
+		hmes, err := home.TestGenerateSeedHomes(1, homeCore, usrs[0].ID)
 		if err != nil {
 			return nil, fmt.Errorf("seeding homes : %w", err)
 		}
@@ -202,16 +202,16 @@ func homeCrud(t *testing.T) {
 }
 
 func homePaging(t *testing.T) {
-	seed := func(ctx context.Context, usrCore *user.Core, hmeCore *home.Core) ([]home.Home, error) {
+	seed := func(ctx context.Context, userCore *user.Core, homeCore *home.Core) ([]home.Home, error) {
 		var filter user.QueryFilter
 		filter.WithName("Admin Gopher")
 
-		usrs, err := usrCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
+		usrs, err := userCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
 		if err != nil {
 			return nil, fmt.Errorf("seeding homes : %w", err)
 		}
 
-		hmes, err := home.TestGenerateSeedHomes(2, hmeCore, usrs[0].ID)
+		hmes, err := home.TestGenerateSeedHomes(2, homeCore, usrs[0].ID)
 		if err != nil {
 			return nil, fmt.Errorf("seeding homes : %w", err)
 		}

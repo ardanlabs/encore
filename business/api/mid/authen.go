@@ -29,7 +29,7 @@ type AuthParams struct {
 // =============================================================================
 
 // AuthHandler is used to provide initial auth for JWT's and basic user:password.
-func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
+func AuthHandler(ctx context.Context, a *auth.Auth, userCore *user.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 	if len(parts) != 2 {
 		return "", nil, errs.Newf(http.StatusUnauthorized, "invalid authorization value")
@@ -40,7 +40,7 @@ func AuthHandler(ctx context.Context, a *auth.Auth, usrCore *user.Core, ap *Auth
 		return processJWT(ctx, a, ap.Authorization)
 
 	case "Basic":
-		return processBasic(ctx, usrCore, ap.Authorization)
+		return processBasic(ctx, userCore, ap.Authorization)
 	}
 
 	return "", nil, errs.Newf(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
@@ -66,7 +66,7 @@ func processJWT(ctx context.Context, a *auth.Auth, token string) (eauth.UID, *au
 	return eauth.UID(subjectID.String()), &claims, nil
 }
 
-func processBasic(ctx context.Context, usrCore *user.Core, basic string) (eauth.UID, *auth.Claims, error) {
+func processBasic(ctx context.Context, userCore *user.Core, basic string) (eauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(basic)
 	if !ok {
 		return "", nil, errs.Newf(http.StatusUnauthorized, "invalid Basic auth")
@@ -77,7 +77,7 @@ func processBasic(ctx context.Context, usrCore *user.Core, basic string) (eauth.
 		return "", nil, errs.New(http.StatusUnauthorized, err)
 	}
 
-	usr, err := usrCore.Authenticate(ctx, *addr, pass)
+	usr, err := userCore.Authenticate(ctx, *addr, pass)
 	if err != nil {
 		return "", nil, errs.New(http.StatusUnauthorized, err)
 	}

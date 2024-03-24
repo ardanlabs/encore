@@ -49,16 +49,16 @@ func Test_Product(t *testing.T) {
 }
 
 func productCrud(t *testing.T) {
-	seed := func(ctx context.Context, usrCore *user.Core, prdCore *product.Core) ([]product.Product, error) {
+	seed := func(ctx context.Context, userCore *user.Core, productCore *product.Core) ([]product.Product, error) {
 		var filter user.QueryFilter
 		filter.WithName("Admin Gopher")
 
-		usrs, err := usrCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
+		usrs, err := userCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
 		if err != nil {
 			return nil, fmt.Errorf("seeding users : %w", err)
 		}
 
-		prds, err := product.TestGenerateSeedProducts(1, prdCore, usrs[0].ID)
+		prds, err := product.TestGenerateSeedProducts(1, productCore, usrs[0].ID)
 		if err != nil {
 			return nil, fmt.Errorf("seeding products : %w", err)
 		}
@@ -200,16 +200,16 @@ func productCrud(t *testing.T) {
 }
 
 func productPaging(t *testing.T) {
-	seed := func(ctx context.Context, usrCore *user.Core, prdCore *product.Core) ([]product.Product, error) {
+	seed := func(ctx context.Context, userCore *user.Core, productCore *product.Core) ([]product.Product, error) {
 		var filter user.QueryFilter
 		filter.WithName("Admin Gopher")
 
-		usrs, err := usrCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
+		usrs, err := userCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
 		if err != nil {
 			return nil, fmt.Errorf("seeding products : %w", err)
 		}
 
-		prds, err := product.TestGenerateSeedProducts(2, prdCore, usrs[0].ID)
+		prds, err := product.TestGenerateSeedProducts(2, productCore, usrs[0].ID)
 		if err != nil {
 			return nil, fmt.Errorf("seeding products : %w", err)
 		}
@@ -318,12 +318,12 @@ func productTran(t *testing.T) {
 	// Execute under a transaction with rollback
 
 	f := func(tx transaction.Transaction) error {
-		usrCore, err := api.User.ExecuteUnderTransaction(tx)
+		userCore, err := api.User.ExecuteUnderTransaction(tx)
 		if err != nil {
 			t.Fatalf("Should be able to create new user core: %s.", err)
 		}
 
-		prdCore, err := api.Product.ExecuteUnderTransaction(tx)
+		productCore, err := api.Product.ExecuteUnderTransaction(tx)
 		if err != nil {
 			t.Fatalf("Should be able to create new product core: %s.", err)
 		}
@@ -342,7 +342,7 @@ func productTran(t *testing.T) {
 			PasswordConfirm: "some",
 		}
 
-		usr, err := usrCore.Create(ctx, nu)
+		usr, err := userCore.Create(ctx, nu)
 		if err != nil {
 			return err
 		}
@@ -354,7 +354,7 @@ func productTran(t *testing.T) {
 			Quantity: 1,
 		}
 
-		_, err = prdCore.Create(ctx, np)
+		_, err = productCore.Create(ctx, np)
 		if err != nil {
 			return err
 		}
@@ -396,12 +396,12 @@ func productTran(t *testing.T) {
 	// Good transaction
 
 	f = func(tx transaction.Transaction) error {
-		usrCore, err := api.User.ExecuteUnderTransaction(tx)
+		userCore, err := api.User.ExecuteUnderTransaction(tx)
 		if err != nil {
 			t.Fatalf("Should be able to create new user core: %s.", err)
 		}
 
-		prdCore, err := api.Product.ExecuteUnderTransaction(tx)
+		productCore, err := api.Product.ExecuteUnderTransaction(tx)
 		if err != nil {
 			t.Fatalf("Should be able to create new product core: %s.", err)
 		}
@@ -420,7 +420,7 @@ func productTran(t *testing.T) {
 			PasswordConfirm: "some",
 		}
 
-		usr, err := usrCore.Create(ctx, nu)
+		usr, err := userCore.Create(ctx, nu)
 		if err != nil {
 			return err
 		}
@@ -432,7 +432,7 @@ func productTran(t *testing.T) {
 			Quantity: 1,
 		}
 
-		_, err = prdCore.Create(ctx, np)
+		_, err = productCore.Create(ctx, np)
 		if err != nil {
 			return err
 		}

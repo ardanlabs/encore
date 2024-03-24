@@ -43,16 +43,16 @@ func Test_VProduct(t *testing.T) {
 }
 
 func vproductPaging(t *testing.T) {
-	seed := func(ctx context.Context, usrCore *user.Core, prdCore *product.Core) ([]product.Product, []user.User, error) {
+	seed := func(ctx context.Context, userCore *user.Core, productCore *product.Core) ([]product.Product, []user.User, error) {
 		var filter user.QueryFilter
 		filter.WithName("Admin Gopher")
 
-		usrs, err := usrCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
+		usrs, err := userCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
 		if err != nil {
 			return nil, nil, fmt.Errorf("seeding products : %w", err)
 		}
 
-		prds, err := product.TestGenerateSeedProducts(2, prdCore, usrs[0].ID)
+		prds, err := product.TestGenerateSeedProducts(2, productCore, usrs[0].ID)
 		if err != nil {
 			return nil, nil, fmt.Errorf("seeding products : %w", err)
 		}

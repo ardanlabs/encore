@@ -45,7 +45,7 @@ func Test_User(t *testing.T) {
 }
 
 func userCrud(t *testing.T) {
-	seed := func(ctx context.Context, usrCore *user.Core) ([]user.User, error) {
+	seed := func(ctx context.Context, userCore *user.Core) ([]user.User, error) {
 		usrs := make([]user.User, 2)
 
 		nu1 := user.NewUser{
@@ -56,7 +56,7 @@ func userCrud(t *testing.T) {
 			Password:        "12345",
 			PasswordConfirm: "12345",
 		}
-		usr1, err := usrCore.Create(ctx, nu1)
+		usr1, err := userCore.Create(ctx, nu1)
 		if err != nil {
 			return nil, fmt.Errorf("seeding user 1 : %w", err)
 		}
@@ -69,7 +69,7 @@ func userCrud(t *testing.T) {
 			Password:        "12345",
 			PasswordConfirm: "12345",
 		}
-		usr2, err := usrCore.Create(ctx, nu2)
+		usr2, err := userCore.Create(ctx, nu2)
 		if err != nil {
 			return nil, fmt.Errorf("seeding user 2 : %w", err)
 		}
@@ -191,7 +191,7 @@ func userCrud(t *testing.T) {
 }
 
 func userPaging(t *testing.T) {
-	seed := func(ctx context.Context, usrCore *user.Core) ([]user.User, error) {
+	seed := func(ctx context.Context, userCore *user.Core) ([]user.User, error) {
 		usrs := make([]user.User, 2)
 
 		nu1 := user.NewUser{
@@ -202,7 +202,7 @@ func userPaging(t *testing.T) {
 			Password:        "12345",
 			PasswordConfirm: "12345",
 		}
-		usr1, err := usrCore.Create(ctx, nu1)
+		usr1, err := userCore.Create(ctx, nu1)
 		if err != nil {
 			return nil, fmt.Errorf("seeding user 1 : %w", err)
 		}
@@ -215,7 +215,7 @@ func userPaging(t *testing.T) {
 			Password:        "12345",
 			PasswordConfirm: "12345",
 		}
-		usr2, err := usrCore.Create(ctx, nu2)
+		usr2, err := userCore.Create(ctx, nu2)
 		if err != nil {
 			return nil, fmt.Errorf("seeding user 2 : %w", err)
 		}
