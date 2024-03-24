@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/web/mid"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 

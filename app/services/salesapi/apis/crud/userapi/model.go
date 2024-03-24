@@ -6,8 +6,8 @@ import (
 	"net/mail"
 	"time"
 
+	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 

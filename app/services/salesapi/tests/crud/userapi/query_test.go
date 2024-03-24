@@ -6,9 +6,9 @@ import (
 	"encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
+	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/page"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )

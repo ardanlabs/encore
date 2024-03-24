@@ -5,8 +5,8 @@ import (
 	"runtime/debug"
 
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/business/web/errs"
-	"github.com/ardanlabs/encore/business/web/metrics"
+	"github.com/ardanlabs/encore/business/api/errs"
+	"github.com/ardanlabs/encore/business/api/metrics"
 )
 
 // Panics handles panics that occur when processing a request.

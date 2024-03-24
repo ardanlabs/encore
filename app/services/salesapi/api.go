@@ -10,7 +10,7 @@ import (
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/tranapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
-	"github.com/ardanlabs/encore/business/web/page"
+	"github.com/ardanlabs/encore/business/api/page"
 )
 
 // Fallback is called for the debug enpoints.

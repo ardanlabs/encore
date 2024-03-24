@@ -11,9 +11,9 @@ import (
 	"time"
 
 	eauth "encore.dev/beta/auth"
+	"github.com/ardanlabs/encore/business/api/auth"
+	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/auth"
-	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )

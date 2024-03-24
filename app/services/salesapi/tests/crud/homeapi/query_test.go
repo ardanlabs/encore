@@ -2,9 +2,9 @@ package home_test
 
 import (
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
+	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/page"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )

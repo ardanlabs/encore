@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/views/vproduct"
 	"github.com/ardanlabs/encore/business/data/sqldb"
-	"github.com/ardanlabs/encore/business/web/order"
 	"github.com/jmoiron/sqlx"
 )
 

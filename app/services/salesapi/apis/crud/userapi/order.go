@@ -3,8 +3,8 @@ package userapi
 import (
 	"errors"
 
+	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/order"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 

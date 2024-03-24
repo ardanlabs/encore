@@ -2,7 +2,7 @@ package salesapi
 
 import (
 	emetrics "encore.dev/metrics"
-	"github.com/ardanlabs/encore/business/web/metrics"
+	"github.com/ardanlabs/encore/business/api/metrics"
 )
 
 // Encore currently requires these metrics to be declared in the same package

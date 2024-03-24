@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	eauth "encore.dev/beta/auth"
+	"github.com/ardanlabs/encore/business/api/auth"
+	"github.com/ardanlabs/encore/business/api/errs"
+	"github.com/ardanlabs/encore/business/api/mid"
+	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/auth"
-	"github.com/ardanlabs/encore/business/web/errs"
-	"github.com/ardanlabs/encore/business/web/mid"
-	"github.com/ardanlabs/encore/business/web/page"
 )
 
 // Handlers manages the set of handler functions for this domain.

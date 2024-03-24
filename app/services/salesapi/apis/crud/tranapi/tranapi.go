@@ -6,9 +6,9 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/errs"
 )
 
 // Handlers manages the set of handler functions for this domain.

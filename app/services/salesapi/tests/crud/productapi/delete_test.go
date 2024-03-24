@@ -3,8 +3,8 @@ package product_test
 import (
 	"net/http"
 
+	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/google/go-cmp/cmp"
 )
 

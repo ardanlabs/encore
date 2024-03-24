@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/home/stores/homedb"
@@ -24,7 +25,6 @@ import (
 	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
-	"github.com/ardanlabs/encore/business/web/auth"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/jmoiron/sqlx"
 )

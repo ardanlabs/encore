@@ -2,8 +2,8 @@ package product_test
 
 import (
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
+	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/page"
 	"github.com/google/go-cmp/cmp"
 )
 

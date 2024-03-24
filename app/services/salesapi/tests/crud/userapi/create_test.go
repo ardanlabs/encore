@@ -6,8 +6,8 @@ import (
 
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
+	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/errs"
 	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"

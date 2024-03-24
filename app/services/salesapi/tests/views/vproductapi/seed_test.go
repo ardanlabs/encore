@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/order"
 )
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {

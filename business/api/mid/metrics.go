@@ -2,7 +2,7 @@ package mid
 
 import (
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/business/web/metrics"
+	"github.com/ardanlabs/encore/business/api/metrics"
 )
 
 // Metrics sets the basic counters and guages.

@@ -6,11 +6,11 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
+	"github.com/ardanlabs/encore/business/api/auth"
+	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/web/auth"
-	"github.com/ardanlabs/encore/business/web/mid"
 )
 
 // AppTable represent fields needed for running an app test.

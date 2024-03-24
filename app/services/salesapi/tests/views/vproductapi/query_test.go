@@ -2,8 +2,8 @@ package vproduct_test
 
 import (
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
+	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/business/web/page"
 )
 
 func vproductQuery200(sd dbtest.SeedData) []dbtest.AppTable {
