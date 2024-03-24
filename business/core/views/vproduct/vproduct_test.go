@@ -71,14 +71,14 @@ func vproductPaging(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	api := dbTest.CoreAPIs
+	api := dbTest.Core
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	t.Log("Go seeding ...")
 
-	prds, usrs, err := seed(ctx, api.User, api.Product)
+	prds, usrs, err := seed(ctx, api.Crud.User, api.Crud.Product)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
@@ -86,12 +86,12 @@ func vproductPaging(t *testing.T) {
 	// -------------------------------------------------------------------------
 
 	name := prds[0].Name
-	prd1, err := api.VProduct.Query(ctx, vproduct.QueryFilter{Name: &name}, vproduct.DefaultOrderBy, 1, 1)
+	prd1, err := api.View.Product.Query(ctx, vproduct.QueryFilter{Name: &name}, vproduct.DefaultOrderBy, 1, 1)
 	if err != nil {
 		t.Fatalf("Should be able to retrieve products %q : %s", name, err)
 	}
 
-	n, err := api.VProduct.Count(ctx, vproduct.QueryFilter{Name: &name})
+	n, err := api.View.Product.Count(ctx, vproduct.QueryFilter{Name: &name})
 	if err != nil {
 		t.Fatalf("Should be able to retrieve product count %q : %s", name, err)
 	}
@@ -109,12 +109,12 @@ func vproductPaging(t *testing.T) {
 	}
 
 	name = prds[1].Name
-	prd2, err := api.VProduct.Query(ctx, vproduct.QueryFilter{Name: &name}, vproduct.DefaultOrderBy, 1, 1)
+	prd2, err := api.View.Product.Query(ctx, vproduct.QueryFilter{Name: &name}, vproduct.DefaultOrderBy, 1, 1)
 	if err != nil {
 		t.Fatalf("Should be able to retrieve products %q : %s", name, err)
 	}
 
-	n, err = api.VProduct.Count(ctx, vproduct.QueryFilter{Name: &name})
+	n, err = api.View.Product.Count(ctx, vproduct.QueryFilter{Name: &name})
 	if err != nil {
 		t.Fatalf("Should be able to retrieve product count %q : %s", name, err)
 	}
@@ -131,12 +131,12 @@ func vproductPaging(t *testing.T) {
 		t.Fatal("Should have the correct user name")
 	}
 
-	prd3, err := api.VProduct.Query(ctx, vproduct.QueryFilter{}, vproduct.DefaultOrderBy, 1, 2)
+	prd3, err := api.View.Product.Query(ctx, vproduct.QueryFilter{}, vproduct.DefaultOrderBy, 1, 2)
 	if err != nil {
 		t.Fatalf("Should be able to retrieve 2 products for page 1 : %s", err)
 	}
 
-	n, err = api.VProduct.Count(ctx, vproduct.QueryFilter{})
+	n, err = api.View.Product.Count(ctx, vproduct.QueryFilter{})
 	if err != nil {
 		t.Fatalf("Should be able to retrieve product count %q : %s", name, err)
 	}

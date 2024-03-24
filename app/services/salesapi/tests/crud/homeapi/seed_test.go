@@ -9,12 +9,14 @@ import (
 )
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
-	usrs, err := user.TestGenerateSeedUsers(1, user.RoleUser, dbTest.CoreAPIs.User)
+	api := dbTest.Core.Crud
+
+	usrs, err := user.TestGenerateSeedUsers(1, user.RoleUser, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	hmes, err := home.TestGenerateSeedHomes(2, dbTest.CoreAPIs.Home, usrs[0].ID)
+	hmes, err := home.TestGenerateSeedHomes(2, api.Home, usrs[0].ID)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding homes : %w", err)
 	}
@@ -27,7 +29,7 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = user.TestGenerateSeedUsers(1, user.RoleUser, dbTest.CoreAPIs.User)
+	usrs, err = user.TestGenerateSeedUsers(1, user.RoleUser, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -39,12 +41,12 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, dbTest.CoreAPIs.User)
+	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	hmes, err = home.TestGenerateSeedHomes(2, dbTest.CoreAPIs.Home, usrs[0].ID)
+	hmes, err = home.TestGenerateSeedHomes(2, api.Home, usrs[0].ID)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding homes : %w", err)
 	}
@@ -57,7 +59,7 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, dbTest.CoreAPIs.User)
+	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}

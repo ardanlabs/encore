@@ -8,7 +8,9 @@ import (
 )
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
-	usrs, err := user.TestGenerateSeedUsers(2, user.RoleAdmin, dbTest.CoreAPIs.User)
+	api := dbTest.Core.Crud
+
+	usrs, err := user.TestGenerateSeedUsers(2, user.RoleAdmin, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -25,7 +27,7 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = user.TestGenerateSeedUsers(2, user.RoleUser, dbTest.CoreAPIs.User)
+	usrs, err = user.TestGenerateSeedUsers(2, user.RoleUser, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}

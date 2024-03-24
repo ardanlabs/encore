@@ -11,7 +11,9 @@ import (
 )
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
-	usrs, err := dbTest.CoreAPIs.User.Query(context.Background(), user.QueryFilter{}, order.By{Field: user.OrderByName, Direction: order.ASC}, 1, 2)
+	api := dbTest.Core.Crud
+
+	usrs, err := api.User.Query(context.Background(), user.QueryFilter{}, order.By{Field: user.OrderByName, Direction: order.ASC}, 1, 2)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -30,12 +32,12 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = user.TestGenerateSeedUsers(1, user.RoleUser, dbTest.CoreAPIs.User)
+	usrs, err = user.TestGenerateSeedUsers(1, user.RoleUser, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := product.TestGenerateSeedProducts(2, dbTest.CoreAPIs.Product, usrs[0].ID)
+	prds, err := product.TestGenerateSeedProducts(2, api.Product, usrs[0].ID)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding products : %w", err)
 	}
@@ -48,12 +50,12 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, dbTest.CoreAPIs.User)
+	usrs, err = user.TestGenerateSeedUsers(1, user.RoleAdmin, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = product.TestGenerateSeedProducts(2, dbTest.CoreAPIs.Product, usrs[0].ID)
+	prds, err = product.TestGenerateSeedProducts(2, api.Product, usrs[0].ID)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding products : %w", err)
 	}
