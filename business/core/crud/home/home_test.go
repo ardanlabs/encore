@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/mail"
 	"os"
 	"runtime/debug"
 	"testing"
@@ -49,12 +50,21 @@ func homeCrud(t *testing.T) {
 		var filter user.QueryFilter
 		filter.WithName("Admin Gopher")
 
-		usrs, err := userCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
-		if err != nil {
-			return nil, fmt.Errorf("seeding users : %w", err)
+		nu := user.NewUser{
+			Name:            "Bill Kennedy",
+			Email:           mail.Address{Address: "bill@ardanlabs.com"},
+			Roles:           []user.Role{user.RoleAdmin},
+			Department:      "IT",
+			Password:        "12345",
+			PasswordConfirm: "12345",
 		}
 
-		hmes, err := home.TestGenerateSeedHomes(1, homeCore, usrs[0].ID)
+		usr, err := userCore.Create(ctx, nu)
+		if err != nil {
+			return nil, fmt.Errorf("seeding user : %w", err)
+		}
+
+		hmes, err := home.TestGenerateSeedHomes(1, homeCore, usr.ID)
 		if err != nil {
 			return nil, fmt.Errorf("seeding homes : %w", err)
 		}
@@ -65,6 +75,7 @@ func homeCrud(t *testing.T) {
 	// ---------------------------------------------------------------------------
 
 	dbTest := dbtest.NewTest(t, url, "Test_Home/crud")
+
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -206,12 +217,21 @@ func homePaging(t *testing.T) {
 		var filter user.QueryFilter
 		filter.WithName("Admin Gopher")
 
-		usrs, err := userCore.Query(ctx, filter, user.DefaultOrderBy, 1, 1)
-		if err != nil {
-			return nil, fmt.Errorf("seeding homes : %w", err)
+		nu := user.NewUser{
+			Name:            "Bill Kennedy",
+			Email:           mail.Address{Address: "bill@ardanlabs.com"},
+			Roles:           []user.Role{user.RoleAdmin},
+			Department:      "IT",
+			Password:        "12345",
+			PasswordConfirm: "12345",
 		}
 
-		hmes, err := home.TestGenerateSeedHomes(2, homeCore, usrs[0].ID)
+		usr, err := userCore.Create(ctx, nu)
+		if err != nil {
+			return nil, fmt.Errorf("seeding user : %w", err)
+		}
+
+		hmes, err := home.TestGenerateSeedHomes(2, homeCore, usr.ID)
 		if err != nil {
 			return nil, fmt.Errorf("seeding homes : %w", err)
 		}

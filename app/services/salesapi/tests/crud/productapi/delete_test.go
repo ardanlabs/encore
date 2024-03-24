@@ -12,15 +12,15 @@ func productDelete200(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name: "asuser",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[0].ID),
-			Token: sd.Users[1].Token,
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
+			Token: sd.Users[0].Token,
 			//method:     http.MethodDelete,
 			//statusCode: http.StatusNoContent,
 		},
 		{
 			Name: "asadmin",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.admins[1].products[0].ID),
-			Token: sd.Admins[1].Token,
+			//url:        fmt.Sprintf("/v1/products/%s", sd.admins[0].products[0].ID),
+			Token: sd.Admins[0].Token,
 			//method:     http.MethodDelete,
 			//statusCode: http.StatusNoContent,
 		},
@@ -33,7 +33,7 @@ func productDelete401(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name: "emptytoken",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[1].ID),
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[1].ID),
 			Token: "",
 			//method:     http.MethodDelete,
 			//statusCode: http.StatusUnauthorized,
@@ -45,8 +45,8 @@ func productDelete401(sd dbtest.SeedData) []dbtest.AppTable {
 		},
 		{
 			Name: "badsig",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[1].ID),
-			Token: sd.Users[1].Token + "A",
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[1].ID),
+			Token: sd.Users[0].Token + "A",
 			//method:     http.MethodDelete,
 			//statusCode: http.StatusUnauthorized,
 			//resp:    &middleware.Response{},
@@ -57,8 +57,8 @@ func productDelete401(sd dbtest.SeedData) []dbtest.AppTable {
 		},
 		{
 			Name: "wronguser",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[1].ID),
-			Token: sd.Users[0].Token,
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[1].ID),
+			Token: sd.Admins[0].Token,
 			//method:     http.MethodDelete,
 			//statusCode: http.StatusUnauthorized,
 			//resp:    &middleware.Response{},

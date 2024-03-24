@@ -7,16 +7,16 @@ import (
 )
 
 func vproductQuery200(sd dbtest.SeedData) []dbtest.AppTable {
-	total := len(sd.Admins[1].Products) + len(sd.Users[1].Products)
+	total := len(sd.Admins[0].Products) + len(sd.Users[0].Products)
 
-	allProducts := toAppVProducts(sd.Admins[1].User, sd.Admins[1].Products)
-	allProducts = append(allProducts, toAppVProducts(sd.Users[1].User, sd.Users[1].Products)...)
+	allProducts := toAppVProducts(sd.Admins[0].User, sd.Admins[0].Products)
+	allProducts = append(allProducts, toAppVProducts(sd.Users[0].User, sd.Users[0].Products)...)
 
 	table := []dbtest.AppTable{
 		{
 			Name: "basic",
 			//url:        "/v1/vproducts?page=1&rows=10&orderBy=product_id,DESC",
-			Token: sd.Admins[1].Token,
+			Token: sd.Admins[0].Token,
 			//statusCode: http.StatusOK,
 			//method:     http.MethodGet,
 			//resp:       &page.Document[vproductapi.AppProduct]{},

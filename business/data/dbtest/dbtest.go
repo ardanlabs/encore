@@ -149,12 +149,6 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 		t.Fatalf("Migrating error: %s", err)
 	}
 
-	t.Logf("Seeding database: %s", dbName)
-
-	if err := migrate.Seed(ctx, db); err != nil {
-		t.Fatalf("Seeding error: %s", err)
-	}
-
 	// -------------------------------------------------------------------------
 
 	a, err := auth.New(auth.Config{

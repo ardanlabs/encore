@@ -8,13 +8,13 @@ import (
 )
 
 func productQuery200(sd dbtest.SeedData) []dbtest.AppTable {
-	total := len(sd.Admins[1].Products) + len(sd.Users[1].Products)
+	total := len(sd.Admins[0].Products) + len(sd.Users[0].Products)
 
 	table := []dbtest.AppTable{
 		{
 			Name: "basic",
 			//url:        "/v1/products?page=1&rows=10&orderBy=product_id,DESC",
-			Token: sd.Admins[1].Token,
+			Token: sd.Admins[0].Token,
 			//statusCode: http.StatusOK,
 			//method:     http.MethodGet,
 			//resp:       &page.Document[productapi.AppProduct]{},
@@ -22,7 +22,7 @@ func productQuery200(sd dbtest.SeedData) []dbtest.AppTable {
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       total,
-				Items:       toAppProducts(append(sd.Admins[1].Products, sd.Users[1].Products...)),
+				Items:       toAppProducts(append(sd.Admins[0].Products, sd.Users[0].Products...)),
 			},
 			CmpFunc: func(x interface{}, y interface{}) string {
 				resp := x.(*page.Document[productapi.AppProduct])
@@ -54,12 +54,12 @@ func productQueryByID200(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name: "basic",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[0].ID),
-			Token: sd.Users[1].Token,
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
+			Token: sd.Users[0].Token,
 			//statusCode: http.StatusOK,
 			//method:     http.MethodGet,
 			//resp:       &productapi.AppProduct{},
-			ExpResp: toAppProductPtr(sd.Users[1].Products[0]),
+			ExpResp: toAppProductPtr(sd.Users[0].Products[0]),
 			CmpFunc: func(x interface{}, y interface{}) string {
 				return cmp.Diff(x, y)
 			},

@@ -15,8 +15,8 @@ func productUpdate200(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name: "basic",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[0].ID),
-			Token: sd.Users[1].Token,
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
+			Token: sd.Users[0].Token,
 			//method:     http.MethodPut,
 			//statusCode: http.StatusOK,
 			// model: &productapi.AppUpdateProduct{
@@ -27,7 +27,7 @@ func productUpdate200(sd dbtest.SeedData) []dbtest.AppTable {
 			//resp: &productapi.AppProduct{},
 			ExpResp: &productapi.AppProduct{
 				Name:     "Guitar",
-				UserID:   sd.Users[1].ID.String(),
+				UserID:   sd.Users[0].ID.String(),
 				Cost:     10.34,
 				Quantity: 10,
 			},
@@ -63,8 +63,8 @@ func productUpdate400(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name: "bad-input",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[0].ID),
-			Token: sd.Users[1].Token,
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
+			Token: sd.Users[0].Token,
 			//method:     http.MethodPut,
 			//statusCode: http.StatusBadRequest,
 			// model: &productapi.AppUpdateProduct{
@@ -89,7 +89,7 @@ func productUpdate401(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name: "emptytoken",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[0].ID),
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
 			Token: "",
 			//method:     http.MethodPut,
 			//statusCode: http.StatusUnauthorized,
@@ -100,8 +100,8 @@ func productUpdate401(sd dbtest.SeedData) []dbtest.AppTable {
 		},
 		{
 			Name: "badsig",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[1].products[0].ID),
-			Token: sd.Users[1].Token + "A",
+			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
+			Token: sd.Users[0].Token + "A",
 			//method:     http.MethodPut,
 			//statusCode: http.StatusUnauthorized,
 			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
