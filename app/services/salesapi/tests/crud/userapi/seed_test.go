@@ -1,6 +1,7 @@
 package user_test
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -8,9 +9,10 @@ import (
 )
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
+	ctx := context.Background()
 	api := dbTest.Core.Crud
 
-	usrs, err := user.TestGenerateSeedUsers(2, user.RoleAdmin, api.User)
+	usrs, err := user.TestGenerateSeedUsers(ctx, 2, user.RoleAdmin, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -27,7 +29,7 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = user.TestGenerateSeedUsers(2, user.RoleUser, api.User)
+	usrs, err = user.TestGenerateSeedUsers(ctx, 2, user.RoleUser, api.User)
 	if err != nil {
 		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
