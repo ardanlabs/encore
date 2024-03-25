@@ -73,9 +73,9 @@ func Test_User(t *testing.T) {
 	app.Test(t, userQuery200(sd), "user-query-200")
 	app.Test(t, userQueryByID200(sd), "user-querybyid-200")
 
-	// app.test(t, userCreate200(sd), "user-create-200")
-	// app.test(t, userCreate401(sd), "user-create-401")
-	// app.test(t, userCreate400(sd), "user-create-400")
+	app.Test(t, userCreate200(sd), "user-create-200")
+	app.Test(t, userCreate401(sd), "user-create-401")
+	app.Test(t, userCreate400(sd), "user-create-400")
 
 	// app.test(t, userUpdate200(sd), "user-update-200")
 	// app.test(t, userUpdate401(sd), "user-update-401")

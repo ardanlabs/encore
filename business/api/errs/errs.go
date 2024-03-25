@@ -23,19 +23,20 @@ var errMap = map[int]errs.ErrCode{
 	http.StatusUnauthorized:        errs.Unauthenticated,
 }
 
-type extraDetails struct {
+// ExtraDetails provides the caller with more error context.
+type ExtraDetails struct {
 	HTTPStatusCode int    `json:"httpStatusCode"`
 	HTTPStatus     string `json:"httpStatus"`
 }
 
-func (extraDetails) ErrDetails() {}
+func (ExtraDetails) ErrDetails() {}
 
 // New constructs an encore error based on an app error.
 func New(httpStatus int, err error) *errs.Error {
 	return &errs.Error{
 		Code:    errMap[httpStatus],
 		Message: err.Error(),
-		Details: extraDetails{
+		Details: ExtraDetails{
 			HTTPStatusCode: httpStatus,
 			HTTPStatus:     http.StatusText(httpStatus),
 		},
@@ -47,7 +48,7 @@ func Newf(httpStatus int, format string, v ...any) *errs.Error {
 	return &errs.Error{
 		Code:    errMap[httpStatus],
 		Message: fmt.Sprintf(format, v...),
-		Details: extraDetails{
+		Details: ExtraDetails{
 			HTTPStatusCode: httpStatus,
 			HTTPStatus:     http.StatusText(httpStatus),
 		},
@@ -61,7 +62,7 @@ func NewResponse(httpStatus int, err error) middleware.Response {
 		Err: &errs.Error{
 			Code:    errMap[httpStatus],
 			Message: err.Error(),
-			Details: extraDetails{
+			Details: ExtraDetails{
 				HTTPStatusCode: httpStatus,
 				HTTPStatus:     http.StatusText(httpStatus),
 			},
@@ -76,7 +77,7 @@ func NewResponsef(httpStatus int, format string, v ...any) middleware.Response {
 		Err: &errs.Error{
 			Code:    errMap[httpStatus],
 			Message: fmt.Sprintf(format, v...),
-			Details: extraDetails{
+			Details: ExtraDetails{
 				HTTPStatusCode: httpStatus,
 				HTTPStatus:     http.StatusText(httpStatus),
 			},

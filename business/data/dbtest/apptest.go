@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	eauth "encore.dev/beta/auth"
+	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/business/api/auth"
+	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/product"
@@ -45,6 +47,8 @@ func ToPointer(r middleware.Response) *middleware.Response {
 type Service interface {
 	AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error)
 }
+
+// =============================================================================
 
 // AppTest contains functions for executing an app test.
 type AppTest struct {
@@ -98,4 +102,31 @@ func (at *AppTest) authHandler(ctx context.Context, token string) (context.Conte
 	}
 
 	return eauth.WithContext(ctx, uid, claims), nil
+}
+
+// =============================================================================
+
+// CmpErrors compares two encore error values. If they are not equal, the
+// reason is returned.
+func CmpErrors(got *eerrs.Error, exp *eerrs.Error) string {
+	if got.Code != exp.Code {
+		return "code does not match"
+	}
+
+	if got.Message != exp.Message {
+		return "message does not match"
+	}
+
+	gotDetails := got.Details.(errs.ExtraDetails)
+	expDetails := exp.Details.(errs.ExtraDetails)
+
+	if gotDetails.HTTPStatus != expDetails.HTTPStatus {
+		return "http status does not match"
+	}
+
+	if gotDetails.HTTPStatusCode != expDetails.HTTPStatusCode {
+		return "http status code does not match"
+	}
+
+	return ""
 }

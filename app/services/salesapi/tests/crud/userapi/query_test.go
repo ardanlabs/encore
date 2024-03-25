@@ -96,8 +96,8 @@ func userQueryByID200(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(x any, y any) string {
-				return cmp.Diff(x, y)
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
 			},
 		},
 	}
