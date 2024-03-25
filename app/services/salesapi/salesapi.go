@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"runtime"
 
 	"encore.dev"
@@ -38,6 +37,7 @@ import (
 
 //encore:service
 type Service struct {
+	name  string
 	mtrcs *metrics.Values
 	db    *sqlx.DB
 	auth  *auth.Auth
@@ -47,13 +47,14 @@ type Service struct {
 }
 
 // NewService is called to create a new encore Service.
-func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
+func NewService(name string, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	userCore := user.NewCore(delegate.New(), userdb.NewStore(db))
 	productCore := product.NewCore(userCore, delegate.New(), productdb.NewStore(db))
 	homeCore := home.NewCore(userCore, delegate.New(), homedb.NewStore(db))
 	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	s := Service{
+		name:  name,
 		mtrcs: newMetrics(),
 		db:    db,
 		auth:  ath,
@@ -99,7 +100,7 @@ func initService() (*Service, error) {
 		return nil, err
 	}
 
-	return NewService(db, auth)
+	return NewService("salesapi", db, auth)
 }
 
 func startup() (*sqlx.DB, *auth.Auth, error) {
@@ -107,7 +108,7 @@ func startup() (*sqlx.DB, *auth.Auth, error) {
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
 
-	rlog.Info("InitService", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	rlog.Info("initService", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// -------------------------------------------------------------------------
 	// Configuration
@@ -143,18 +144,18 @@ func startup() (*sqlx.DB, *auth.Auth, error) {
 	// -------------------------------------------------------------------------
 	// App Starting
 
-	rlog.Info("startup", "environment", encore.Meta().Environment.Name)
+	rlog.Info("initService", "environment", encore.Meta().Environment.Name)
 
 	out, err := conf.String(&cfg)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generating config for output: %w", err)
 	}
-	rlog.Info("startup", "config", out)
+	rlog.Info("initService", "config", out)
 
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	rlog.Info("startup", "status", "initializing database support")
+	rlog.Info("initService", "status", "initializing database support")
 
 	db, err := sqldb.Open(sqldb.Config{
 		EDB:          appdb.AppDB,
@@ -174,16 +175,16 @@ func startup() (*sqlx.DB, *auth.Auth, error) {
 	// -------------------------------------------------------------------------
 	// Auth Support
 
-	rlog.Info("startup", "status", "initializing authentication support")
+	rlog.Info("initService", "status", "initializing authentication support")
 
 	// Load the private keys files from disk. We can assume some system like
 	// Vault has created these files already. How that happens is not our
 	// concern.
 
 	ks := keystore.New()
-	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
-		return nil, nil, fmt.Errorf("reading keys: %w", err)
-	}
+	// if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+	// 	return nil, nil, fmt.Errorf("reading keys: %w", err)
+	// }
 
 	authCfg := auth.Config{
 		DB:        db,

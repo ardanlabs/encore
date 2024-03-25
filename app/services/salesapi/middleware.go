@@ -2,6 +2,7 @@ package salesapi
 
 import (
 	"context"
+	"fmt"
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
@@ -15,6 +16,7 @@ import (
 //lint:ignore U1000 "called by encore"
 //encore:authhandler
 func (s *Service) AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
+	fmt.Println("********* AUTHHANDLER: Name", s.name)
 	return mid.AuthHandler(ctx, s.auth, s.core.user, ap)
 }
 
@@ -60,6 +62,7 @@ func (s *Service) authorizeUserOnly(req middleware.Request, next middleware.Next
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_user
 func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) middleware.Response {
+	fmt.Println("************> authorizeUser", s.name)
 	return mid.AuthorizeUser(s.auth, s.core.user, req, next)
 }
 

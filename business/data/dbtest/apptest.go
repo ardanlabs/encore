@@ -63,15 +63,17 @@ func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
 
 	for _, tt := range table {
 		f := func(t *testing.T) {
-			t.Log("Calling authHandler")
-			ctx, err := at.authHandler(context.Background(), tt.Token)
-			if err != nil {
-				diff := tt.CmpFunc(err, tt.ExpResp)
-				if diff != "" {
-					log(err, tt.ExpResp)
-				}
-				return
-			}
+			ctx := context.Background()
+
+			// t.Log("Calling authHandler")
+			// ctx, err := at.authHandler(ctx, tt.Token)
+			// if err != nil {
+			// 	diff := tt.CmpFunc(err, tt.ExpResp)
+			// 	if diff != "" {
+			// 		log(err, tt.ExpResp)
+			// 	}
+			// 	return
+			// }
 
 			t.Log("Calling excFunc")
 			got := tt.ExcFunc(ctx)

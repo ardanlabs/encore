@@ -58,14 +58,14 @@ func Test_User(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
+	service, err := salesapi.NewService("user_test", dbTest.DB, dbTest.Auth)
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}
-	et.MockService("salesapi", service)
+	et.MockService("salesapi", service, et.RunMiddleware(true))
 
 	app := dbtest.AppTest{
-		Service: service,
+		//Service: service,
 	}
 
 	// -------------------------------------------------------------------------

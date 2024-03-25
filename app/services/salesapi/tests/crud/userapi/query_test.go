@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"context"
+	"fmt"
 
 	"encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
@@ -89,6 +90,8 @@ func userQueryByID200(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: toAppUserPtr(sd.Users[0].User),
 			ExcFunc: func(ctx context.Context) any {
+				n, _ := salesapi.Name(ctx)
+				fmt.Println("************> TEST", n.Value)
 				resp, err := salesapi.UserQueryByID(ctx, sd.Users[0].ID.String())
 				if err != nil {
 					return err
