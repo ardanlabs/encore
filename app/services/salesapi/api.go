@@ -13,15 +13,6 @@ import (
 	"github.com/ardanlabs/encore/business/api/page"
 )
 
-type ServiceName struct {
-	Value string
-}
-
-//encore:api private
-func (s *Service) Name(ctx context.Context) (ServiceName, error) {
-	return ServiceName{Value: s.name}, nil
-}
-
 // Fallback is called for the debug enpoints.
 //
 //encore:api public raw path=/!fallback

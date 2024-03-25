@@ -59,7 +59,8 @@ func AuthorizeUser(a *auth.Auth, userCore *user.Core, req middleware.Request, ne
 	if len(req.Data().PathParams) == 1 {
 		id := req.Data().PathParams[0]
 
-		userID, err := uuid.Parse(id.Value)
+		var err error
+		userID, err = uuid.Parse(id.Value)
 		if err != nil {
 			return errs.NewResponse(http.StatusBadRequest, ErrInvalidID)
 		}

@@ -48,9 +48,9 @@ func (s *Store) ExecuteUnderTransaction(tx transaction.Transaction) (user.Storer
 func (s *Store) Create(ctx context.Context, usr user.User) error {
 	const q = `
 	INSERT INTO users
-		(user_id, name, email, password_hash, roles, enabled, department, date_created, date_updated)
+		(user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated)
 	VALUES
-		(:user_id, :name, :email, :password_hash, :roles, :enabled, :department, :date_created, :date_updated)`
+		(:user_id, :name, :email, :password_hash, :roles, :department, :enabled, :date_created, :date_updated)`
 
 	if err := sqldb.NamedExecContext(ctx, s.db, q, toDBUser(usr)); err != nil {
 		if errors.Is(err, sqldb.ErrDBDuplicatedEntry) {
@@ -73,6 +73,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 		"roles" = :roles,
 		"password_hash" = :password_hash,
 		"department" = :department,
+		"enabled" = :enabled,
 		"date_updated" = :date_updated
 	WHERE
 		user_id = :user_id`
@@ -117,7 +118,7 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 
 	const q = `
 	SELECT
-		user_id, name, email, password_hash, roles, enabled, department, date_created, date_updated
+		user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
 	FROM
 		users`
 
@@ -173,7 +174,7 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, err
 
 	const q = `
 	SELECT
-        user_id, name, email, password_hash, roles, enabled, department, date_created, date_updated
+        user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
 	FROM
 		users
 	WHERE 
@@ -205,7 +206,7 @@ func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]user.Use
 
 	const q = `
 	SELECT
-        user_id, name, email, password_hash, roles, enabled, department, date_created, date_updated
+        user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
 	FROM
 		users
 	WHERE
@@ -232,7 +233,7 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (user.User
 
 	const q = `
 	SELECT
-        user_id, name, email, password_hash, roles, enabled, department, date_created, date_updated
+        user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
 	FROM
 		users
 	WHERE

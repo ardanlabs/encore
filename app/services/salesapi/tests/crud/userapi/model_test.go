@@ -34,8 +34,3 @@ func toAppUsers(users []user.User) []userapi.AppUser {
 
 	return items
 }
-
-func toAppUserPtr(usr user.User) *userapi.AppUser {
-	appUsr := toAppUser(usr)
-	return &appUsr
-}

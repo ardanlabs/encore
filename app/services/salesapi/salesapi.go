@@ -37,7 +37,6 @@ import (
 
 //encore:service
 type Service struct {
-	name  string
 	mtrcs *metrics.Values
 	db    *sqlx.DB
 	auth  *auth.Auth
@@ -54,7 +53,6 @@ func NewService(name string, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	s := Service{
-		name:  name,
 		mtrcs: newMetrics(),
 		db:    db,
 		auth:  ath,
