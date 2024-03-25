@@ -65,15 +65,15 @@ func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
 		f := func(t *testing.T) {
 			ctx := context.Background()
 
-			// t.Log("Calling authHandler")
-			// ctx, err := at.authHandler(ctx, tt.Token)
-			// if err != nil {
-			// 	diff := tt.CmpFunc(err, tt.ExpResp)
-			// 	if diff != "" {
-			// 		log(err, tt.ExpResp)
-			// 	}
-			// 	return
-			// }
+			t.Log("Calling authHandler")
+			ctx, err := at.authHandler(ctx, tt.Token)
+			if err != nil {
+				diff := tt.CmpFunc(err, tt.ExpResp)
+				if diff != "" {
+					log(err, tt.ExpResp)
+				}
+				return
+			}
 
 			t.Log("Calling excFunc")
 			got := tt.ExcFunc(ctx)

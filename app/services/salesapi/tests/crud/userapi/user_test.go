@@ -65,7 +65,7 @@ func Test_User(t *testing.T) {
 	et.MockService("salesapi", service, et.RunMiddleware(true))
 
 	app := dbtest.AppTest{
-		//Service: service,
+		Service: service,
 	}
 
 	// -------------------------------------------------------------------------
