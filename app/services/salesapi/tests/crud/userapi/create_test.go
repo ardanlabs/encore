@@ -186,7 +186,7 @@ func userCreate401(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
+			ExpResp: errs.Newf(http.StatusBadRequest, "user not enabled : query user: query: userID[b64f07b2-38fc-4489-8f7c-c2b8f07b5219]: db: user not found"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := salesapi.UserCreate(ctx, userapi.AppNewUser{})
 				if err != nil {

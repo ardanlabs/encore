@@ -1,28 +1,56 @@
 package user_test
 
 import (
+	"context"
 	"net/http"
 
+	eerrs "encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/google/go-cmp/cmp"
 )
 
 func userDelete200(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "asuser",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[1].ID),
-			Token: sd.Users[1].Token,
-			//method:     http.MethodDelete,
-			//statusCode: http.StatusNoContent,
+			Name:    "asuser",
+			Token:   sd.Users[1].Token,
+			ExpResp: nil,
+			ExcFunc: func(ctx context.Context) any {
+				err := salesapi.UserDelete(ctx, sd.Users[1].ID.String())
+				if err != nil {
+					return err
+				}
+
+				return nil
+			},
+			CmpFunc: func(got any, exp any) string {
+				if got != nil {
+					return "error occurred"
+				}
+
+				return ""
+			},
 		},
 		{
-			Name: "asadmin",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.admins[1].ID),
-			Token: sd.Admins[1].Token,
-			//method:     http.MethodDelete,
-			//statusCode: http.StatusNoContent,
+			Name:    "asadmin",
+			Token:   sd.Admins[1].Token,
+			ExpResp: nil,
+			ExcFunc: func(ctx context.Context) any {
+				err := salesapi.UserDelete(ctx, sd.Admins[1].ID.String())
+				if err != nil {
+					return err
+				}
+
+				return nil
+			},
+			CmpFunc: func(got any, exp any) string {
+				if got != nil {
+					return "error occurred"
+				}
+
+				return ""
+			},
 		},
 	}
 
@@ -32,39 +60,60 @@ func userDelete200(sd dbtest.SeedData) []dbtest.AppTable {
 func userDelete401(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "emptytoken",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			Token: "",
-			//method:     http.MethodDelete,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "emptytoken",
+			Token:   "",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				err := salesapi.UserDelete(ctx, "")
+				if err != nil {
+					return err
+				}
+
+				return err
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 		{
-			Name: "badsig",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			Token: sd.Users[0].Token + "A",
-			//method:     http.MethodDelete,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "badsig",
+			Token:   sd.Users[0].Token + "A",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				err := salesapi.UserDelete(ctx, "")
+				if err != nil {
+					return err
+				}
+
+				return err
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 		{
-			Name: "wronguser",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			Token: sd.Users[1].Token,
-			//method:     http.MethodDelete,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "wronguser",
+			Token:   sd.Users[1].Token,
+			ExpResp: errs.Newf(http.StatusUnauthorized, "user not enabled : query user: query: userID["+sd.Users[1].ID.String()+"]: db: user not found"),
+			ExcFunc: func(ctx context.Context) any {
+				err := salesapi.UserDelete(ctx, sd.Users[0].ID.String())
+				if err != nil {
+					return err
+				}
+
+				return err
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 	}

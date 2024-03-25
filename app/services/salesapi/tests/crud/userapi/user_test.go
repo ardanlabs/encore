@@ -77,10 +77,10 @@ func Test_User(t *testing.T) {
 	app.Test(t, userCreate401(sd), "user-create-401")
 	app.Test(t, userCreate400(sd), "user-create-400")
 
-	// app.test(t, userUpdate200(sd), "user-update-200")
-	// app.test(t, userUpdate401(sd), "user-update-401")
-	// app.test(t, userUpdate400(sd), "user-update-400")
+	// app.Test(t, userUpdate200(sd), "user-update-200")
+	// app.Test(t, userUpdate401(sd), "user-update-401")
+	// app.Test(t, userUpdate400(sd), "user-update-400")
 
-	// app.test(t, userDelete200(sd), "user-delete-200")
-	// app.test(t, userDelete401(sd), "user-delete-401")
+	app.Test(t, userDelete200(sd), "user-delete-200")
+	app.Test(t, userDelete401(sd), "user-delete-401")
 }
