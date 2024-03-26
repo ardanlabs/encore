@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"runtime"
 
 	"encore.dev"
@@ -180,9 +181,9 @@ func startup() (*sqlx.DB, *auth.Auth, error) {
 	// concern.
 
 	ks := keystore.New()
-	// if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
-	// 	return nil, nil, fmt.Errorf("reading keys: %w", err)
-	// }
+	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+		return nil, nil, fmt.Errorf("reading keys: %w", err)
+	}
 
 	authCfg := auth.Config{
 		DB:        db,
