@@ -51,11 +51,11 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Install Tooling and Dependencies
 #
-#   This project uses Docker and it is expected to be installed. Please provide
-#   Docker at least 4 CPUs. To use Podman instead please alias Docker CLI to
-#   Podman CLI or symlink the Docker socket to the Podman socket. More
-#   information on migrating from Docker to Podman can be found at
-#   https://podman-desktop.io/docs/migrating-from-docker.
+#	This project uses Docker and it is expected to be installed. Please provide
+#	Docker at least 4 CPUs. To use Podman instead please alias Docker CLI to
+#	Podman CLI or symlink the Docker socket to the Podman socket. More
+#	information on migrating from Docker to Podman can be found at
+#	https://podman-desktop.io/docs/migrating-from-docker.
 #
 #	Run these commands to install everything needed.
 #	$ make dev-brew
