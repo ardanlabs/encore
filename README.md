@@ -59,7 +59,7 @@ To clone the project, create a folder and use the git clone command. Then please
 $ cd $HOME
 $ mkdir code
 $ cd code
-$ git clone https://github.com/ardanlabs/service or git@github.com:ardanlabs/service.git
+$ git clone https://github.com/ardanlabs/encore or git@github.com:ardanlabs/encore.git
 $ cd service
 ```
 
