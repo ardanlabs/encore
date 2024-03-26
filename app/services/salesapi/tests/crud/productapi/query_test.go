@@ -2,17 +2,25 @@ package product_test
 
 import (
 	"context"
+	"sort"
 
-	"encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
 	"github.com/ardanlabs/encore/business/api/page"
+	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
 func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
-	total := len(sd.Admins[0].Products) + len(sd.Users[0].Products)
+	prds := make([]product.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
+
+	prds = append(prds, sd.Admins[0].Products...)
+	prds = append(prds, sd.Users[0].Products...)
+
+	sort.Slice(prds, func(i, j int) bool {
+		return prds[i].Name <= prds[j].Name
+	})
 
 	table := []dbtest.AppTable{
 		{
@@ -21,14 +29,14 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 			ExpResp: page.Document[productapi.AppProduct]{
 				Page:        1,
 				RowsPerPage: 10,
-				Total:       total,
-				Items:       toAppProducts(append(sd.Admins[0].Products, sd.Users[0].Products...)),
+				Total:       len(prds),
+				Items:       toAppProducts(prds),
 			},
 			ExcFunc: func(ctx context.Context) any {
 				qp := productapi.QueryParams{
 					Page:    1,
 					Rows:    10,
-					OrderBy: "product_id,ASC",
+					OrderBy: "name,ASC",
 					Name:    "Name",
 				}
 
@@ -40,29 +48,27 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if errs, exists := got.(*errs.Error); exists {
-					return errs.Message
+				gotResp, exists := got.(page.Document[productapi.AppProduct])
+				if !exists {
+					return "error occurred"
 				}
 
-				gotResp := got.(page.Document[productapi.AppProduct])
 				expResp := exp.(page.Document[productapi.AppProduct])
 
 				var found int
-				for _, r := range gotResp.Items {
-					for _, e := range expResp.Items {
-						if e.ID == r.ID {
+				for i := range gotResp.Items {
+					for j := range expResp.Items {
+						if expResp.Items[i].ID == gotResp.Items[j].ID {
 							found++
-							break
 						}
 					}
 				}
 
-				if found != total {
-					return "number of expected products didn't match"
+				if found != len(prds) {
+					return "number of expected users didn't match"
 				}
 
-				return ""
-
+				return cmp.Diff(got, exp)
 			},
 		},
 	}

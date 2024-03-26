@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"encore.dev/et"
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
@@ -41,7 +42,7 @@ func run(m *testing.M) (code int, err error) {
 func Test_Home(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_Home/crud")
+	dbTest := dbtest.NewTest(t, url, "Test_Home")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -50,36 +51,36 @@ func Test_Home(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	// sd, err := insertSeedData(dbTest)
-	// if err != nil {
-	// 	t.Fatalf("Seeding error: %s", err)
-	// }
+	sd, err := insertSeedData(dbTest)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
 
 	// -------------------------------------------------------------------------
 
-	// service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
-	// if err != nil {
-	// 	t.Fatalf("Service init error: %s", err)
-	// }
-	// et.MockService("salesapi", service)
+	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
+	if err != nil {
+		t.Fatalf("Service init error: %s", err)
+	}
+	et.MockService("salesapi", service, et.RunMiddleware(true))
 
-	// app := dbtest.AppTest{
-	// 	Service: service,
-	// }
+	app := dbtest.AppTest{
+		Service: service,
+	}
 
 	// -------------------------------------------------------------------------
 
-	// app.test(t, homeQuery200(sd), "home-query-200")
-	// app.test(t, homeQueryByID200(sd), "home-querybyid-200")
+	app.Test(t, homeQueryOk(sd), "home-query-ok")
+	// app.Test(t, homeQueryByIDOk(sd), "home-querybyid-ok")
 
-	// app.test(t, homeCreate200(sd), "home-create-200")
-	// app.test(t, homeCreate401(sd), "home-create-401")
-	// app.test(t, homeCreate400(sd), "home-create-400")
+	// app.Test(t, homeCreateOk(sd), "home-create-ok")
+	// app.Test(t, homeCreateBad(sd), "home-create-bad")
+	// app.Test(t, homeCreateAuth(sd), "home-create-auth")
 
-	// app.test(t, homeUpdate200(sd), "home-update-200")
-	// app.test(t, homeUpdate401(sd), "home-update-401")
-	// app.test(t, homeUpdate400(sd), "home-update-400")
+	// app.Test(t, homeUpdateOk(sd), "home-update-ok")
+	// app.Test(t, homeUpdateBad(sd), "home-update-bad")
+	// app.Test(t, homeUpdateAuth(sd), "home-update-auth")
 
-	// app.test(t, homeDelete200(sd), "home-delete-200")
-	// app.test(t, homeDelete401(sd), "home-delete-401")
+	// app.Test(t, homeDeleteOk(sd), "home-delete-ok")
+	// app.Test(t, homeDeleteAuth(sd), "home-delete-auth")
 }

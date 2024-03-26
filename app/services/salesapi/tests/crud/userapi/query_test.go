@@ -10,20 +10,16 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 )
 
 func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	usrs := make([]user.User, 0, len(sd.Admins)+len(sd.Users))
-	usrsMap := make(map[uuid.UUID]user.User)
 
 	for _, adm := range sd.Admins {
-		usrsMap[adm.ID] = adm.User
 		usrs = append(usrs, adm.User)
 	}
 
 	for _, usr := range sd.Users {
-		usrsMap[usr.ID] = usr.User
 		usrs = append(usrs, usr.User)
 	}
 
