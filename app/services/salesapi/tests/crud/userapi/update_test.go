@@ -42,6 +42,8 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 					return err
 				}
 
+				resp.DateUpdated = resp.DateCreated
+
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
@@ -60,7 +62,7 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "bad-input",
+			Name:    "input",
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
 			ExcFunc: func(ctx context.Context) any {
@@ -79,7 +81,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "bad-role",
+			Name:    "role",
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(http.StatusBadRequest, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
@@ -118,7 +120,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badtoken",
+			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
@@ -132,7 +134,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badsig",
+			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {

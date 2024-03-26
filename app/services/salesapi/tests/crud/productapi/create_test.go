@@ -59,7 +59,7 @@ func productCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 func productCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "missing-input",
+			Name:    "missing",
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
@@ -94,7 +94,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badtoken",
+			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
@@ -108,7 +108,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badsig",
+			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {

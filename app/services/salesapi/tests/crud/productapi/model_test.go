@@ -19,11 +19,6 @@ func toAppProduct(prd product.Product) productapi.AppProduct {
 	}
 }
 
-func toAppProductPtr(prd product.Product) *productapi.AppProduct {
-	appPrd := toAppProduct(prd)
-	return &appPrd
-}
-
 func toAppProducts(prds []product.Product) []productapi.AppProduct {
 	items := make([]productapi.AppProduct, len(prds))
 	for i, prd := range prds {

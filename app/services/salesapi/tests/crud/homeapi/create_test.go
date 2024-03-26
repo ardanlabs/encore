@@ -1,36 +1,22 @@
 package home_test
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 )
 
-func homeCreate200(sd dbtest.SeedData) []dbtest.AppTable {
+func homeCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "basic",
-			//url:        "/v1/homes",
+			Name:  "basic",
 			Token: sd.Users[0].Token,
-			//method:     http.MethodPost,
-			//statusCode: http.StatusCreated,
-			// model: &homeapi.AppNewHome{
-			// 	Type: "SINGLE FAMILY",
-			// 	Address: homeapi.AppNewAddress{
-			// 		Address1: "123 Mocking Bird Lane",
-			// 		ZipCode:  "35810",
-			// 		City:     "Huntsville",
-			// 		State:    "AL",
-			// 		Country:  "US",
-			// 	},
-			// },
-			//// resp: &homeapi.AppHome{},
-			ExpResp: &homeapi.AppHome{
+			ExpResp: homeapi.AppHome{
 				UserID: sd.Users[0].ID.String(),
 				Type:   "SINGLE FAMILY",
 				Address: homeapi.AppAddress{
@@ -41,27 +27,38 @@ func homeCreate200(sd dbtest.SeedData) []dbtest.AppTable {
 					Country:  "US",
 				},
 			},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				resp := x.(*homeapi.AppHome)
-				expResp := y.(*homeapi.AppHome)
-
-				if _, err := uuid.Parse(resp.ID); err != nil {
-					return "bad uuid for ID"
+			ExcFunc: func(ctx context.Context) any {
+				app := homeapi.AppNewHome{
+					Type: "SINGLE FAMILY",
+					Address: homeapi.AppNewAddress{
+						Address1: "123 Mocking Bird Lane",
+						ZipCode:  "35810",
+						City:     "Huntsville",
+						State:    "AL",
+						Country:  "US",
+					},
 				}
 
-				if resp.DateCreated == "" {
-					return "missing date created"
+				resp, err := salesapi.HomeCreate(ctx, app)
+				if err != nil {
+					return err
 				}
 
-				if resp.DateUpdated == "" {
-					return "missing date updated"
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp, exists := got.(homeapi.AppHome)
+				if !exists {
+					return "error occurred"
 				}
 
-				expResp.ID = resp.ID
-				expResp.DateCreated = resp.DateCreated
-				expResp.DateUpdated = resp.DateUpdated
+				expResp := exp.(homeapi.AppHome)
 
-				return cmp.Diff(x, y)
+				expResp.ID = gotResp.ID
+				expResp.DateCreated = gotResp.DateCreated
+				expResp.DateUpdated = gotResp.DateUpdated
+
+				return cmp.Diff(gotResp, expResp)
 			},
 		},
 	}
@@ -69,104 +66,120 @@ func homeCreate200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func homeCreate400(sd dbtest.SeedData) []dbtest.AppTable {
+func homeCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "missing-input",
-			//url:        "/v1/homes",
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPost,
-			//statusCode: http.StatusBadRequest,
-			//model: &homeapi.AppNewHome{},
-			//// resp:  &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
-				validate.FieldError{Field: "address1", Err: "address1 is a required field"},
-				validate.FieldError{Field: "city", Err: "city is a required field"},
-				validate.FieldError{Field: "country", Err: "country is a required field"},
-				validate.FieldError{Field: "state", Err: "state is a required field"},
-				validate.FieldError{Field: "type", Err: "type is a required field"},
-				validate.FieldError{Field: "zipCode", Err: "zipCode is a required field"},
-			})),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "missing",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "bad-type",
-			//url:        "/v1/homes",
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPost,
-			//statusCode: http.StatusBadRequest,
-			// model: &homeapi.AppNewHome{
-			// 	Type: "BAD TYPE",
-			// 	Address: homeapi.AppNewAddress{
-			// 		Address1: "123 Mocking Bird Lane",
-			// 		ZipCode:  "35810",
-			// 		City:     "Huntsville",
-			// 		State:    "AL",
-			// 		Country:  "US",
-			// 	},
-			// },
-			//// resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid type \"BAD TYPE\"`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "type",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusBadRequest, "parse: invalid type \"BAD TYPE\""),
+			ExcFunc: func(ctx context.Context) any {
+				app := homeapi.AppNewHome{
+					Type: "BAD TYPE",
+					Address: homeapi.AppNewAddress{
+						Address1: "123 Mocking Bird Lane",
+						ZipCode:  "35810",
+						City:     "Huntsville",
+						State:    "AL",
+						Country:  "US",
+					},
+				}
+
+				resp, err := salesapi.HomeCreate(ctx, app)
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 
 	return table
 }
 
-func homeCreate401(sd dbtest.SeedData) []dbtest.AppTable {
+func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "emptytoken",
-			//url:        "/v1/homes",
-			Token: "",
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			// resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "emptytoken",
+			Token:   "",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "badtoken",
-			//url:        "/v1/homes",
-			Token: sd.Admins[0].Token[:10],
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			// resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "token",
+			Token:   sd.Admins[0].Token[:10],
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "badsig",
-			//url:        "/v1/homes",
-			Token: sd.Admins[0].Token + "A",
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			// resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "sig",
+			Token:   sd.Admins[0].Token + "A",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "wronguser",
-			//url:        "/v1/homes",
-			Token: sd.Admins[0].Token,
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			// resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "wronguser",
+			Token:   sd.Admins[0].Token,
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[[{ADMIN}]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				app := homeapi.AppNewHome{
+					Type: "SINGLE FAMILY",
+					Address: homeapi.AppNewAddress{
+						Address1: "123 Mocking Bird Lane",
+						ZipCode:  "35810",
+						City:     "Huntsville",
+						State:    "AL",
+						Country:  "US",
+					},
+				}
+
+				resp, err := salesapi.HomeCreate(ctx, app)
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 

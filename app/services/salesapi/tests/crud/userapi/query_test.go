@@ -24,12 +24,12 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	}
 
 	sort.Slice(usrs, func(i, j int) bool {
-		return usrs[i].Name <= usrs[j].Name
+		return usrs[i].ID.String() <= usrs[j].ID.String()
 	})
 
 	table := []dbtest.AppTable{
 		{
-			Name:  "query",
+			Name:  "basic",
 			Token: sd.Admins[0].Token,
 			ExpResp: page.Document[userapi.AppUser]{
 				Page:        1,
@@ -41,7 +41,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				qp := userapi.QueryParams{
 					Page:    1,
 					Rows:    10,
-					OrderBy: "name,ASC",
+					OrderBy: "user_id,ASC",
 					Name:    "Name",
 				}
 

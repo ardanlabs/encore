@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"encore.dev/et"
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
@@ -50,24 +51,24 @@ func Test_VProduct(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	// sd, err := createSeed(dbTest)
-	// if err != nil {
-	// 	t.Fatalf("Seeding error: %s", err)
-	// }
+	sd, err := insertSeedData(dbTest)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
 
 	// -------------------------------------------------------------------------
 
-	// service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
-	// if err != nil {
-	// 	t.Fatalf("Service init error: %s", err)
-	// }
-	// et.MockService("salesapi", service)
+	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
+	if err != nil {
+		t.Fatalf("Service init error: %s", err)
+	}
+	et.MockService("salesapi", service, et.RunMiddleware(true))
 
-	// app := dbtest.AppTest{
-	// 	Service: service,
-	// }
+	app := dbtest.AppTest{
+		Service: service,
+	}
 
 	// -------------------------------------------------------------------------
 
-	//app.test(t, vproductQuery200(sd), "vproduct-query-200")
+	app.Test(t, vproductQueryOk(sd), "vproduct-query-ok")
 }

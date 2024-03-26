@@ -1,50 +1,55 @@
 package vproduct_test
 
 import (
+	"context"
+	"sort"
+
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/data/dbtest"
+	"github.com/google/go-cmp/cmp"
 )
 
-func vproductQuery200(sd dbtest.SeedData) []dbtest.AppTable {
-	total := len(sd.Admins[0].Products) + len(sd.Users[0].Products)
+func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
+	prds := toAppVProducts(sd.Admins[0].User, sd.Admins[0].Products)
+	prds = append(prds, toAppVProducts(sd.Users[0].User, sd.Users[0].Products)...)
 
-	allProducts := toAppVProducts(sd.Admins[0].User, sd.Admins[0].Products)
-	allProducts = append(allProducts, toAppVProducts(sd.Users[0].User, sd.Users[0].Products)...)
+	sort.Slice(prds, func(i, j int) bool {
+		return prds[i].ID <= prds[j].ID
+	})
 
 	table := []dbtest.AppTable{
 		{
-			Name: "basic",
-			//url:        "/v1/vproducts?page=1&rows=10&orderBy=product_id,DESC",
+			Name:  "basic",
 			Token: sd.Admins[0].Token,
-			//statusCode: http.StatusOK,
-			//method:     http.MethodGet,
-			//resp:       &page.Document[vproductapi.AppProduct]{},
-			ExpResp: &page.Document[vproductapi.AppProduct]{
+			ExpResp: page.Document[vproductapi.AppProduct]{
 				Page:        1,
 				RowsPerPage: 10,
-				Total:       total,
-				Items:       allProducts,
+				Total:       len(prds),
+				Items:       prds,
 			},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				resp := x.(*page.Document[vproductapi.AppProduct])
-				exp := y.(*page.Document[vproductapi.AppProduct])
-
-				var found int
-				for _, r := range resp.Items {
-					for _, e := range exp.Items {
-						if e.ID == r.ID && e.UserName == r.UserName {
-							found++
-							break
-						}
-					}
+			ExcFunc: func(ctx context.Context) any {
+				qp := vproductapi.QueryParams{
+					Page:    1,
+					Rows:    10,
+					OrderBy: "product_id,ASC",
+					Name:    "Name",
 				}
 
-				if found != total {
-					return "number of expected products didn't match"
+				resp, err := salesapi.VProductQuery(ctx, qp)
+				if err != nil {
+					return err
 				}
 
-				return ""
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				if _, exists := got.(page.Document[vproductapi.AppProduct]); !exists {
+					return "error occurred"
+				}
+
+				return cmp.Diff(got, exp)
 			},
 		},
 	}

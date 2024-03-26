@@ -33,8 +33,3 @@ func toAppHomes(homes []home.Home) []homeapi.AppHome {
 
 	return items
 }
-
-func toAppHomePtr(hme home.Home) *homeapi.AppHome {
-	appHme := toAppHome(hme)
-	return &appHme
-}

@@ -12,7 +12,7 @@ import (
 func productDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "asuser",
+			Name:    "user",
 			Token:   sd.Users[0].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
@@ -31,7 +31,7 @@ func productDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 			},
 		},
 		{
-			Name:    "asuser",
+			Name:    "admin",
 			Token:   sd.Admins[0].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
@@ -71,7 +71,7 @@ func productDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badsig",
+			Name:    "sig",
 			Token:   sd.Users[0].Token + "A",
 			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {

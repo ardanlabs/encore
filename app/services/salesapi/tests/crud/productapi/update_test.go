@@ -38,6 +38,8 @@ func productUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 					return err
 				}
 
+				resp.DateUpdated = resp.DateCreated
+
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
@@ -56,7 +58,7 @@ func productUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 func productUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "bad-input",
+			Name:    "input",
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"cost\",\"error\":\"cost must be 0 or greater\"},{\"field\":\"quantity\",\"error\":\"quantity must be 1 or greater\"}]"),
 			ExcFunc: func(ctx context.Context) any {
@@ -96,7 +98,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badtoken",
+			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
@@ -110,7 +112,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badsig",
+			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {

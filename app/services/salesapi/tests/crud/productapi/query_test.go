@@ -14,12 +14,11 @@ import (
 
 func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	prds := make([]product.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
-
 	prds = append(prds, sd.Admins[0].Products...)
 	prds = append(prds, sd.Users[0].Products...)
 
 	sort.Slice(prds, func(i, j int) bool {
-		return prds[i].Name <= prds[j].Name
+		return prds[i].ID.String() <= prds[j].ID.String()
 	})
 
 	table := []dbtest.AppTable{
@@ -36,7 +35,7 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				qp := productapi.QueryParams{
 					Page:    1,
 					Rows:    10,
-					OrderBy: "name,ASC",
+					OrderBy: "product_id,ASC",
 					Name:    "Name",
 				}
 

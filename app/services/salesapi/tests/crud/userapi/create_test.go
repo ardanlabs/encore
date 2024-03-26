@@ -63,7 +63,7 @@ func userCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "missing-input",
+			Name:    "missing",
 			Token:   sd.Admins[0].Token,
 			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
@@ -77,7 +77,7 @@ func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "bad-role",
+			Name:    "role",
 			Token:   sd.Admins[0].Token,
 			ExpResp: errs.Newf(http.StatusBadRequest, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
@@ -121,7 +121,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badtoken",
+			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
@@ -135,7 +135,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name:    "badsig",
+			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
