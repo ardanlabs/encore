@@ -11,18 +11,18 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Go Installation
 #
-#   You need to have Go version 1.22 to run this code.
+#	You need to have Go version 1.22 to run this code.
 #
-#   https://go.dev/dl/
+#	https://go.dev/dl/
 #
-#   If you are not allowed to update your Go frontend, you can install
-#   and use a 1.22 frontend.
+#	If you are not allowed to update your Go frontend, you can install
+#	and use a 1.22 frontend.
 #
-#   $ go install golang.org/dl/go1.22@latest
-#   $ go1.22 download
+#	$ go install golang.org/dl/go1.22@latest
+#	$ go1.22 download
 #
-#   This means you need to use `go1.22` instead of `go` for any command
-#   using the Go frontend tooling from the makefile.
+#	This means you need to use `go1.22` instead of `go` for any command
+#	using the Go frontend tooling from the makefile.
 
 # ==============================================================================
 # Brew Installation
@@ -74,13 +74,13 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # Running The Project
 #
 #	$ make up
-#   $ make token
-#   $ export TOKEN=<token>
-#   $ make users
+#	$ make token
+#	$ export TOKEN=<token>
+#	$ make users
 #
-#   Use can use this command to shut everything down
+#	Use can use this command to shut everything down
 #
-#   $ make down
+#	$ make down
 
 # ==============================================================================
 # CLASS NOTES
