@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func userCreate200(sd dbtest.SeedData) []dbtest.AppTable {
+func userCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:  "basic",
@@ -70,7 +70,7 @@ func userCreate200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userCreate400(sd dbtest.SeedData) []dbtest.AppTable {
+func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:    "missing-input",
@@ -98,7 +98,7 @@ func userCreate400(sd dbtest.SeedData) []dbtest.AppTable {
 			ExcFunc: func(ctx context.Context) any {
 				app := userapi.AppNewUser{
 					Name:            "Bill Kennedy",
-					Email:           "bill@ardanlabs.com",
+					Email:           "bill2@ardanlabs.com",
 					Roles:           []string{"BAD ROLE"},
 					Department:      "IT",
 					Password:        "123",
@@ -124,7 +124,7 @@ func userCreate400(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userCreate401(sd dbtest.SeedData) []dbtest.AppTable {
+func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:    "emptytoken",
@@ -186,9 +186,18 @@ func userCreate401(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(http.StatusBadRequest, "user not enabled : query user: query: userID[b64f07b2-38fc-4489-8f7c-c2b8f07b5219]: db: user not found"),
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserCreate(ctx, userapi.AppNewUser{})
+				app := userapi.AppNewUser{
+					Name:            "Bill Kennedy",
+					Email:           "bill2@ardanlabs.com",
+					Roles:           []string{"USER"},
+					Department:      "IT",
+					Password:        "123",
+					PasswordConfirm: "123",
+				}
+
+				resp, err := salesapi.UserCreate(ctx, app)
 				if err != nil {
 					return err
 				}

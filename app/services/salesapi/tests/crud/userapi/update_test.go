@@ -1,61 +1,68 @@
 package user_test
 
 import (
+	"context"
 	"net/http"
 
+	eerrs "encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )
 
-func userUpdate200(sd dbtest.SeedData) []dbtest.AppTable {
+func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "basic",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
+			Name:  "basic",
 			Token: sd.Users[0].Token,
-			//method:     http.MethodPut,
-			//statusCode: http.StatusOK,
-			// model: &userapi.AppUpdateUser{
-			// 	Name:            dbtest.StringPointer("Jack Kennedy"),
-			// 	Email:           dbtest.StringPointer("jack@ardanlabs.com"),
-			// 	Roles:           []string{"ADMIN"},
-			// 	Department:      dbtest.StringPointer("IT"),
-			// 	Password:        dbtest.StringPointer("123"),
-			// 	PasswordConfirm: dbtest.StringPointer("123"),
-			// },
-			//resp: &userapi.AppUser{},
-			ExpResp: &userapi.AppUser{
+			ExpResp: userapi.AppUser{
 				Name:       "Jack Kennedy",
 				Email:      "jack@ardanlabs.com",
 				Roles:      []string{"ADMIN"},
 				Department: "IT",
 				Enabled:    true,
 			},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				resp := x.(*userapi.AppUser)
-				expResp := y.(*userapi.AppUser)
+			ExcFunc: func(ctx context.Context) any {
+				app := userapi.AppUpdateUser{
+					Name:            dbtest.StringPointer("Jack Kennedy"),
+					Email:           dbtest.StringPointer("jack@ardanlabs.com"),
+					Roles:           []string{"ADMIN"},
+					Department:      dbtest.StringPointer("IT"),
+					Password:        dbtest.StringPointer("123"),
+					PasswordConfirm: dbtest.StringPointer("123"),
+				}
 
-				if _, err := uuid.Parse(resp.ID); err != nil {
+				resp, err := salesapi.UserUpdate(ctx, sd.Users[0].ID.String(), app)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(userapi.AppUser)
+				expResp := exp.(userapi.AppUser)
+
+				if _, err := uuid.Parse(gotResp.ID); err != nil {
 					return "bad uuid for ID"
 				}
 
-				if resp.DateCreated == "" {
+				if gotResp.DateCreated == "" {
 					return "missing date created"
 				}
 
-				if resp.DateUpdated == "" {
+				if gotResp.DateUpdated == "" {
 					return "missing date updated"
 				}
 
-				expResp.ID = resp.ID
-				expResp.DateCreated = resp.DateCreated
-				expResp.DateUpdated = resp.DateUpdated
+				expResp.ID = gotResp.ID
+				expResp.DateCreated = gotResp.DateCreated
+				expResp.DateUpdated = gotResp.DateUpdated
 
-				return cmp.Diff(x, y)
+				return cmp.Diff(gotResp, expResp)
 			},
 		},
 	}
@@ -63,40 +70,53 @@ func userUpdate200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userUpdate400(sd dbtest.SeedData) []dbtest.AppTable {
+func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "bad-input",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPut,
-			//statusCode: http.StatusBadRequest,
-			// model: &userapi.AppUpdateUser{
-			// 	Email:           dbtest.StringPointer("bill@"),
-			// 	PasswordConfirm: dbtest.StringPointer("jack"),
-			// },
-			//resp: &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
-				validate.FieldError{Field: "email", Err: "email must be a valid email address"},
-				validate.FieldError{Field: "passwordConfirm", Err: "passwordConfirm must be equal to Password"},
-			})),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "bad-input",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
+			ExcFunc: func(ctx context.Context) any {
+				app := userapi.AppUpdateUser{
+					Email:           dbtest.StringPointer("jack@"),
+					PasswordConfirm: dbtest.StringPointer("123"),
+				}
+
+				resp, err := salesapi.UserUpdate(ctx, sd.Users[0].ID.String(), app)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 		{
-			Name: "bad-role",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPut,
-			//statusCode: http.StatusBadRequest,
-			// model: &userapi.AppUpdateUser{
-			// 	Roles: []string{"BAD ROLE"},
-			// },
-			//resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusBadRequest, `parse: invalid role \"BAD ROLE\"`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "bad-role",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusBadRequest, "parse: invalid role \"BAD ROLE\""),
+			ExcFunc: func(ctx context.Context) any {
+				app := userapi.AppUpdateUser{
+					Roles: []string{"BAD ROLE"},
+				}
+
+				resp, err := salesapi.UserUpdate(ctx, sd.Users[0].ID.String(), app)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 	}
@@ -104,48 +124,91 @@ func userUpdate400(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userUpdate401(sd dbtest.SeedData) []dbtest.AppTable {
+func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "emptytoken",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			Token: "",
-			//method:     http.MethodPut,
-			////statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "emptytoken",
+			Token:   "",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.UserUpdate(ctx, "", userapi.AppUpdateUser{})
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 		{
-			Name: "badsig",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.users[0].ID),
-			Token: sd.Users[0].Token + "A",
-			//method:     http.MethodPut,
-			//statusCode: http.StatusUnauthorized,
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "badtoken",
+			Token:   sd.Admins[0].Token[:10],
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapi.AppUpdateUser{})
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 		{
-			Name: "wronguser",
-			//url:        fmt.Sprintf("/v1/users/%s", sd.admins[0].ID),
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPut,
-			//statusCode: http.StatusUnauthorized,
-			// model: &userapi.AppUpdateUser{
-			// 	Name:            dbtest.StringPointer("Bill Kennedy"),
-			// 	Email:           dbtest.StringPointer("bill@ardanlabs.com"),
-			// 	Roles:           []string{"ADMIN"},
-			// 	Department:      dbtest.StringPointer("IT"),
-			// 	Password:        dbtest.StringPointer("123"),
-			// 	PasswordConfirm: dbtest.StringPointer("123"),
-			// },
-			//resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "badsig",
+			Token:   sd.Admins[0].Token + "A",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapi.AppUpdateUser{})
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
+			},
+		},
+		{
+			Name:    "wronguser",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				app := userapi.AppUpdateUser{
+					Name:            dbtest.StringPointer("Jack Kennedy"),
+					Email:           dbtest.StringPointer("jack2@ardanlabs.com"),
+					Roles:           []string{"ADMIN"},
+					Department:      dbtest.StringPointer("IT"),
+					Password:        dbtest.StringPointer("123"),
+					PasswordConfirm: dbtest.StringPointer("123"),
+				}
+
+				resp, err := salesapi.UserUpdate(ctx, sd.Users[1].ID.String(), app)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*eerrs.Error)
+				expResp := exp.(*eerrs.Error)
+
+				return dbtest.CmpErrors(gotResp, expResp)
 			},
 		},
 	}

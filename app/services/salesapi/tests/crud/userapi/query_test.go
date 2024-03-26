@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func userQuery200(sd dbtest.SeedData) []dbtest.AppTable {
+func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	usrs := make([]user.User, 0, len(sd.Admins)+len(sd.Users))
 	usrsMap := make(map[uuid.UUID]user.User)
 
@@ -82,7 +82,7 @@ func userQuery200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userQueryByID200(sd dbtest.SeedData) []dbtest.AppTable {
+func userQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:    "basic",

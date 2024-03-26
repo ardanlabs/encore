@@ -10,7 +10,7 @@ import (
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
-func userDelete200(sd dbtest.SeedData) []dbtest.AppTable {
+func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:    "asuser",
@@ -57,7 +57,7 @@ func userDelete200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userDelete401(sd dbtest.SeedData) []dbtest.AppTable {
+func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:    "emptytoken",

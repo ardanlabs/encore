@@ -20,7 +20,7 @@ func AuthorizeAny(a *auth.Auth, req middleware.Request, next middleware.Next) mi
 	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAny); err != nil {
-		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAny, err)
+		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAny, err)
 	}
 
 	return next(req)
@@ -32,7 +32,7 @@ func AuthorizeUserOnly(a *auth.Auth, req middleware.Request, next middleware.Nex
 	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleUserOnly); err != nil {
-		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleUserOnly, err)
+		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleUserOnly, err)
 	}
 
 	return next(req)
@@ -44,7 +44,7 @@ func AuthorizeAdminOnly(a *auth.Auth, req middleware.Request, next middleware.Ne
 	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAdminOnly); err != nil {
-		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOnly, err)
+		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOnly, err)
 	}
 
 	return next(req)
@@ -62,17 +62,17 @@ func AuthorizeUser(a *auth.Auth, userCore *user.Core, req middleware.Request, ne
 		var err error
 		userID, err = uuid.Parse(id.Value)
 		if err != nil {
-			return errs.NewResponse(http.StatusBadRequest, ErrInvalidID)
+			return errs.NewResponse(http.StatusUnauthorized, ErrInvalidID)
 		}
 
 		usr, err := userCore.QueryByID(ctx, userID)
 		if err != nil {
 			switch {
 			case errors.Is(err, user.ErrNotFound):
-				return errs.NewResponse(http.StatusBadRequest, err)
+				return errs.NewResponse(http.StatusUnauthorized, err)
 
 			default:
-				return errs.NewResponsef(http.StatusInternalServerError, "querybyid: userID[%s]: %s", userID, err)
+				return errs.NewResponsef(http.StatusUnauthorized, "querybyid: userID[%s]: %s", userID, err)
 			}
 		}
 
@@ -82,7 +82,7 @@ func AuthorizeUser(a *auth.Auth, userCore *user.Core, req middleware.Request, ne
 	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
-		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
+		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
 	}
 
 	return next(req)
@@ -99,14 +99,14 @@ func AuthorizeProduct(a *auth.Auth, productCore *product.Core, req middleware.Re
 
 		productID, err := uuid.Parse(id.Value)
 		if err != nil {
-			return errs.NewResponse(http.StatusBadRequest, ErrInvalidID)
+			return errs.NewResponse(http.StatusUnauthorized, ErrInvalidID)
 		}
 
 		prd, err := productCore.QueryByID(ctx, productID)
 		if err != nil {
 			switch {
 			case errors.Is(err, product.ErrNotFound):
-				return errs.NewResponse(http.StatusBadRequest, err)
+				return errs.NewResponse(http.StatusUnauthorized, err)
 
 			default:
 				return errs.NewResponsef(http.StatusInternalServerError, "querybyid: productID[%s]: %s", productID, err)
@@ -120,7 +120,7 @@ func AuthorizeProduct(a *auth.Auth, productCore *product.Core, req middleware.Re
 	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
-		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
+		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
 	}
 
 	return next(req)
@@ -137,17 +137,17 @@ func AuthorizeHome(a *auth.Auth, homeCore *home.Core, req middleware.Request, ne
 
 		homeID, err := uuid.Parse(id.Value)
 		if err != nil {
-			return errs.NewResponse(http.StatusBadRequest, ErrInvalidID)
+			return errs.NewResponse(http.StatusUnauthorized, ErrInvalidID)
 		}
 
 		hme, err := homeCore.QueryByID(ctx, homeID)
 		if err != nil {
 			switch {
 			case errors.Is(err, home.ErrNotFound):
-				return errs.NewResponse(http.StatusBadRequest, err)
+				return errs.NewResponse(http.StatusUnauthorized, err)
 
 			default:
-				return errs.NewResponsef(http.StatusInternalServerError, "querybyid: homeID[%s]: %s", homeID, err)
+				return errs.NewResponsef(http.StatusUnauthorized, "querybyid: homeID[%s]: %s", homeID, err)
 			}
 		}
 
@@ -158,7 +158,7 @@ func AuthorizeHome(a *auth.Auth, homeCore *home.Core, req middleware.Request, ne
 	claims := eauth.Data().(*auth.Claims)
 
 	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
-		return errs.NewResponsef(http.StatusBadRequest, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
+		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
 	}
 
 	return next(req)

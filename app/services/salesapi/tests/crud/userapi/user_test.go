@@ -70,17 +70,17 @@ func Test_User(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	app.Test(t, userQuery200(sd), "user-query-200")
-	app.Test(t, userQueryByID200(sd), "user-querybyid-200")
+	app.Test(t, userQueryOk(sd), "user-query-ok")
+	app.Test(t, userQueryByIDOk(sd), "user-querybyid-ok")
 
-	app.Test(t, userCreate200(sd), "user-create-200")
-	app.Test(t, userCreate401(sd), "user-create-401")
-	app.Test(t, userCreate400(sd), "user-create-400")
+	app.Test(t, userCreateOk(sd), "user-create-ok")
+	app.Test(t, userCreateAuth(sd), "user-create-auth")
+	app.Test(t, userCreateBad(sd), "user-create-bad")
 
-	// app.Test(t, userUpdate200(sd), "user-update-200")
-	// app.Test(t, userUpdate401(sd), "user-update-401")
-	// app.Test(t, userUpdate400(sd), "user-update-400")
+	app.Test(t, userUpdateOk(sd), "user-update-ok")
+	app.Test(t, userUpdateAuth(sd), "user-update-auth")
+	app.Test(t, userUpdateBad(sd), "user-update-bad")
 
-	app.Test(t, userDelete200(sd), "user-delete-200")
-	app.Test(t, userDelete401(sd), "user-delete-401")
+	app.Test(t, userDeleteOk(sd), "user-delete-ok")
+	app.Test(t, userDeleteAuth(sd), "user-delete-auth")
 }
