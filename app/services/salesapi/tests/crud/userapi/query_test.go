@@ -2,8 +2,8 @@ package user_test
 
 import (
 	"context"
+	"sort"
 
-	"encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
 	"github.com/ardanlabs/encore/business/api/page"
@@ -27,6 +27,10 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		usrs = append(usrs, usr.User)
 	}
 
+	sort.Slice(usrs, func(i, j int) bool {
+		return usrs[i].Name <= usrs[j].Name
+	})
+
 	table := []dbtest.AppTable{
 		{
 			Name:  "query",
@@ -41,7 +45,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				qp := userapi.QueryParams{
 					Page:    1,
 					Rows:    10,
-					OrderBy: "user_id,ASC",
+					OrderBy: "name,ASC",
 					Name:    "Name",
 				}
 
@@ -53,19 +57,18 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if errs, exists := got.(*errs.Error); exists {
-					return errs.Message
+				gotResp, exists := got.(page.Document[userapi.AppUser])
+				if !exists {
+					return "error occurred"
 				}
 
-				gotResp := got.(page.Document[userapi.AppUser])
 				expResp := exp.(page.Document[userapi.AppUser])
 
 				var found int
-				for _, r := range gotResp.Items {
-					for _, e := range expResp.Items {
-						if e.ID == r.ID {
+				for i := range gotResp.Items {
+					for j := range expResp.Items {
+						if expResp.Items[i].ID == gotResp.Items[j].ID {
 							found++
-							break
 						}
 					}
 				}
@@ -74,7 +77,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 					return "number of expected users didn't match"
 				}
 
-				return ""
+				return cmp.Diff(got, exp)
 			},
 		},
 	}
@@ -97,6 +100,10 @@ func userQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
+				if _, exists := got.(userapi.AppUser); !exists {
+					return "error occurred"
+				}
+
 				return cmp.Diff(got, exp)
 			},
 		},

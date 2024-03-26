@@ -1,57 +1,54 @@
 package product_test
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 )
 
-func productCreate200(sd dbtest.SeedData) []dbtest.AppTable {
+func productCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "basic",
-			//url:        "/v1/products",
+			Name:  "basic",
 			Token: sd.Users[0].Token,
-			//method:     http.MethodPost,
-			//statusCode: http.StatusCreated,
-			// model: &productapi.AppNewProduct{
-			// 	Name:     "Guitar",
-			// 	Cost:     10.34,
-			// 	Quantity: 10,
-			// },
-			//resp: &productapi.AppProduct{},
-			ExpResp: &productapi.AppProduct{
-				Name:     "Guitar",
+			ExpResp: productapi.AppProduct{
 				UserID:   sd.Users[0].ID.String(),
+				Name:     "Guitar",
 				Cost:     10.34,
 				Quantity: 10,
 			},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				resp := x.(*productapi.AppProduct)
-				expResp := y.(*productapi.AppProduct)
-
-				if _, err := uuid.Parse(resp.ID); err != nil {
-					return "bad uuid for ID"
+			ExcFunc: func(ctx context.Context) any {
+				app := productapi.AppNewProduct{
+					Name:     "Guitar",
+					Cost:     10.34,
+					Quantity: 10,
 				}
 
-				if resp.DateCreated == "" {
-					return "missing date created"
+				resp, err := salesapi.ProductCreate(ctx, app)
+				if err != nil {
+					return err
 				}
 
-				if resp.DateUpdated == "" {
-					return "missing date updated"
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp, exists := got.(productapi.AppProduct)
+				if !exists {
+					return "error occurred"
 				}
 
-				expResp.ID = resp.ID
-				expResp.DateCreated = resp.DateCreated
-				expResp.DateUpdated = resp.DateUpdated
+				expResp := exp.(productapi.AppProduct)
 
-				return cmp.Diff(x, y)
+				expResp.ID = gotResp.ID
+				expResp.DateCreated = gotResp.DateCreated
+				expResp.DateUpdated = gotResp.DateUpdated
+
+				return cmp.Diff(gotResp, expResp)
 			},
 		},
 	}
@@ -59,79 +56,90 @@ func productCreate200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func productCreate400(sd dbtest.SeedData) []dbtest.AppTable {
+func productCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "missing-input",
-			//url:        "/v1/products",
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPost,
-			//statusCode: http.StatusBadRequest,
-			//model: &productapi.AppNewProduct{},
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
-				validate.FieldError{Field: "cost", Err: "cost is a required field"},
-				validate.FieldError{Field: "name", Err: "name is a required field"},
-				validate.FieldError{Field: "quantity", Err: "quantity is a required field"},
-			})),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "missing-input",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 
 	return table
 }
 
-func productCreate401(sd dbtest.SeedData) []dbtest.AppTable {
+func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "emptytoken",
-			//url:        "/v1/products",
-			Token: "",
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "emptytoken",
+			Token:   "",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "badtoken",
-			//url:        "/v1/products",
-			Token: sd.Admins[0].Token[:10],
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "badtoken",
+			Token:   sd.Admins[0].Token[:10],
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "badsig",
-			//url:        "/v1/products",
-			Token: sd.Admins[0].Token + "A",
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "badsig",
+			Token:   sd.Admins[0].Token + "A",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "wronguser",
-			//url:        "/v1/products",
-			Token: sd.Admins[0].Token,
-			//method:     http.MethodPost,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "wronguser",
+			Token:   sd.Admins[0].Token,
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[[{ADMIN}]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				app := productapi.AppNewProduct{
+					Name:     "Guitar",
+					Cost:     10.34,
+					Quantity: 10,
+				}
+
+				resp, err := salesapi.ProductCreate(ctx, app)
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 

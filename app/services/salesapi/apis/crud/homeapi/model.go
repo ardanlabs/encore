@@ -3,8 +3,10 @@ package homeapi
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
+	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/foundation/validate"
@@ -115,7 +117,7 @@ func toCoreNewHome(ctx context.Context, app AppNewHome) (home.NewHome, error) {
 // Validate checks if the data in the model is considered clean.
 func (app AppNewHome) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return err
+		return errs.Newf(http.StatusBadRequest, "validate: %s", err)
 	}
 
 	return nil
@@ -177,7 +179,7 @@ func toCoreUpdateHome(app AppUpdateHome) (home.UpdateHome, error) {
 // Validate checks the data in the model is considered clean.
 func (app AppUpdateHome) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return err
+		return errs.Newf(http.StatusBadRequest, "validate: %s", err)
 	}
 
 	return nil

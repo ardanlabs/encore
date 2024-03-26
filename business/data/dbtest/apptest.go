@@ -108,17 +108,24 @@ func (at *AppTest) authHandler(ctx context.Context, token string) (context.Conte
 
 // CmpErrors compares two encore error values. If they are not equal, the
 // reason is returned.
-func CmpErrors(got *eerrs.Error, exp *eerrs.Error) string {
-	if got.Code != exp.Code {
+func CmpErrors(got any, exp any) string {
+	expResp := exp.(*eerrs.Error)
+
+	gotResp, exists := got.(*eerrs.Error)
+	if !exists {
+		return "no error occurred"
+	}
+
+	if gotResp.Code != expResp.Code {
 		return "code does not match"
 	}
 
-	if got.Message != exp.Message {
+	if gotResp.Message != expResp.Message {
 		return "message does not match"
 	}
 
-	gotDetails := got.Details.(errs.ExtraDetails)
-	expDetails := exp.Details.(errs.ExtraDetails)
+	gotDetails := gotResp.Details.(errs.ExtraDetails)
+	expDetails := expResp.Details.(errs.ExtraDetails)
 
 	if gotDetails.HTTPStatus != expDetails.HTTPStatus {
 		return "http status does not match"

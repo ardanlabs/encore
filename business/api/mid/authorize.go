@@ -114,12 +114,12 @@ func AuthorizeProduct(a *auth.Auth, productCore *product.Core, req middleware.Re
 		}
 
 		userID = prd.UserID
-		ctx = setProduct(ctx, prd)
+		req = setProduct(req, prd)
 	}
 
 	claims := eauth.Data().(*auth.Claims)
 
-	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
+	if err := a.Authorize(req.Context(), *claims, userID, auth.RuleAdminOrSubject); err != nil {
 		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
 	}
 
@@ -152,12 +152,12 @@ func AuthorizeHome(a *auth.Auth, homeCore *home.Core, req middleware.Request, ne
 		}
 
 		userID = hme.UserID
-		ctx = setHome(ctx, hme)
+		req = setHome(req, hme)
 	}
 
 	claims := eauth.Data().(*auth.Claims)
 
-	if err := a.Authorize(ctx, *claims, userID, auth.RuleAdminOrSubject); err != nil {
+	if err := a.Authorize(req.Context(), *claims, userID, auth.RuleAdminOrSubject); err != nil {
 		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOrSubject, err)
 	}
 

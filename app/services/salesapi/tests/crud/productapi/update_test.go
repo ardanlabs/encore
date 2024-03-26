@@ -1,57 +1,51 @@
 package product_test
 
 import (
+	"context"
 	"net/http"
+	"time"
 
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
-	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 )
 
-func productUpdate200(sd dbtest.SeedData) []dbtest.AppTable {
+func productUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "basic",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
+			Name:  "basic",
 			Token: sd.Users[0].Token,
-			//method:     http.MethodPut,
-			//statusCode: http.StatusOK,
-			// model: &productapi.AppUpdateProduct{
-			// 	Name:     dbtest.StringPointer("Guitar"),
-			// 	Cost:     dbtest.FloatPointer(10.34),
-			// 	Quantity: dbtest.IntPointer(10),
-			// },
-			//resp: &productapi.AppProduct{},
-			ExpResp: &productapi.AppProduct{
-				Name:     "Guitar",
-				UserID:   sd.Users[0].ID.String(),
-				Cost:     10.34,
-				Quantity: 10,
+			ExpResp: productapi.AppProduct{
+				ID:          sd.Users[0].Products[0].ID.String(),
+				UserID:      sd.Users[0].ID.String(),
+				Name:        "Guitar",
+				Cost:        10.34,
+				Quantity:    10,
+				DateCreated: sd.Users[0].Products[0].DateCreated.Format(time.RFC3339),
+				DateUpdated: sd.Users[0].Products[0].DateUpdated.Format(time.RFC3339),
 			},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				resp := x.(*productapi.AppProduct)
-				expResp := y.(*productapi.AppProduct)
-
-				if _, err := uuid.Parse(resp.ID); err != nil {
-					return "bad uuid for ID"
+			ExcFunc: func(ctx context.Context) any {
+				app := productapi.AppUpdateProduct{
+					Name:     dbtest.StringPointer("Guitar"),
+					Cost:     dbtest.FloatPointer(10.34),
+					Quantity: dbtest.IntPointer(10),
 				}
 
-				if resp.DateCreated == "" {
-					return "missing date created"
+				resp, err := salesapi.ProductUpdate(ctx, sd.Users[0].Products[0].ID.String(), app)
+				if err != nil {
+					return err
 				}
 
-				if resp.DateUpdated == "" {
-					return "missing date updated"
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				if _, exists := got.(productapi.AppProduct); !exists {
+					return "error occurred"
 				}
 
-				expResp.ID = resp.ID
-				expResp.DateCreated = resp.DateCreated
-				expResp.DateUpdated = resp.DateUpdated
-
-				return cmp.Diff(x, y)
+				return cmp.Diff(got, exp)
 			},
 		},
 	}
@@ -59,72 +53,95 @@ func productUpdate200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func productUpdate400(sd dbtest.SeedData) []dbtest.AppTable {
+func productUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "bad-input",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPut,
-			//statusCode: http.StatusBadRequest,
-			// model: &productapi.AppUpdateProduct{
-			// 	Cost:     dbtest.FloatPointer(-1.0),
-			// 	Quantity: dbtest.IntPointer(0),
-			// },
-			//resp: &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponse(http.StatusBadRequest, validate.FieldErrors{
-				validate.FieldError{Field: "cost", Err: "cost must be 0 or greate"},
-				validate.FieldError{Field: "quantity", Err: "quantity must be 1 or greater"},
-			})),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "bad-input",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"cost\",\"error\":\"cost must be 0 or greater\"},{\"field\":\"quantity\",\"error\":\"quantity must be 1 or greater\"}]"),
+			ExcFunc: func(ctx context.Context) any {
+				app := productapi.AppUpdateProduct{
+					Cost:     dbtest.FloatPointer(-10.34),
+					Quantity: dbtest.IntPointer(-10),
+				}
+
+				resp, err := salesapi.ProductUpdate(ctx, sd.Users[0].ID.String(), app)
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 
 	return table
 }
 
-func productUpdate401(sd dbtest.SeedData) []dbtest.AppTable {
+func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "emptytoken",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
-			Token: "",
-			//method:     http.MethodPut,
-			//statusCode: http.StatusUnauthorized,
-			//resp:       &middleware.Response{},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "emptytoken",
+			Token:   "",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductUpdate(ctx, "", productapi.AppUpdateProduct{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "badsig",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
-			Token: sd.Users[0].Token + "A",
-			//method:     http.MethodPut,
-			//statusCode: http.StatusUnauthorized,
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "badtoken",
+			Token:   sd.Admins[0].Token[:10],
+			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductUpdate(ctx, "", productapi.AppUpdateProduct{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
-			Name: "wronguser",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.admins[1].products[0].ID),
-			Token: sd.Users[0].Token,
-			//method:     http.MethodPut,
-			//statusCode: http.StatusUnauthorized,
-			// model: &productapi.AppUpdateProduct{
-			// 	Name:     dbtest.StringPointer("Guitar"),
-			// 	Cost:     dbtest.FloatPointer(10.34),
-			// 	Quantity: dbtest.IntPointer(10),
-			// },
-			//resp:    &middleware.Response{},
-			ExpResp: dbtest.ToPointer(errs.NewResponsef(http.StatusUnauthorized, `Unauthorized`)),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "badsig",
+			Token:   sd.Admins[0].Token + "A",
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductUpdate(ctx, "", productapi.AppUpdateProduct{})
+				if err != nil {
+					return err
+				}
+
+				return resp
 			},
+			CmpFunc: dbtest.CmpErrors,
+		},
+		{
+			Name:    "wronguser",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				app := productapi.AppUpdateProduct{
+					Name:     dbtest.StringPointer("Guitar"),
+					Cost:     dbtest.FloatPointer(10.34),
+					Quantity: dbtest.IntPointer(10),
+				}
+
+				resp, err := salesapi.ProductUpdate(ctx, sd.Admins[0].Products[0].ID.String(), app)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 

@@ -3,14 +3,13 @@ package user_test
 import (
 	"context"
 	"net/http"
+	"time"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 )
 
 func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
@@ -19,11 +18,14 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 			Name:  "basic",
 			Token: sd.Users[0].Token,
 			ExpResp: userapi.AppUser{
-				Name:       "Jack Kennedy",
-				Email:      "jack@ardanlabs.com",
-				Roles:      []string{"ADMIN"},
-				Department: "IT",
-				Enabled:    true,
+				ID:          sd.Users[0].ID.String(),
+				Name:        "Jack Kennedy",
+				Email:       "jack@ardanlabs.com",
+				Roles:       []string{"ADMIN"},
+				Department:  "IT",
+				Enabled:     true,
+				DateCreated: sd.Users[0].DateCreated.Format(time.RFC3339),
+				DateUpdated: sd.Users[0].DateUpdated.Format(time.RFC3339),
 			},
 			ExcFunc: func(ctx context.Context) any {
 				app := userapi.AppUpdateUser{
@@ -43,26 +45,11 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(userapi.AppUser)
-				expResp := exp.(userapi.AppUser)
-
-				if _, err := uuid.Parse(gotResp.ID); err != nil {
-					return "bad uuid for ID"
+				if _, exists := got.(userapi.AppUser); !exists {
+					return "error occurred"
 				}
 
-				if gotResp.DateCreated == "" {
-					return "missing date created"
-				}
-
-				if gotResp.DateUpdated == "" {
-					return "missing date updated"
-				}
-
-				expResp.ID = gotResp.ID
-				expResp.DateCreated = gotResp.DateCreated
-				expResp.DateUpdated = gotResp.DateUpdated
-
-				return cmp.Diff(gotResp, expResp)
+				return cmp.Diff(got, exp)
 			},
 		},
 	}
@@ -89,12 +76,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "bad-role",
@@ -112,12 +94,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 
@@ -138,12 +115,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "badtoken",
@@ -157,12 +129,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "badsig",
@@ -176,12 +143,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -204,12 +166,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 

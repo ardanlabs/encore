@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -17,8 +16,7 @@ func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[1].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				err := salesapi.UserDelete(ctx, sd.Users[1].ID.String())
-				if err != nil {
+				if err := salesapi.UserDelete(ctx, sd.Users[1].ID.String()); err != nil {
 					return err
 				}
 
@@ -37,8 +35,7 @@ func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[1].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				err := salesapi.UserDelete(ctx, sd.Admins[1].ID.String())
-				if err != nil {
+				if err := salesapi.UserDelete(ctx, sd.Admins[1].ID.String()); err != nil {
 					return err
 				}
 
@@ -69,14 +66,9 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					return err
 				}
 
-				return err
+				return nil
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "badsig",
@@ -88,14 +80,9 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					return err
 				}
 
-				return err
+				return nil
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -107,14 +94,9 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					return err
 				}
 
-				return err
+				return nil
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 

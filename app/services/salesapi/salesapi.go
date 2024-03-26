@@ -46,7 +46,7 @@ type Service struct {
 }
 
 // NewService is called to create a new encore Service.
-func NewService(name string, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
+func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	userCore := user.NewCore(delegate.New(), userdb.NewStore(db))
 	productCore := product.NewCore(userCore, delegate.New(), productdb.NewStore(db))
 	homeCore := home.NewCore(userCore, delegate.New(), homedb.NewStore(db))
@@ -98,7 +98,7 @@ func initService() (*Service, error) {
 		return nil, err
 	}
 
-	return NewService("salesapi", db, auth)
+	return NewService(db, auth)
 }
 
 func startup() (*sqlx.DB, *auth.Auth, error) {

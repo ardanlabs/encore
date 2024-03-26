@@ -1,36 +1,55 @@
 package product_test
 
 import (
+	"context"
+
+	"encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func productQuery200(sd dbtest.SeedData) []dbtest.AppTable {
+func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	total := len(sd.Admins[0].Products) + len(sd.Users[0].Products)
 
 	table := []dbtest.AppTable{
 		{
-			Name: "basic",
-			//url:        "/v1/products?page=1&rows=10&orderBy=product_id,DESC",
+			Name:  "basic",
 			Token: sd.Admins[0].Token,
-			//statusCode: http.StatusOK,
-			//method:     http.MethodGet,
-			//resp:       &page.Document[productapi.AppProduct]{},
-			ExpResp: &page.Document[productapi.AppProduct]{
+			ExpResp: page.Document[productapi.AppProduct]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       total,
 				Items:       toAppProducts(append(sd.Admins[0].Products, sd.Users[0].Products...)),
 			},
-			CmpFunc: func(x interface{}, y interface{}) string {
-				resp := x.(*page.Document[productapi.AppProduct])
-				exp := y.(*page.Document[productapi.AppProduct])
+			ExcFunc: func(ctx context.Context) any {
+				qp := productapi.QueryParams{
+					Page:    1,
+					Rows:    10,
+					OrderBy: "product_id,ASC",
+					Name:    "Name",
+				}
+
+				resp, err := salesapi.ProductQuery(ctx, qp)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				if errs, exists := got.(*errs.Error); exists {
+					return errs.Message
+				}
+
+				gotResp := got.(page.Document[productapi.AppProduct])
+				expResp := exp.(page.Document[productapi.AppProduct])
 
 				var found int
-				for _, r := range resp.Items {
-					for _, e := range exp.Items {
+				for _, r := range gotResp.Items {
+					for _, e := range expResp.Items {
 						if e.ID == r.ID {
 							found++
 							break
@@ -43,6 +62,7 @@ func productQuery200(sd dbtest.SeedData) []dbtest.AppTable {
 				}
 
 				return ""
+
 			},
 		},
 	}
@@ -50,18 +70,22 @@ func productQuery200(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func productQueryByID200(sd dbtest.SeedData) []dbtest.AppTable {
+func productQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name: "basic",
-			//url:        fmt.Sprintf("/v1/products/%s", sd.Users[0].products[0].ID),
-			Token: sd.Users[0].Token,
-			//statusCode: http.StatusOK,
-			//method:     http.MethodGet,
-			//resp:       &productapi.AppProduct{},
-			ExpResp: toAppProductPtr(sd.Users[0].Products[0]),
-			CmpFunc: func(x interface{}, y interface{}) string {
-				return cmp.Diff(x, y)
+			Name:    "basic",
+			Token:   sd.Users[0].Token,
+			ExpResp: toAppProduct(sd.Users[0].Products[0]),
+			ExcFunc: func(ctx context.Context) any {
+				resp, err := salesapi.ProductQueryByID(ctx, sd.Users[0].Products[0].ID.String())
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
 			},
 		},
 	}

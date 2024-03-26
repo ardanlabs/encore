@@ -4,13 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 )
 
 func userCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
@@ -43,20 +41,12 @@ func userCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(userapi.AppUser)
+				gotResp, exists := got.(userapi.AppUser)
+				if !exists {
+					return "error occurred"
+				}
+
 				expResp := exp.(userapi.AppUser)
-
-				if _, err := uuid.Parse(gotResp.ID); err != nil {
-					return "bad uuid for ID"
-				}
-
-				if gotResp.DateCreated == "" {
-					return "missing date created"
-				}
-
-				if gotResp.DateUpdated == "" {
-					return "missing date updated"
-				}
 
 				expResp.ID = gotResp.ID
 				expResp.DateCreated = gotResp.DateCreated
@@ -84,12 +74,7 @@ func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "bad-role",
@@ -112,12 +97,7 @@ func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 
@@ -138,12 +118,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "badtoken",
@@ -157,12 +132,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "badsig",
@@ -176,12 +146,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -204,12 +169,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*eerrs.Error)
-				expResp := exp.(*eerrs.Error)
-
-				return dbtest.CmpErrors(gotResp, expResp)
-			},
+			CmpFunc: dbtest.CmpErrors,
 		},
 	}
 

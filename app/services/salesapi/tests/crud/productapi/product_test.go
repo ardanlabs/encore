@@ -7,12 +7,15 @@ import (
 	"testing"
 
 	"encore.dev/et"
+	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
 var url string
 
 func TestMain(m *testing.M) {
+	et.EnableServiceInstanceIsolation()
+
 	code, err := run(m)
 	if err != nil {
 		fmt.Println(err)
@@ -22,8 +25,6 @@ func TestMain(m *testing.M) {
 }
 
 func run(m *testing.M) (code int, err error) {
-	et.EnableServiceInstanceIsolation()
-
 	url, err = dbtest.StartDB()
 	if err != nil {
 		return 1, err
@@ -50,36 +51,36 @@ func Test_Product(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
-	// sd, err := insertSeedData(dbTest)
-	// if err != nil {
-	// 	t.Fatalf("Seeding error: %s", err)
-	// }
+	sd, err := insertSeedData(dbTest)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
 
 	// -------------------------------------------------------------------------
 
-	// service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
-	// if err != nil {
-	// 	t.Fatalf("Service init error: %s", err)
-	// }
-	// et.MockService("salesapi", service)
+	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
+	if err != nil {
+		t.Fatalf("Service init error: %s", err)
+	}
+	et.MockService("salesapi", service, et.RunMiddleware(true))
 
-	// app := dbtest.AppTest{
-	// 	Service: service,
-	// }
+	app := dbtest.AppTest{
+		Service: service,
+	}
 
 	// -------------------------------------------------------------------------
 
-	// app.test(t, productQuery200(sd), "product-query-200")
-	// app.test(t, productQueryByID200(sd), "product-querybyid-200")
+	app.Test(t, productQueryOk(sd), "product-query-ok")
+	app.Test(t, productQueryByIDOk(sd), "product-querybyid-ok")
 
-	// app.test(t, productCreate200(sd), "product-create-200")
-	// app.test(t, productCreate401(sd), "product-create-401")
-	// app.test(t, productCreate400(sd), "product-create-400")
+	app.Test(t, productCreateOk(sd), "product-create-ok")
+	app.Test(t, productCreateBad(sd), "product-create-bad")
+	app.Test(t, productCreateAuth(sd), "product-create-auth")
 
-	// app.test(t, productUpdate200(sd), "product-update-200")
-	// app.test(t, productUpdate401(sd), "product-update-401")
-	// app.test(t, productUpdate400(sd), "product-update-400")
+	app.Test(t, productUpdateOk(sd), "product-update-ok")
+	app.Test(t, productUpdateBad(sd), "product-update-bad")
+	app.Test(t, productUpdateAuth(sd), "product-update-auth")
 
-	// app.test(t, productDelete200(sd), "product-delete-200")
-	// app.test(t, productDelete401(sd), "product-delete-401")
+	app.Test(t, productDeleteOk(sd), "product-delete-ok")
+	app.Test(t, productDeleteAuth(sd), "product-delete-auth")
 }
