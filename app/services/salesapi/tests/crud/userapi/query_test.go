@@ -53,24 +53,8 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(page.Document[userapi.AppUser])
-				if !exists {
+				if _, exists := got.(page.Document[userapi.AppUser]); !exists {
 					return "error occurred"
-				}
-
-				expResp := exp.(page.Document[userapi.AppUser])
-
-				var found int
-				for i := range gotResp.Items {
-					for j := range expResp.Items {
-						if expResp.Items[i].ID == gotResp.Items[j].ID {
-							found++
-						}
-					}
-				}
-
-				if found != len(usrs) {
-					return "number of expected users didn't match"
 				}
 
 				return cmp.Diff(got, exp)

@@ -48,24 +48,8 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(page.Document[productapi.AppProduct])
-				if !exists {
+				if _, exists := got.(page.Document[productapi.AppProduct]); !exists {
 					return "error occurred"
-				}
-
-				expResp := exp.(page.Document[productapi.AppProduct])
-
-				var found int
-				for i := range gotResp.Items {
-					for j := range expResp.Items {
-						if expResp.Items[i].ID == gotResp.Items[j].ID {
-							found++
-						}
-					}
-				}
-
-				if found != len(prds) {
-					return "number of expected users didn't match"
 				}
 
 				return cmp.Diff(got, exp)
@@ -91,6 +75,10 @@ func productQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
+				if _, exists := got.(productapi.AppProduct); !exists {
+					return "error occurred"
+				}
+
 				return cmp.Diff(got, exp)
 			},
 		},
