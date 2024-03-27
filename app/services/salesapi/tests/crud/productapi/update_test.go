@@ -24,7 +24,7 @@ func productUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				Cost:        10.34,
 				Quantity:    10,
 				DateCreated: sd.Users[0].Products[0].DateCreated.Format(time.RFC3339),
-				DateUpdated: sd.Users[0].Products[0].DateUpdated.Format(time.RFC3339),
+				DateUpdated: sd.Users[0].Products[0].DateCreated.Format(time.RFC3339),
 			},
 			ExcFunc: func(ctx context.Context) any {
 				app := productapi.AppUpdateProduct{
