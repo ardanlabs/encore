@@ -9,9 +9,9 @@ jobs:
       - run:
           name: Install Encore
           command: |
-            curl -L https://encore.dev/install.sh | bash
-            which encore
-            encore version
+              curl -L https://encore.dev/install.sh | bash
+              which encore
+              encore version
       - run:
           name: Install Go 1.22
           command: |
