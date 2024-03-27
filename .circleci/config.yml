@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Download Dependencies
           command: |
-              go mod download    
+              go mod download -x
       - run:
           name: Run tests
           command: |
