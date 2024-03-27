@@ -29,6 +29,8 @@ jobs:
       - run:
           name: Run tests
           command: |
+              export ENCORE_INSTALL="/home/circleci/.encore"
+              export PATH="$ENCORE_INSTALL/bin:$PATH"
               CGO_ENABLED=0 encore test ./...
       - run:
           name: Run vet

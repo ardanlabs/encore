@@ -1,7 +1,10 @@
 # Ultimate Software Design with Encore
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/ardanlabs/encore)](https://goreportcard.com/report/github.com/ardanlabs/service)
-[![go.mod Go version](https://img.shields.io/github/go-mod/go-version/ardanlabs/encore)](https://github.com/ardanlabs/service)
+[![CircleCI](https://circleci.com/gh/ardanlabs/encore.svg?style=svg)](https://circleci.com/gh/ardanlabs/service)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ardanlabs/encore)](https://goreportcard.com/report/github.com/ardanlabs/encore)
+[![go.mod Go version](https://img.shields.io/github/go-mod/go-version/ardanlabs/encore)](https://github.com/ardanlabs/encore)
+
+[![InsightsSnapshot](https://dl.circleci.com/insights-snapshot/gh/ardanlabs/encore/main/workflow/badge.svg)](https://app.circleci.com/insights/github/ardanlabs/encore/workflows/workflow/overview?branch=master)
 
 Copyright 2018, 2019, 2020, 2021, 2022, 2023, 2024 Ardan Labs  
 hello@ardanlabs.com
