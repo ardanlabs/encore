@@ -15,10 +15,6 @@ jobs:
               which encore
               encore version
       - run:
-          name: "Download Postgres Image"
-          command: |
-              docker pull encoredotdev/postgres:15
-      - run:
           name: Install Go 1.22
           command: |
               sudo rm -rf /usr/local/go
