@@ -21,7 +21,7 @@ type AppTable struct {
 	Token   string
 	ExpResp any
 	ExcFunc func(ctx context.Context) any
-	CmpFunc func(x any, y any) string
+	CmpFunc func(got any, exp any) string
 }
 
 // User represents an app user specified for the test.
