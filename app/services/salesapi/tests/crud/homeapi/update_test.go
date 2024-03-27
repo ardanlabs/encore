@@ -55,10 +55,6 @@ func homeUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if _, exists := got.(homeapi.AppHome); !exists {
-					return "error occurred"
-				}
-
 				return cmp.Diff(got, exp)
 			},
 		},

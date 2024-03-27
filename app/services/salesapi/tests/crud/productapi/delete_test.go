@@ -7,6 +7,7 @@ import (
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
+	"github.com/google/go-cmp/cmp"
 )
 
 func productDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
@@ -23,11 +24,7 @@ func productDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return nil
 			},
 			CmpFunc: func(got any, exp any) string {
-				if got != nil {
-					return "error occurred"
-				}
-
-				return ""
+				return cmp.Diff(got, exp)
 			},
 		},
 		{
@@ -42,11 +39,7 @@ func productDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return nil
 			},
 			CmpFunc: func(got any, exp any) string {
-				if got != nil {
-					return "error occurred"
-				}
-
-				return ""
+				return cmp.Diff(got, exp)
 			},
 		},
 	}

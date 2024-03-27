@@ -47,10 +47,6 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if _, exists := got.(page.Document[productapi.AppProduct]); !exists {
-					return "error occurred"
-				}
-
 				return cmp.Diff(got, exp)
 			},
 		},
@@ -74,10 +70,6 @@ func productQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if _, exists := got.(productapi.AppProduct); !exists {
-					return "error occurred"
-				}
-
 				return cmp.Diff(got, exp)
 			},
 		},

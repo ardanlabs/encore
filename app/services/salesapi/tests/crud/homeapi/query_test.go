@@ -46,10 +46,6 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if _, exists := got.(page.Document[homeapi.AppHome]); !exists {
-					return "error occurred"
-				}
-
 				return cmp.Diff(got, exp)
 			},
 		},
@@ -73,10 +69,6 @@ func homeQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if _, exists := got.(homeapi.AppHome); !exists {
-					return "error occurred"
-				}
-
 				return cmp.Diff(got, exp)
 			},
 		},

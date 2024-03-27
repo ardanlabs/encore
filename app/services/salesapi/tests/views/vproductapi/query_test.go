@@ -45,10 +45,6 @@ func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if _, exists := got.(page.Document[vproductapi.AppProduct]); !exists {
-					return "error occurred"
-				}
-
 				return cmp.Diff(got, exp)
 			},
 		},

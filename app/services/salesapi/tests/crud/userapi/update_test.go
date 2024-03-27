@@ -47,10 +47,6 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				if _, exists := got.(userapi.AppUser); !exists {
-					return "error occurred"
-				}
-
 				return cmp.Diff(got, exp)
 			},
 		},
