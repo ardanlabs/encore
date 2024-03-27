@@ -25,7 +25,7 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				Department:  "IT",
 				Enabled:     true,
 				DateCreated: sd.Users[0].DateCreated.Format(time.RFC3339),
-				DateUpdated: sd.Users[0].DateUpdated.Format(time.RFC3339),
+				DateUpdated: sd.Users[0].DateCreated.Format(time.RFC3339),
 			},
 			ExcFunc: func(ctx context.Context) any {
 				app := userapi.AppUpdateUser{
