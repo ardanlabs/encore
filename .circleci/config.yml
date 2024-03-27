@@ -10,6 +10,8 @@ jobs:
           name: Install Encore
           command: |
               curl -L https://encore.dev/install.sh | bash
+              export ENCORE_INSTALL="/home/circleci/.encore"
+              export PATH="$ENCORE_INSTALL/bin:$PATH"
               which encore
               encore version
       - run:
