@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+        name: Install Encore
+        command: |
+          curl -L https://encore.dev/install.sh | bash
+          which encore
+          encore version
+      - run:
+          name: Install Go 1.22
+          command: |
+              sudo rm -rf /usr/local/go
+              wget -O go.tgz https://go.dev/dl/go1.22.1.linux-amd64.tar.gz
+              sudo tar -C /usr/local -xzf go.tgz
+              which go
+              go version
+      - run:
+          name: Download Dependencies
+          command: |
+              go mod download    
+      - run:
+          name: Run tests
+          command: |
+              CGO_ENABLED=0 go test ./...
+      - run:
+          name: Run vet
+          command: |
+              CGO_ENABLED=0 go vet ./...
+      - run:
+          name: Run staticheck
+          command: |
+              go install honnef.co/go/tools/cmd/staticcheck@latest
+              staticcheck -checks=all ./...
+      - run:
+          name: Run govulncheck
+          command: |
+              go install golang.org/x/vuln/cmd/govulncheck@latest
+              govulncheck ./...
