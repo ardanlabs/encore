@@ -74,7 +74,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "role",
@@ -92,7 +92,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 	}
 
@@ -113,7 +113,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "token",
@@ -127,7 +127,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -141,7 +141,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -164,7 +164,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 	}
 

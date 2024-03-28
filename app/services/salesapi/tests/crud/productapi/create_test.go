@@ -70,7 +70,7 @@ func productCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 	}
 
@@ -91,7 +91,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "token",
@@ -105,7 +105,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -119,7 +119,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -139,7 +139,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 	}
 

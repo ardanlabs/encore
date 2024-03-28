@@ -25,7 +25,7 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	tu1 := dbtest.User{
 		User:     usrs[0],
-		Token:    dbTest.Token(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Token:    dbTest.Token(usrs[0].Email.Address),
 		Products: prds,
 	}
 
@@ -43,7 +43,7 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	tu2 := dbtest.User{
 		User:     usrs[0],
-		Token:    dbTest.Token(usrs[0].Email.Address, fmt.Sprintf("Password%s", usrs[0].Name[4:])),
+		Token:    dbTest.Token(usrs[0].Email.Address),
 		Products: prds,
 	}
 

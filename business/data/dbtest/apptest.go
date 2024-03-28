@@ -6,7 +6,6 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
-	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
@@ -38,11 +37,6 @@ type SeedData struct {
 	Admins []User
 }
 
-// ToPointer converts a middleware reponose value to a pointer.
-func ToPointer(r middleware.Response) *middleware.Response {
-	return &r
-}
-
 // Service defines the method set required to exist for any encore service type.
 type Service interface {
 	AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error)
@@ -57,7 +51,9 @@ type AppTest struct {
 
 // Test performs the actual test logic based on the table data.
 func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
-	log := func(got any, exp any) {
+	log := func(diff string, got any, exp any) {
+		t.Log("DIFF")
+		t.Logf("%s", diff)
 		t.Log("GOT")
 		t.Logf("%#v", got)
 		t.Log("EXP")
@@ -74,7 +70,7 @@ func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
 			if err != nil {
 				diff := tt.CmpFunc(err, tt.ExpResp)
 				if diff != "" {
-					log(err, tt.ExpResp)
+					log(diff, err, tt.ExpResp)
 				}
 				return
 			}
@@ -84,7 +80,7 @@ func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
 
 			diff := tt.CmpFunc(got, tt.ExpResp)
 			if diff != "" {
-				log(got, tt.ExpResp)
+				log(diff, got, tt.ExpResp)
 			}
 		}
 
@@ -106,9 +102,9 @@ func (at *AppTest) authHandler(ctx context.Context, token string) (context.Conte
 
 // =============================================================================
 
-// CmpErrors compares two encore error values. If they are not equal, the
+// CmpAppErrors compares two encore error values. If they are not equal, the
 // reason is returned.
-func CmpErrors(got any, exp any) string {
+func CmpAppErrors(got any, exp any) string {
 	expResp := exp.(*eerrs.Error)
 
 	gotResp, exists := got.(*eerrs.Error)

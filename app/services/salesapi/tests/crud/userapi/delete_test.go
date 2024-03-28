@@ -61,7 +61,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return nil
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -75,7 +75,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return nil
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -89,7 +89,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return nil
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 	}
 

@@ -88,7 +88,7 @@ func homeUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "type",
@@ -106,7 +106,7 @@ func homeUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 	}
 
@@ -127,7 +127,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "token",
@@ -141,7 +141,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -155,7 +155,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -181,7 +181,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpErrors,
+			CmpFunc: dbtest.CmpAppErrors,
 		},
 	}
 

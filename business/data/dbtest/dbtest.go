@@ -188,7 +188,7 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 }
 
 // Token generates an authenticated token for a user.
-func (tst *Test) Token(email string, pass string) string {
+func (tst *Test) Token(email string) string {
 	addr, _ := mail.ParseAddress(email)
 
 	store := userdb.NewStore(tst.DB)

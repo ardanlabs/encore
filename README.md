@@ -1,6 +1,6 @@
 # Ultimate Software Design with Encore
 
-[![CircleCI](https://circleci.com/gh/ardanlabs/encore.svg?style=svg)](https://circleci.com/gh/ardanlabs/service)
+[![CircleCI](https://circleci.com/gh/ardanlabs/encore.svg?style=svg)](https://circleci.com/gh/ardanlabs/encore)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ardanlabs/encore)](https://goreportcard.com/report/github.com/ardanlabs/encore)
 [![go.mod Go version](https://img.shields.io/github/go-mod/go-version/ardanlabs/encore)](https://github.com/ardanlabs/encore)
 
@@ -44,15 +44,15 @@ hello@ardanlabs.com
 
 ## Index
 
-* [Installation](https://github.com/ardanlabs/service#installation)
-* [Create Your Own Version](https://github.com/ardanlabs/service#create-your-own-version)
-* [Purchase Video](https://github.com/ardanlabs/service#purchase-video)
-* [Experience](https://github.com/ardanlabs/service#our-experience)
-* [Teacher](https://github.com/ardanlabs/service#our-teacher)
-* [More About Go](https://github.com/ardanlabs/service#more-about-go)
-* [Minimal Qualified Student](https://github.com/ardanlabs/service#minimal-qualified-student)
-* [Important Reading](https://github.com/ardanlabs/service#important-reading)
-* [Joining the Go Slack Community](https://github.com/ardanlabs/service#joining-the-go-slack-community)
+* [Installation](https://github.com/ardanlabs/encore#installation)
+* [Create Your Own Version](https://github.com/ardanlabs/encore#create-your-own-version)
+* [Purchase Video](https://github.com/ardanlabs/encore#purchase-video)
+* [Experience](https://github.com/ardanlabs/encore#our-experience)
+* [Teacher](https://github.com/ardanlabs/encore#our-teacher)
+* [More About Go](https://github.com/ardanlabs/encore#more-about-go)
+* [Minimal Qualified Student](https://github.com/ardanlabs/encore#minimal-qualified-student)
+* [Important Reading](https://github.com/ardanlabs/encore#important-reading)
+* [Joining the Go Slack Community](https://github.com/ardanlabs/encore#joining-the-go-slack-community)
 
 ## Installation
 
@@ -63,7 +63,7 @@ $ cd $HOME
 $ mkdir code
 $ cd code
 $ git clone https://github.com/ardanlabs/encore or git@github.com:ardanlabs/encore.git
-$ cd service
+$ cd encore
 ```
 
 ## Create Your Own Version
