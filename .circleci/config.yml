@@ -27,7 +27,13 @@ jobs:
           command: |
               go mod download -x
       - run:
-          name: Run tests
+          name: Encore Check
+          command: |
+              export ENCORE_INSTALL="/home/circleci/.encore"
+              export PATH="$ENCORE_INSTALL/bin:$PATH"
+              CGO_ENABLED=0 encore check -v
+      - run:
+          name: Run Tests
           command: |
               export ENCORE_INSTALL="/home/circleci/.encore"
               export PATH="$ENCORE_INSTALL/bin:$PATH"
