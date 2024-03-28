@@ -9,9 +9,6 @@ import (
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
-	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 
 // AppTable represent fields needed for running an app test.
@@ -21,20 +18,6 @@ type AppTable struct {
 	ExpResp any
 	ExcFunc func(ctx context.Context) any
 	CmpFunc func(got any, exp any) string
-}
-
-// User represents an app user specified for the test.
-type User struct {
-	user.User
-	Token    string
-	Products []product.Product
-	Homes    []home.Home
-}
-
-// SeedData represents data that was seeded for the test.
-type SeedData struct {
-	Users  []User
-	Admins []User
 }
 
 // Service defines the method set required to exist for any encore service type.

@@ -15,11 +15,8 @@ type UnitTable struct {
 
 // =============================================================================
 
-// UnitTest contains functions for executing an unit test.
-type UnitTest struct{}
-
-// Test performs the actual test logic based on the table data.
-func (ut *UnitTest) Test(t *testing.T, table []UnitTable, testName string) {
+// UnitTest performs the actual test logic based on the table data.
+func UnitTest(t *testing.T, table []UnitTable, testName string) {
 	log := func(diff string, got any, exp any) {
 		t.Log("DIFF")
 		t.Logf("%s", diff)

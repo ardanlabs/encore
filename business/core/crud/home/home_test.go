@@ -60,11 +60,10 @@ func Test_Home(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	var app dbtest.UnitTest
-	app.Test(t, query(dbTest, sd), "query")
-	app.Test(t, create(dbTest, sd), "create")
-	app.Test(t, update(dbTest, sd), "update")
-	app.Test(t, delete(dbTest, sd), "delete")
+	dbtest.UnitTest(t, query(dbTest, sd), "query")
+	dbtest.UnitTest(t, create(dbTest, sd), "create")
+	dbtest.UnitTest(t, update(dbTest, sd), "update")
+	dbtest.UnitTest(t, delete(dbTest, sd), "delete")
 }
 
 // =============================================================================

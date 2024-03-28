@@ -61,8 +61,7 @@ func Test_Product(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	var app dbtest.UnitTest
-	app.Test(t, query(dbTest, sd), "query")
+	dbtest.UnitTest(t, query(dbTest, sd), "query")
 }
 
 // =============================================================================

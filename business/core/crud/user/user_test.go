@@ -61,11 +61,10 @@ func Test_User(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	var app dbtest.UnitTest
-	app.Test(t, query(dbTest, sd), "query")
-	app.Test(t, create(dbTest), "create")
-	app.Test(t, update(dbTest, sd), "update")
-	app.Test(t, delete(dbTest, sd), "delete")
+	dbtest.UnitTest(t, query(dbTest, sd), "query")
+	dbtest.UnitTest(t, create(dbTest), "create")
+	dbtest.UnitTest(t, update(dbTest, sd), "update")
+	dbtest.UnitTest(t, delete(dbTest, sd), "delete")
 }
 
 // =============================================================================
