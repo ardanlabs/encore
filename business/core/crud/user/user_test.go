@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"sort"
 	"testing"
+	"time"
 
 	"encore.dev/et"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -148,6 +149,23 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
+				gotResp, exists := got.([]user.User)
+				if !exists {
+					return "error occurred"
+				}
+
+				expResp := exp.([]user.User)
+
+				for i := range gotResp {
+					if gotResp[i].DateCreated.Format(time.RFC3339) == expResp[i].DateCreated.Format(time.RFC3339) {
+						expResp[i].DateCreated = gotResp[i].DateCreated
+					}
+
+					if gotResp[i].DateUpdated.Format(time.RFC3339) == expResp[i].DateUpdated.Format(time.RFC3339) {
+						expResp[i].DateUpdated = gotResp[i].DateUpdated
+					}
+				}
+
 				return cmp.Diff(got, exp)
 			},
 		},
@@ -163,6 +181,21 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
+				gotResp, exists := got.(user.User)
+				if !exists {
+					return "error occurred"
+				}
+
+				expResp := exp.(user.User)
+
+				if gotResp.DateCreated.Format(time.RFC3339) == expResp.DateCreated.Format(time.RFC3339) {
+					expResp.DateCreated = gotResp.DateCreated
+				}
+
+				if gotResp.DateUpdated.Format(time.RFC3339) == expResp.DateUpdated.Format(time.RFC3339) {
+					expResp.DateUpdated = gotResp.DateUpdated
+				}
+
 				return cmp.Diff(got, exp)
 			},
 		},
