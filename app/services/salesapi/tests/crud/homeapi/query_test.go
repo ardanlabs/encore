@@ -23,7 +23,7 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 
 	table := []dbtest.AppTable{
 		{
-			Name:  "basic",
+			Name:  "all",
 			Token: sd.Admins[0].Token,
 			ExpResp: page.Document[homeapi.AppHome]{
 				Page:        1,
@@ -57,7 +57,7 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 func homeQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "basic",
+			Name:    "byid",
 			Token:   sd.Users[0].Token,
 			ExpResp: toAppHome(sd.Users[0].Homes[0]),
 			ExcFunc: func(ctx context.Context) any {

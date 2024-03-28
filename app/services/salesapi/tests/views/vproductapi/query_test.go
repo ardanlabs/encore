@@ -21,7 +21,7 @@ func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 
 	table := []dbtest.AppTable{
 		{
-			Name:  "basic",
+			Name:  "all",
 			Token: sd.Admins[0].Token,
 			ExpResp: page.Document[vproductapi.AppProduct]{
 				Page:        1,

@@ -29,7 +29,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 
 	table := []dbtest.AppTable{
 		{
-			Name:  "basic",
+			Name:  "all",
 			Token: sd.Admins[0].Token,
 			ExpResp: page.Document[userapi.AppUser]{
 				Page:        1,
@@ -64,7 +64,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 func userQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "basic",
+			Name:    "byid",
 			Token:   sd.Users[0].Token,
 			ExpResp: toAppUser(sd.Users[0].User),
 			ExcFunc: func(ctx context.Context) any {

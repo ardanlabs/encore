@@ -23,7 +23,7 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 
 	table := []dbtest.AppTable{
 		{
-			Name:  "basic",
+			Name:  "all",
 			Token: sd.Admins[0].Token,
 			ExpResp: page.Document[productapi.AppProduct]{
 				Page:        1,
@@ -58,7 +58,7 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 func productQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
-			Name:    "basic",
+			Name:    "byid",
 			Token:   sd.Users[0].Token,
 			ExpResp: toAppProduct(sd.Users[0].Products[0]),
 			ExcFunc: func(ctx context.Context) any {

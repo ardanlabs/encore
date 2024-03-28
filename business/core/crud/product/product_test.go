@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"encore.dev/et"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -19,8 +18,6 @@ import (
 var url string
 
 func TestMain(m *testing.M) {
-	et.EnableServiceInstanceIsolation()
-
 	code, err := run(m)
 	if err != nil {
 		fmt.Println(err)
