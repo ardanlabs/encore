@@ -166,7 +166,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					}
 				}
 
-				return cmp.Diff(got, exp)
+				return cmp.Diff(gotResp, expResp)
 			},
 		},
 		{
@@ -196,7 +196,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					expResp.DateUpdated = gotResp.DateUpdated
 				}
 
-				return cmp.Diff(got, exp)
+				return cmp.Diff(gotResp, expResp)
 			},
 		},
 	}
