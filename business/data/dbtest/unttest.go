@@ -3,9 +3,6 @@ package dbtest
 import (
 	"context"
 	"testing"
-
-	eerrs "encore.dev/beta/errs"
-	"github.com/ardanlabs/encore/business/api/errs"
 )
 
 // UnitTable represent fields needed for running an unit test.
@@ -48,38 +45,4 @@ func (ut *UnitTest) Test(t *testing.T, table []UnitTable, testName string) {
 
 		t.Run(testName+"-"+tt.Name, f)
 	}
-}
-
-// =============================================================================
-
-// CmpErrors compares two encore error values. If they are not equal, the
-// reason is returned.
-func CmpUnitErrors(got any, exp any) string {
-	expResp := exp.(*eerrs.Error)
-
-	gotResp, exists := got.(*eerrs.Error)
-	if !exists {
-		return "no error occurred"
-	}
-
-	if gotResp.Code != expResp.Code {
-		return "code does not match"
-	}
-
-	if gotResp.Message != expResp.Message {
-		return "message does not match"
-	}
-
-	gotDetails := gotResp.Details.(errs.ExtraDetails)
-	expDetails := expResp.Details.(errs.ExtraDetails)
-
-	if gotDetails.HTTPStatus != expDetails.HTTPStatus {
-		return "http status does not match"
-	}
-
-	if gotDetails.HTTPStatusCode != expDetails.HTTPStatusCode {
-		return "http status code does not match"
-	}
-
-	return ""
 }
