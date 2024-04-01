@@ -2,7 +2,6 @@ package salesapi
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"encore.dev"
@@ -33,7 +32,7 @@ func (s *Service) Fallback(w http.ResponseWriter, r *http.Request) {
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=POST path=/v1/homes tag:metrics tag:authorize_user_role
+//encore:api auth method=POST path=/v1/homes tag:metrics tag:authorize tag:as_user_role
 func (s *Service) HomeCreate(ctx context.Context, app homeapi.AppNewHome) (homeapi.AppHome, error) {
 	return s.api.core.home.Create(ctx, app)
 }
@@ -51,7 +50,7 @@ func (s *Service) HomeDelete(ctx context.Context, homeID string) error {
 }
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=GET path=/v1/homes tag:metrics tag:authorize_any_role
+//encore:api auth method=GET path=/v1/homes tag:metrics tag:authorize tag:as_any_role
 func (s *Service) HomeQuery(ctx context.Context, qp homeapi.QueryParams) (page.Document[homeapi.AppHome], error) {
 	return s.api.core.home.Query(ctx, qp)
 }
@@ -65,7 +64,7 @@ func (s *Service) HomeQueryByID(ctx context.Context, productID string) (homeapi.
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=POST path=/v1/products tag:metrics tag:authorize_user_role
+//encore:api auth method=POST path=/v1/products tag:metrics tag:authorize tag:as_user_role
 func (s *Service) ProductCreate(ctx context.Context, app productapi.AppNewProduct) (productapi.AppProduct, error) {
 	return s.api.core.product.Create(ctx, app)
 }
@@ -83,7 +82,7 @@ func (s *Service) ProductDelete(ctx context.Context, productID string) error {
 }
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=GET path=/v1/products tag:metrics tag:authorize_any_role
+//encore:api auth method=GET path=/v1/products tag:metrics tag:authorize tag:as_any_role
 func (s *Service) ProductQuery(ctx context.Context, qp productapi.QueryParams) (page.Document[productapi.AppProduct], error) {
 	return s.api.core.product.Query(ctx, qp)
 }
@@ -97,7 +96,7 @@ func (s *Service) ProductQueryByID(ctx context.Context, productID string) (produ
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=POST path=/v1/tran tag:metrics tag:authorize_user_role
+//encore:api auth method=POST path=/v1/tran tag:metrics tag:authorize tag:as_user_role
 func (s *Service) TranCreate(ctx context.Context, app tranapi.AppNewTran) (tranapi.AppProduct, error) {
 	return s.api.core.tran.Create(ctx, app)
 }
@@ -111,7 +110,7 @@ func (s *Service) UserToken(ctx context.Context, kid string) (userapi.Token, err
 }
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=POST path=/v1/users tag:metrics tag:authorize_admin_role
+//encore:api auth method=POST path=/v1/users tag:metrics tag:authorize tag:as_admin_role
 func (s *Service) UserCreate(ctx context.Context, app userapi.AppNewUser) (userapi.AppUser, error) {
 	return s.api.core.user.Create(ctx, app)
 }
@@ -123,9 +122,8 @@ func (s *Service) UserUpdate(ctx context.Context, userID string, app userapi.App
 }
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=PUT path=/v1/role/:userID tag:metrics tag:authorize_user_admin_only tag:as_admin_only
+//encore:api auth method=PUT path=/v1/role/:userID tag:metrics tag:authorize_user tag:as_admin_role
 func (s *Service) UserUpdateRole(ctx context.Context, userID string, app userapi.AppUpdateUserRole) (userapi.AppUser, error) {
-	fmt.Println("************> API")
 	return s.api.core.user.UpdateRole(ctx, userID, app)
 }
 
@@ -136,7 +134,7 @@ func (s *Service) UserDelete(ctx context.Context, userID string) error {
 }
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=GET path=/v1/users tag:metrics tag:authorize_admin_role
+//encore:api auth method=GET path=/v1/users tag:metrics tag:authorize tag:as_admin_role
 func (s *Service) UserQuery(ctx context.Context, qp userapi.QueryParams) (page.Document[userapi.AppUser], error) {
 	return s.api.core.user.Query(ctx, qp)
 }
@@ -150,7 +148,7 @@ func (s *Service) UserQueryByID(ctx context.Context, userID string) (userapi.App
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=GET path=/v1/vproducts tag:metrics tag:authorize_admin_role
+//encore:api auth method=GET path=/v1/vproducts tag:metrics tag:authorize tag:as_admin_role
 func (s *Service) VProductQuery(ctx context.Context, qp vproductapi.QueryParams) (page.Document[vproductapi.AppProduct], error) {
 	return s.api.view.product.Query(ctx, qp)
 }

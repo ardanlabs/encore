@@ -2,7 +2,6 @@ package mid
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	eauth "encore.dev/beta/auth"
@@ -15,85 +14,22 @@ import (
 	"github.com/google/uuid"
 )
 
-// AuthorizeAnyRole checks the user making the request is an admin or user.
-func AuthorizeAnyRole(a *auth.Auth, req middleware.Request, next middleware.Next) middleware.Response {
+// Authorize checks the user making the request is an admin or user.
+func Authorize(a *auth.Auth, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	claims := eauth.Data().(*auth.Claims)
-
-	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAny); err != nil {
-		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAny, err)
-	}
-
-	return next(req)
-}
-
-// AuthorizeUserRole checks the user making the request is a user.
-func AuthorizeUserRole(a *auth.Auth, req middleware.Request, next middleware.Next) middleware.Response {
-	ctx := req.Context()
-	claims := eauth.Data().(*auth.Claims)
-
-	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleUserOnly); err != nil {
-		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleUserOnly, err)
-	}
-
-	return next(req)
-}
-
-// AuthorizeAdminRole checks the user making the request is an admin.
-func AuthorizeAdminRole(a *auth.Auth, req middleware.Request, next middleware.Next) middleware.Response {
-	ctx := req.Context()
-	claims := eauth.Data().(*auth.Claims)
-
-	if err := a.Authorize(ctx, *claims, uuid.UUID{}, auth.RuleAdminOnly); err != nil {
-		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, auth.RuleAdminOnly, err)
-	}
-
-	return next(req)
-}
-
-// AuthorizeUserAdminOnly checks the user making the call has specified a user id on
-// the route that matches the claims.
-func AuthorizeUserAdminOnly(a *auth.Auth, userCore *user.Core, req middleware.Request, next middleware.Next) middleware.Response {
-	ctx := req.Context()
-	var userID uuid.UUID
-
-	fmt.Println("*************>", req.Data().API.Tags)
 
 	rule := auth.RuleAdminOnly
 	for _, tag := range req.Data().API.Tags {
-		fmt.Println("*************>", tag)
-		if tag == "as_admin_only" {
-			rule = auth.RuleAdminOnly
-			break
+		switch tag {
+		case "as_any_role":
+			rule = auth.RuleAny
+		case "as_user_role":
+			rule = auth.RuleUserOnly
 		}
 	}
 
-	if len(req.Data().PathParams) == 1 {
-		id := req.Data().PathParams[0]
-
-		var err error
-		userID, err = uuid.Parse(id.Value)
-		if err != nil {
-			return errs.NewResponse(http.StatusUnauthorized, ErrInvalidID)
-		}
-
-		usr, err := userCore.QueryByID(ctx, userID)
-		if err != nil {
-			switch {
-			case errors.Is(err, user.ErrNotFound):
-				return errs.NewResponse(http.StatusUnauthorized, err)
-
-			default:
-				return errs.NewResponsef(http.StatusUnauthorized, "querybyid: userID[%s]: %s", userID, err)
-			}
-		}
-
-		req = setUser(req, usr)
-	}
-
-	claims := eauth.Data().(*auth.Claims)
-
-	if err := a.Authorize(ctx, *claims, userID, rule); err != nil {
+	if err := a.Authorize(ctx, *claims, uuid.UUID{}, rule); err != nil {
 		return errs.NewResponsef(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", claims.Roles, rule, err)
 	}
 
@@ -106,12 +42,9 @@ func AuthorizeUser(a *auth.Auth, userCore *user.Core, req middleware.Request, ne
 	ctx := req.Context()
 	var userID uuid.UUID
 
-	fmt.Println("*************>", req.Data().API.Tags)
-
 	rule := auth.RuleAdminOrSubject
 	for _, tag := range req.Data().API.Tags {
-		fmt.Println("*************>", tag)
-		if tag == "as_admin_only" {
+		if tag == "as_admin_role" {
 			rule = auth.RuleAdminOnly
 			break
 		}
