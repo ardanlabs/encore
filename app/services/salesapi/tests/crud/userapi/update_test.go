@@ -21,7 +21,7 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				ID:          sd.Users[0].ID.String(),
 				Name:        "Jack Kennedy",
 				Email:       "jack@ardanlabs.com",
-				Roles:       []string{"ADMIN"},
+				Roles:       []string{"USER"},
 				Department:  "IT",
 				Enabled:     true,
 				DateCreated: sd.Users[0].DateCreated.Format(time.RFC3339),
@@ -31,7 +31,6 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				app := userapi.AppUpdateUser{
 					Name:            dbtest.StringPointer("Jack Kennedy"),
 					Email:           dbtest.StringPointer("jack@ardanlabs.com"),
-					Roles:           []string{"ADMIN"},
 					Department:      dbtest.StringPointer("IT"),
 					Password:        dbtest.StringPointer("123"),
 					PasswordConfirm: dbtest.StringPointer("123"),
@@ -78,14 +77,14 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 		},
 		{
 			Name:    "role",
-			Token:   sd.Users[0].Token,
+			Token:   sd.Admins[0].Token,
 			ExpResp: errs.Newf(http.StatusBadRequest, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
-				app := userapi.AppUpdateUser{
+				app := userapi.AppUpdateUserRole{
 					Roles: []string{"BAD ROLE"},
 				}
 
-				resp, err := salesapi.UserUpdate(ctx, sd.Users[0].ID.String(), app)
+				resp, err := salesapi.UserUpdateRole(ctx, sd.Admins[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -151,13 +150,30 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 				app := userapi.AppUpdateUser{
 					Name:            dbtest.StringPointer("Jack Kennedy"),
 					Email:           dbtest.StringPointer("jack2@ardanlabs.com"),
-					Roles:           []string{"ADMIN"},
 					Department:      dbtest.StringPointer("IT"),
 					Password:        dbtest.StringPointer("123"),
 					PasswordConfirm: dbtest.StringPointer("123"),
 				}
 
 				resp, err := salesapi.UserUpdate(ctx, sd.Users[1].ID.String(), app)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: dbtest.CmpAppErrors,
+		},
+		{
+			Name:    "roleadminonly",
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExcFunc: func(ctx context.Context) any {
+				app := userapi.AppUpdateUserRole{
+					Roles: []string{"ADMIN"},
+				}
+
+				resp, err := salesapi.UserUpdateRole(ctx, sd.Users[1].ID.String(), app)
 				if err != nil {
 					return err
 				}

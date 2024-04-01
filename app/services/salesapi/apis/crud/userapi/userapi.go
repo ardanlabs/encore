@@ -78,6 +78,26 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateUser)
 	return toAppUser(updUsr), nil
 }
 
+// UpdateRole updates an existing user's role.
+func (h *Handlers) UpdateRole(ctx context.Context, userID string, app AppUpdateUserRole) (AppUser, error) {
+	uu, err := toCoreUpdateUserRole(app)
+	if err != nil {
+		return AppUser{}, errs.New(http.StatusBadRequest, err)
+	}
+
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return AppUser{}, errs.Newf(http.StatusInternalServerError, "user missing in context: %s", err)
+	}
+
+	updUsr, err := h.user.Update(ctx, usr, uu)
+	if err != nil {
+		return AppUser{}, errs.Newf(http.StatusInternalServerError, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+	}
+
+	return toAppUser(updUsr), nil
+}
+
 // Delete removes a user from the system.
 func (h *Handlers) Delete(ctx context.Context, userID string) error {
 	usr, err := mid.GetUser(ctx)
