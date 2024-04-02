@@ -70,7 +70,7 @@ func Test_Product(t *testing.T) {
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 	ctx := context.Background()
-	api := dbTest.Core.Crud
+	api := dbTest.Core.BusCrud
 
 	usrs, err := user.TestGenerateSeedUsers(ctx, 1, user.RoleUser, api.User)
 	if err != nil {
@@ -136,7 +136,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					Name: dbtest.StringPointer("Name"),
 				}
 
-				resp, err := dbt.Core.Crud.Product.Query(ctx, filter, product.DefaultOrderBy, 1, 10)
+				resp, err := dbt.Core.BusCrud.Product.Query(ctx, filter, product.DefaultOrderBy, 1, 10)
 				if err != nil {
 					return err
 				}
@@ -168,7 +168,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "byid",
 			ExpResp: sd.Users[0].Products[0],
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := dbt.Core.Crud.Product.QueryByID(ctx, sd.Users[0].Products[0].ID)
+				resp, err := dbt.Core.BusCrud.Product.QueryByID(ctx, sd.Users[0].Products[0].ID)
 				if err != nil {
 					return err
 				}
@@ -217,7 +217,7 @@ func create(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					Quantity: 10,
 				}
 
-				resp, err := dbt.Core.Crud.Product.Create(ctx, np)
+				resp, err := dbt.Core.BusCrud.Product.Create(ctx, np)
 				if err != nil {
 					return err
 				}
@@ -264,7 +264,7 @@ func update(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					Quantity: dbtest.IntPointer(10),
 				}
 
-				resp, err := dbt.Core.Crud.Product.Update(ctx, sd.Users[0].Products[0], up)
+				resp, err := dbt.Core.BusCrud.Product.Update(ctx, sd.Users[0].Products[0], up)
 				if err != nil {
 					return err
 				}
@@ -295,7 +295,7 @@ func delete(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "user",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := dbt.Core.Crud.Product.Delete(ctx, sd.Users[0].Products[1]); err != nil {
+				if err := dbt.Core.BusCrud.Product.Delete(ctx, sd.Users[0].Products[1]); err != nil {
 					return err
 				}
 
@@ -309,7 +309,7 @@ func delete(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "admin",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := dbt.Core.Crud.Product.Delete(ctx, sd.Admins[0].Products[1]); err != nil {
+				if err := dbt.Core.BusCrud.Product.Delete(ctx, sd.Admins[0].Products[1]); err != nil {
 					return err
 				}
 

@@ -68,7 +68,7 @@ func Test_Product(t *testing.T) {
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 	ctx := context.Background()
-	api := dbTest.Core.Crud
+	api := dbTest.Core.BusCrud
 
 	usrs, err := user.TestGenerateSeedUsers(ctx, 1, user.RoleUser, api.User)
 	if err != nil {
@@ -157,7 +157,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					Name: dbtest.StringPointer("Name"),
 				}
 
-				resp, err := dbt.Core.View.Product.Query(ctx, filter, vproduct.DefaultOrderBy, 1, 10)
+				resp, err := dbt.Core.BusView.Product.Query(ctx, filter, vproduct.DefaultOrderBy, 1, 10)
 				if err != nil {
 					return err
 				}

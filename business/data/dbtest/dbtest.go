@@ -53,23 +53,23 @@ func StopDB() error {
 
 // =============================================================================
 
-// Crud provides core business crud apis.
-type Crud struct {
+// BusCrud provides core business crud apis.
+type BusCrud struct {
 	Delegate *delegate.Delegate
 	Home     *home.Core
 	Product  *product.Core
 	User     *user.Core
 }
 
-// View provides core business view apis.
-type View struct {
+// BusView provides core business view apis.
+type BusView struct {
 	Product *vproduct.Core
 }
 
 // Core represents all the core api's needed for testing.
 type Core struct {
-	Crud Crud
-	View View
+	BusCrud BusCrud
+	BusView BusView
 }
 
 func newCoreAPIs(db *sqlx.DB) Core {
@@ -80,13 +80,13 @@ func newCoreAPIs(db *sqlx.DB) Core {
 	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	return Core{
-		Crud: Crud{
+		BusCrud: BusCrud{
 			Delegate: delegate,
 			Home:     homeCore,
 			Product:  productCore,
 			User:     userCore,
 		},
-		View: View{
+		BusView: BusView{
 			Product: vproductCore,
 		},
 	}

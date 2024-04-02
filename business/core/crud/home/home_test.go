@@ -70,7 +70,7 @@ func Test_Home(t *testing.T) {
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 	ctx := context.Background()
-	api := dbTest.Core.Crud
+	api := dbTest.Core.BusCrud
 
 	usrs, err := user.TestGenerateSeedUsers(ctx, 1, user.RoleUser, api.User)
 	if err != nil {
@@ -156,7 +156,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "all",
 			ExpResp: hmes,
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := dbt.Core.Crud.Home.Query(ctx, home.QueryFilter{}, home.DefaultOrderBy, 1, 10)
+				resp, err := dbt.Core.BusCrud.Home.Query(ctx, home.QueryFilter{}, home.DefaultOrderBy, 1, 10)
 				if err != nil {
 					return err
 				}
@@ -188,7 +188,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "byid",
 			ExpResp: sd.Users[0].Homes[0],
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := dbt.Core.Crud.Home.QueryByID(ctx, sd.Users[0].Homes[0].ID)
+				resp, err := dbt.Core.BusCrud.Home.QueryByID(ctx, sd.Users[0].Homes[0].ID)
 				if err != nil {
 					return err
 				}
@@ -247,7 +247,7 @@ func create(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					},
 				}
 
-				resp, err := dbt.Core.Crud.Home.Create(ctx, nh)
+				resp, err := dbt.Core.BusCrud.Home.Create(ctx, nh)
 				if err != nil {
 					return err
 				}
@@ -306,7 +306,7 @@ func update(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					},
 				}
 
-				resp, err := dbt.Core.Crud.Home.Update(ctx, sd.Users[0].Homes[0], uh)
+				resp, err := dbt.Core.BusCrud.Home.Update(ctx, sd.Users[0].Homes[0], uh)
 				if err != nil {
 					return err
 				}
@@ -339,7 +339,7 @@ func delete(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "user",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := dbt.Core.Crud.Home.Delete(ctx, sd.Users[0].Homes[1]); err != nil {
+				if err := dbt.Core.BusCrud.Home.Delete(ctx, sd.Users[0].Homes[1]); err != nil {
 					return err
 				}
 
@@ -353,7 +353,7 @@ func delete(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "admin",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := dbt.Core.Crud.Home.Delete(ctx, sd.Admins[0].Homes[1]); err != nil {
+				if err := dbt.Core.BusCrud.Home.Delete(ctx, sd.Admins[0].Homes[1]); err != nil {
 					return err
 				}
 

@@ -11,7 +11,7 @@ import (
 
 func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 	ctx := context.Background()
-	api := dbTest.Core.Crud
+	api := dbTest.Core.BusCrud
 
 	usrs, err := user.TestGenerateSeedUsers(ctx, 1, user.RoleUser, api.User)
 	if err != nil {
