@@ -2,8 +2,8 @@ package user_test
 
 import (
 	"context"
-	"net/http"
 
+	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -52,7 +52,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "emptytoken",
 			Token:   "",
-			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				err := salesapi.UserDelete(ctx, "")
 				if err != nil {
@@ -66,7 +66,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "sig",
 			Token:   sd.Users[0].Token + "A",
-			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				err := salesapi.UserDelete(ctx, "")
 				if err != nil {
@@ -80,7 +80,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[1].Token,
-			ExpResp: errs.Newf(http.StatusUnauthorized, "user not enabled : query user: query: userID["+sd.Users[1].ID.String()+"]: db: user not found"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "user not enabled : query user: query: userID["+sd.Users[1].ID.String()+"]: db: user not found"),
 			ExcFunc: func(ctx context.Context) any {
 				err := salesapi.UserDelete(ctx, sd.Users[0].ID.String())
 				if err != nil {

@@ -2,8 +2,8 @@ package product_test
 
 import (
 	"context"
-	"net/http"
 
+	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
 	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
 	"github.com/ardanlabs/encore/business/api/errs"
@@ -61,7 +61,7 @@ func productCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "missing",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(http.StatusBadRequest, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
+			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
 				if err != nil {
@@ -82,7 +82,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "emptytoken",
 			Token:   "",
-			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
 				if err != nil {
@@ -96,7 +96,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
-			ExpResp: errs.Newf(http.StatusUnauthorized, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
 				if err != nil {
@@ -110,7 +110,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
-			ExpResp: errs.Newf(http.StatusUnauthorized, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
 				if err != nil {
@@ -124,7 +124,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:    "wronguser",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(http.StatusUnauthorized, "authorize: you are not authorized for that action, claims[[{ADMIN}]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{ADMIN}]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := productapi.AppNewProduct{
 					Name:     "Guitar",

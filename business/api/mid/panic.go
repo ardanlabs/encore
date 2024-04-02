@@ -1,9 +1,9 @@
 package mid
 
 import (
-	"net/http"
 	"runtime/debug"
 
+	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/metrics"
@@ -14,7 +14,7 @@ func Panics(v *metrics.Values, req middleware.Request, next middleware.Next) (re
 	defer func() {
 		if rec := recover(); rec != nil {
 			trace := debug.Stack()
-			resp = errs.NewResponsef(http.StatusInternalServerError, "PANIC [%v] TRACE[%s]", rec, string(trace))
+			resp = errs.NewResponsef(eerrs.Internal, "PANIC [%v] TRACE[%s]", rec, string(trace))
 
 			v.IncPanics()
 		}

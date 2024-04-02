@@ -4,9 +4,9 @@ package userapi
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	eauth "encore.dev/beta/auth"
+	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
@@ -34,7 +34,7 @@ func (api *API) Token(ctx context.Context, kid string) (Token, error) {
 
 	tkn, err := api.auth.GenerateToken(kid, *claims)
 	if err != nil {
-		return Token{}, errs.New(http.StatusInternalServerError, err)
+		return Token{}, errs.New(eerrs.Internal, err)
 	}
 
 	return toToken(tkn), nil
@@ -44,15 +44,15 @@ func (api *API) Token(ctx context.Context, kid string) (Token, error) {
 func (api *API) Create(ctx context.Context, app AppNewUser) (AppUser, error) {
 	nc, err := toCoreNewUser(app)
 	if err != nil {
-		return AppUser{}, errs.New(http.StatusBadRequest, err)
+		return AppUser{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	usr, err := api.user.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
-			return AppUser{}, errs.New(http.StatusConflict, user.ErrUniqueEmail)
+			return AppUser{}, errs.New(eerrs.Aborted, user.ErrUniqueEmail)
 		}
-		return AppUser{}, errs.Newf(http.StatusInternalServerError, "create: usr[%+v]: %s", usr, err)
+		return AppUser{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
 
 	return toAppUser(usr), nil
@@ -62,17 +62,17 @@ func (api *API) Create(ctx context.Context, app AppNewUser) (AppUser, error) {
 func (api *API) Update(ctx context.Context, userID string, app AppUpdateUser) (AppUser, error) {
 	uu, err := toCoreUpdateUser(app)
 	if err != nil {
-		return AppUser{}, errs.New(http.StatusBadRequest, err)
+		return AppUser{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return AppUser{}, errs.Newf(http.StatusInternalServerError, "user missing in context: %s", err)
+		return AppUser{}, errs.Newf(eerrs.Internal, "user missing in context: %s", err)
 	}
 
 	updUsr, err := api.user.Update(ctx, usr, uu)
 	if err != nil {
-		return AppUser{}, errs.Newf(http.StatusInternalServerError, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+		return AppUser{}, errs.Newf(eerrs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
 
 	return toAppUser(updUsr), nil
@@ -82,17 +82,17 @@ func (api *API) Update(ctx context.Context, userID string, app AppUpdateUser) (A
 func (api *API) UpdateRole(ctx context.Context, userID string, app AppUpdateUserRole) (AppUser, error) {
 	uu, err := toCoreUpdateUserRole(app)
 	if err != nil {
-		return AppUser{}, errs.New(http.StatusBadRequest, err)
+		return AppUser{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return AppUser{}, errs.Newf(http.StatusInternalServerError, "user missing in context: %s", err)
+		return AppUser{}, errs.Newf(eerrs.Internal, "user missing in context: %s", err)
 	}
 
 	updUsr, err := api.user.Update(ctx, usr, uu)
 	if err != nil {
-		return AppUser{}, errs.Newf(http.StatusInternalServerError, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+		return AppUser{}, errs.Newf(eerrs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
 
 	return toAppUser(updUsr), nil
@@ -102,11 +102,11 @@ func (api *API) UpdateRole(ctx context.Context, userID string, app AppUpdateUser
 func (api *API) Delete(ctx context.Context, userID string) error {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return errs.Newf(http.StatusInternalServerError, "userID[%s] missing in context: %s", userID, err)
+		return errs.Newf(eerrs.Internal, "userID[%s] missing in context: %s", userID, err)
 	}
 
 	if err := api.user.Delete(ctx, usr); err != nil {
-		return errs.Newf(http.StatusInternalServerError, "delete: userID[%s]: %s", usr.ID, err)
+		return errs.Newf(eerrs.Internal, "delete: userID[%s]: %s", usr.ID, err)
 	}
 
 	return nil
@@ -130,12 +130,12 @@ func (api *API) Query(ctx context.Context, qp QueryParams) (page.Document[AppUse
 
 	usrs, err := api.user.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
-		return page.Document[AppUser]{}, errs.Newf(http.StatusInternalServerError, "query: %s", err)
+		return page.Document[AppUser]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
 	total, err := api.user.Count(ctx, filter)
 	if err != nil {
-		return page.Document[AppUser]{}, errs.Newf(http.StatusInternalServerError, "count: %s", err)
+		return page.Document[AppUser]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
 
 	return page.NewDocument(toAppUsers(usrs), total, qp.Page, qp.Rows), nil
@@ -145,7 +145,7 @@ func (api *API) Query(ctx context.Context, qp QueryParams) (page.Document[AppUse
 func (api *API) QueryByID(ctx context.Context, userID string) (AppUser, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return AppUser{}, errs.Newf(http.StatusInternalServerError, "querybyid: userID[%s]: %s", userID, err)
+		return AppUser{}, errs.Newf(eerrs.Internal, "querybyid: userID[%s]: %s", userID, err)
 	}
 
 	return toAppUser(usr), nil

@@ -2,10 +2,10 @@ package userapi
 
 import (
 	"fmt"
-	"net/http"
 	"net/mail"
 	"time"
 
+	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/foundation/validate"
@@ -104,7 +104,7 @@ func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 // Validate checks the data in the model is considered clean.
 func (app AppNewUser) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return errs.Newf(http.StatusBadRequest, "validate: %s", err)
+		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}
 
 	return nil
@@ -170,7 +170,7 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 // Validate checks the data in the model is considered clean.
 func (app AppUpdateUser) Validate() error {
 	if err := validate.Check(app); err != nil {
-		return errs.Newf(http.StatusBadRequest, "validate: %s", err)
+		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}
 
 	return nil

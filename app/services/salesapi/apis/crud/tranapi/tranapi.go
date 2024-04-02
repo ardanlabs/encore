@@ -4,8 +4,8 @@ package tranapi
 import (
 	"context"
 	"errors"
-	"net/http"
 
+	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -29,32 +29,32 @@ func New(user *user.Core, product *product.Core) *API {
 func (api *API) Create(ctx context.Context, app AppNewTran) (AppProduct, error) {
 	h, err := api.executeUnderTransaction(ctx)
 	if err != nil {
-		return AppProduct{}, errs.New(http.StatusInternalServerError, err)
+		return AppProduct{}, errs.New(eerrs.Internal, err)
 	}
 
 	np, err := toCoreNewProduct(app.Product)
 	if err != nil {
-		return AppProduct{}, errs.New(http.StatusBadRequest, err)
+		return AppProduct{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	nu, err := toCoreNewUser(app.User)
 	if err != nil {
-		return AppProduct{}, errs.New(http.StatusBadRequest, err)
+		return AppProduct{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	usr, err := h.user.Create(ctx, nu)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
-			return AppProduct{}, errs.New(http.StatusConflict, user.ErrUniqueEmail)
+			return AppProduct{}, errs.New(eerrs.Aborted, user.ErrUniqueEmail)
 		}
-		return AppProduct{}, errs.Newf(http.StatusInternalServerError, "create: usr[%+v]: %s", usr, err)
+		return AppProduct{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
 
 	np.UserID = usr.ID
 
 	prd, err := h.product.Create(ctx, np)
 	if err != nil {
-		return AppProduct{}, errs.Newf(http.StatusInternalServerError, "create: prd[%+v]: %s", prd, err)
+		return AppProduct{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
 	return toAppProduct(prd), nil
