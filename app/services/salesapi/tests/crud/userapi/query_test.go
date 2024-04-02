@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/app/services/salesapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/userapp"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -31,14 +31,14 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[userapi.AppUser]{
+			ExpResp: page.Document[userapp.AppUser]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(usrs),
 				Items:       toAppUsers(usrs),
 			},
 			ExcFunc: func(ctx context.Context) any {
-				qp := userapi.QueryParams{
+				qp := userapp.QueryParams{
 					Page:    1,
 					Rows:    10,
 					OrderBy: "user_id,ASC",

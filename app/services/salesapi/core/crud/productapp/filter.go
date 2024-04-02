@@ -1,4 +1,4 @@
-package productapi
+package productapp
 
 import (
 	"strconv"

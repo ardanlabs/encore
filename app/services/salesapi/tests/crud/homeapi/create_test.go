@@ -5,7 +5,7 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
+	homeapp "github.com/ardanlabs/encore/app/services/salesapi/core/crud/homeapp"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
@@ -16,10 +16,10 @@ func homeCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "basic",
 			Token: sd.Users[0].Token,
-			ExpResp: homeapi.AppHome{
+			ExpResp: homeapp.AppHome{
 				UserID: sd.Users[0].ID.String(),
 				Type:   "SINGLE FAMILY",
-				Address: homeapi.AppAddress{
+				Address: homeapp.AppAddress{
 					Address1: "123 Mocking Bird Lane",
 					ZipCode:  "35810",
 					City:     "Huntsville",
@@ -28,9 +28,9 @@ func homeCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				},
 			},
 			ExcFunc: func(ctx context.Context) any {
-				app := homeapi.AppNewHome{
+				app := homeapp.AppNewHome{
 					Type: "SINGLE FAMILY",
-					Address: homeapi.AppNewAddress{
+					Address: homeapp.AppNewAddress{
 						Address1: "123 Mocking Bird Lane",
 						ZipCode:  "35810",
 						City:     "Huntsville",
@@ -47,12 +47,12 @@ func homeCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(homeapi.AppHome)
+				gotResp, exists := got.(homeapp.AppHome)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(homeapi.AppHome)
+				expResp := exp.(homeapp.AppHome)
 
 				expResp.ID = gotResp.ID
 				expResp.DateCreated = gotResp.DateCreated
@@ -73,7 +73,7 @@ func homeCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				resp, err := salesapi.HomeCreate(ctx, homeapp.AppNewHome{})
 				if err != nil {
 					return err
 				}
@@ -87,9 +87,9 @@ func homeCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.FailedPrecondition, "parse: invalid type \"BAD TYPE\""),
 			ExcFunc: func(ctx context.Context) any {
-				app := homeapi.AppNewHome{
+				app := homeapp.AppNewHome{
 					Type: "BAD TYPE",
-					Address: homeapi.AppNewAddress{
+					Address: homeapp.AppNewAddress{
 						Address1: "123 Mocking Bird Lane",
 						ZipCode:  "35810",
 						City:     "Huntsville",
@@ -119,7 +119,7 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				resp, err := salesapi.HomeCreate(ctx, homeapp.AppNewHome{})
 				if err != nil {
 					return err
 				}
@@ -133,7 +133,7 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				resp, err := salesapi.HomeCreate(ctx, homeapp.AppNewHome{})
 				if err != nil {
 					return err
 				}
@@ -147,7 +147,7 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapi.AppNewHome{})
+				resp, err := salesapi.HomeCreate(ctx, homeapp.AppNewHome{})
 				if err != nil {
 					return err
 				}
@@ -161,9 +161,9 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token,
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{ADMIN}]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				app := homeapi.AppNewHome{
+				app := homeapp.AppNewHome{
 					Type: "SINGLE FAMILY",
-					Address: homeapi.AppNewAddress{
+					Address: homeapp.AppNewAddress{
 						Address1: "123 Mocking Bird Lane",
 						ZipCode:  "35810",
 						City:     "Huntsville",

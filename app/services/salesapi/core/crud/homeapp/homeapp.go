@@ -1,5 +1,5 @@
-// Package homeapi maintains the group of handlers for home access.
-package homeapi
+// Package homeapp maintains the app layer api for the home domain.
+package homeapp
 
 import (
 	"context"

@@ -5,7 +5,7 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/services/salesapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/productapp"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
@@ -16,14 +16,14 @@ func productCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "basic",
 			Token: sd.Users[0].Token,
-			ExpResp: productapi.AppProduct{
+			ExpResp: productapp.AppProduct{
 				UserID:   sd.Users[0].ID.String(),
 				Name:     "Guitar",
 				Cost:     10.34,
 				Quantity: 10,
 			},
 			ExcFunc: func(ctx context.Context) any {
-				app := productapi.AppNewProduct{
+				app := productapp.AppNewProduct{
 					Name:     "Guitar",
 					Cost:     10.34,
 					Quantity: 10,
@@ -37,12 +37,12 @@ func productCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(productapi.AppProduct)
+				gotResp, exists := got.(productapp.AppProduct)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(productapi.AppProduct)
+				expResp := exp.(productapp.AppProduct)
 
 				expResp.ID = gotResp.ID
 				expResp.DateCreated = gotResp.DateCreated
@@ -63,7 +63,7 @@ func productCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				resp, err := salesapi.ProductCreate(ctx, productapp.AppNewProduct{})
 				if err != nil {
 					return err
 				}
@@ -84,7 +84,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				resp, err := salesapi.ProductCreate(ctx, productapp.AppNewProduct{})
 				if err != nil {
 					return err
 				}
@@ -98,7 +98,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				resp, err := salesapi.ProductCreate(ctx, productapp.AppNewProduct{})
 				if err != nil {
 					return err
 				}
@@ -112,7 +112,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.ProductCreate(ctx, productapi.AppNewProduct{})
+				resp, err := salesapi.ProductCreate(ctx, productapp.AppNewProduct{})
 				if err != nil {
 					return err
 				}
@@ -126,7 +126,7 @@ func productCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token,
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{ADMIN}]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				app := productapi.AppNewProduct{
+				app := productapp.AppNewProduct{
 					Name:     "Guitar",
 					Cost:     10.34,
 					Quantity: 10,

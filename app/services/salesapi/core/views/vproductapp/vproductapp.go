@@ -1,5 +1,5 @@
-// Package vproductapi maintains the group of handlers for detailed product data.
-package vproductapi
+// Package vproductapp maintains the app layer api for the vproduct domain.
+package vproductapp
 
 import (
 	"context"

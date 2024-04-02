@@ -1,4 +1,4 @@
-package vproductapi
+package vproductapp
 
 import (
 	"time"

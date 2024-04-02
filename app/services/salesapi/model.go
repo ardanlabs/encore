@@ -1,34 +1,38 @@
 package salesapi
 
 import (
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/tranapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
+	homeapp "github.com/ardanlabs/encore/app/services/salesapi/core/crud/homeapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/productapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/tranapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/userapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/views/vproductapp"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 
-type coreAPI struct {
-	home    *homeapi.API
-	product *productapi.API
-	tran    *tranapi.API
-	user    *userapi.API
+type crudApp struct {
+	home    *homeapp.API
+	product *productapp.API
+	tran    *tranapp.API
+	user    *userapp.API
 }
 
-type viewAPI struct {
-	product *vproductapi.Handlers
+type viewApp struct {
+	product *vproductapp.Handlers
 }
 
-type api struct {
-	core coreAPI
-	view viewAPI
+type app struct {
+	crud crudApp
+	view viewApp
 }
 
-type core struct {
+type crudBus struct {
 	home    *home.Core
 	product *product.Core
 	user    *user.Core
+}
+
+type business struct {
+	crud crudBus
 }

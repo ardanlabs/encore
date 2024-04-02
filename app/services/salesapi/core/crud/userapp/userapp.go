@@ -1,5 +1,5 @@
-// Package userapi maintains the group of handlers for user access.
-package userapi
+// Package userapp maintains the app layer api for the user domain.
+package userapp
 
 import (
 	"context"

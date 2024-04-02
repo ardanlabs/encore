@@ -1,4 +1,4 @@
-package homeapi
+package homeapp
 
 import (
 	"time"

@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"encore.dev"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/tranapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
+	homeapp "github.com/ardanlabs/encore/app/services/salesapi/core/crud/homeapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/productapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/tranapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/userapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/views/vproductapp"
 	"github.com/ardanlabs/encore/business/api/page"
 )
 
@@ -33,122 +33,122 @@ func (s *Service) Fallback(w http.ResponseWriter, r *http.Request) {
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=POST path=/v1/homes tag:metrics tag:authorize tag:as_user_role
-func (s *Service) HomeCreate(ctx context.Context, app homeapi.AppNewHome) (homeapi.AppHome, error) {
-	return s.api.core.home.Create(ctx, app)
+func (s *Service) HomeCreate(ctx context.Context, app homeapp.AppNewHome) (homeapp.AppHome, error) {
+	return s.app.crud.home.Create(ctx, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=PUT path=/v1/homes/:homeID tag:metrics tag:authorize_home
-func (s *Service) HomeUpdate(ctx context.Context, homeID string, app homeapi.AppUpdateHome) (homeapi.AppHome, error) {
-	return s.api.core.home.Update(ctx, homeID, app)
+func (s *Service) HomeUpdate(ctx context.Context, homeID string, app homeapp.AppUpdateHome) (homeapp.AppHome, error) {
+	return s.app.crud.home.Update(ctx, homeID, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=DELETE path=/v1/homes/:homeID tag:metrics tag:authorize_home
 func (s *Service) HomeDelete(ctx context.Context, homeID string) error {
-	return s.api.core.home.Delete(ctx, homeID)
+	return s.app.crud.home.Delete(ctx, homeID)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/homes tag:metrics tag:authorize tag:as_any_role
-func (s *Service) HomeQuery(ctx context.Context, qp homeapi.QueryParams) (page.Document[homeapi.AppHome], error) {
-	return s.api.core.home.Query(ctx, qp)
+func (s *Service) HomeQuery(ctx context.Context, qp homeapp.QueryParams) (page.Document[homeapp.AppHome], error) {
+	return s.app.crud.home.Query(ctx, qp)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/homes/:productID tag:metrics tag:authorize_home
-func (s *Service) HomeQueryByID(ctx context.Context, productID string) (homeapi.AppHome, error) {
-	return s.api.core.home.QueryByID(ctx, productID)
+func (s *Service) HomeQueryByID(ctx context.Context, productID string) (homeapp.AppHome, error) {
+	return s.app.crud.home.QueryByID(ctx, productID)
 }
 
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=POST path=/v1/products tag:metrics tag:authorize tag:as_user_role
-func (s *Service) ProductCreate(ctx context.Context, app productapi.AppNewProduct) (productapi.AppProduct, error) {
-	return s.api.core.product.Create(ctx, app)
+func (s *Service) ProductCreate(ctx context.Context, app productapp.AppNewProduct) (productapp.AppProduct, error) {
+	return s.app.crud.product.Create(ctx, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=PUT path=/v1/products/:productID tag:metrics tag:authorize_product
-func (s *Service) ProductUpdate(ctx context.Context, productID string, app productapi.AppUpdateProduct) (productapi.AppProduct, error) {
-	return s.api.core.product.Update(ctx, productID, app)
+func (s *Service) ProductUpdate(ctx context.Context, productID string, app productapp.AppUpdateProduct) (productapp.AppProduct, error) {
+	return s.app.crud.product.Update(ctx, productID, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=DELETE path=/v1/products/:productID tag:metrics tag:authorize_product
 func (s *Service) ProductDelete(ctx context.Context, productID string) error {
-	return s.api.core.product.Delete(ctx, productID)
+	return s.app.crud.product.Delete(ctx, productID)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/products tag:metrics tag:authorize tag:as_any_role
-func (s *Service) ProductQuery(ctx context.Context, qp productapi.QueryParams) (page.Document[productapi.AppProduct], error) {
-	return s.api.core.product.Query(ctx, qp)
+func (s *Service) ProductQuery(ctx context.Context, qp productapp.QueryParams) (page.Document[productapp.AppProduct], error) {
+	return s.app.crud.product.Query(ctx, qp)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/products/:productID tag:metrics tag:authorize_product
-func (s *Service) ProductQueryByID(ctx context.Context, productID string) (productapi.AppProduct, error) {
-	return s.api.core.product.QueryByID(ctx, productID)
+func (s *Service) ProductQueryByID(ctx context.Context, productID string) (productapp.AppProduct, error) {
+	return s.app.crud.product.QueryByID(ctx, productID)
 }
 
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=POST path=/v1/tran tag:metrics tag:authorize tag:as_user_role
-func (s *Service) TranCreate(ctx context.Context, app tranapi.AppNewTran) (tranapi.AppProduct, error) {
-	return s.api.core.tran.Create(ctx, app)
+func (s *Service) TranCreate(ctx context.Context, app tranapp.AppNewTran) (tranapp.AppProduct, error) {
+	return s.app.crud.tran.Create(ctx, app)
 }
 
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/token/:kid tag:metrics
-func (s *Service) UserToken(ctx context.Context, kid string) (userapi.Token, error) {
-	return s.api.core.user.Token(ctx, kid)
+func (s *Service) UserToken(ctx context.Context, kid string) (userapp.Token, error) {
+	return s.app.crud.user.Token(ctx, kid)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=POST path=/v1/users tag:metrics tag:authorize tag:as_admin_role
-func (s *Service) UserCreate(ctx context.Context, app userapi.AppNewUser) (userapi.AppUser, error) {
-	return s.api.core.user.Create(ctx, app)
+func (s *Service) UserCreate(ctx context.Context, app userapp.AppNewUser) (userapp.AppUser, error) {
+	return s.app.crud.user.Create(ctx, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=PUT path=/v1/users/:userID tag:metrics tag:authorize_user
-func (s *Service) UserUpdate(ctx context.Context, userID string, app userapi.AppUpdateUser) (userapi.AppUser, error) {
-	return s.api.core.user.Update(ctx, userID, app)
+func (s *Service) UserUpdate(ctx context.Context, userID string, app userapp.AppUpdateUser) (userapp.AppUser, error) {
+	return s.app.crud.user.Update(ctx, userID, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=PUT path=/v1/role/:userID tag:metrics tag:authorize_user tag:as_admin_role
-func (s *Service) UserUpdateRole(ctx context.Context, userID string, app userapi.AppUpdateUserRole) (userapi.AppUser, error) {
-	return s.api.core.user.UpdateRole(ctx, userID, app)
+func (s *Service) UserUpdateRole(ctx context.Context, userID string, app userapp.AppUpdateUserRole) (userapp.AppUser, error) {
+	return s.app.crud.user.UpdateRole(ctx, userID, app)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=DELETE path=/v1/users/:userID tag:metrics tag:authorize_user
 func (s *Service) UserDelete(ctx context.Context, userID string) error {
-	return s.api.core.user.Delete(ctx, userID)
+	return s.app.crud.user.Delete(ctx, userID)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/users tag:metrics tag:authorize tag:as_admin_role
-func (s *Service) UserQuery(ctx context.Context, qp userapi.QueryParams) (page.Document[userapi.AppUser], error) {
-	return s.api.core.user.Query(ctx, qp)
+func (s *Service) UserQuery(ctx context.Context, qp userapp.QueryParams) (page.Document[userapp.AppUser], error) {
+	return s.app.crud.user.Query(ctx, qp)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/users/:userID tag:metrics tag:authorize_user
-func (s *Service) UserQueryByID(ctx context.Context, userID string) (userapi.AppUser, error) {
-	return s.api.core.user.QueryByID(ctx, userID)
+func (s *Service) UserQueryByID(ctx context.Context, userID string) (userapp.AppUser, error) {
+	return s.app.crud.user.QueryByID(ctx, userID)
 }
 
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/vproducts tag:metrics tag:authorize tag:as_admin_role
-func (s *Service) VProductQuery(ctx context.Context, qp vproductapi.QueryParams) (page.Document[vproductapi.AppProduct], error) {
-	return s.api.view.product.Query(ctx, qp)
+func (s *Service) VProductQuery(ctx context.Context, qp vproductapp.QueryParams) (page.Document[vproductapp.AppProduct], error) {
+	return s.app.view.product.Query(ctx, qp)
 }

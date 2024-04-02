@@ -12,11 +12,11 @@ import (
 	"encore.dev"
 	"encore.dev/rlog"
 	"github.com/ardanlabs/conf/v3"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/tranapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/userapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
+	homeapp "github.com/ardanlabs/encore/app/services/salesapi/core/crud/homeapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/productapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/tranapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/userapp"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/views/vproductapp"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/debug"
 	"github.com/ardanlabs/encore/business/api/metrics"
@@ -36,42 +36,47 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// Service represents the encore service application.
+//
 //encore:service
 type Service struct {
 	mtrcs *metrics.Values
 	db    *sqlx.DB
 	auth  *auth.Auth
-	api   api
-	core  core
+	app   app
+	bus   business
 	debug http.Handler
 }
 
 // NewService is called to create a new encore Service.
 func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
-	userCore := user.NewCore(delegate.New(), userdb.NewStore(db))
-	productCore := product.NewCore(userCore, delegate.New(), productdb.NewStore(db))
-	homeCore := home.NewCore(userCore, delegate.New(), homedb.NewStore(db))
+	delegate := delegate.New()
+	userCore := user.NewCore(delegate, userdb.NewStore(db))
+	productCore := product.NewCore(userCore, delegate, productdb.NewStore(db))
+	homeCore := home.NewCore(userCore, delegate, homedb.NewStore(db))
 	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
 
 	s := Service{
 		mtrcs: newMetrics(),
 		db:    db,
 		auth:  ath,
-		api: api{
-			core: coreAPI{
-				user:    userapi.New(userCore, ath),
-				product: productapi.New(productCore),
-				home:    homeapi.New(homeCore),
-				tran:    tranapi.New(userCore, productCore),
+		app: app{
+			crud: crudApp{
+				user:    userapp.New(userCore, ath),
+				product: productapp.New(productCore),
+				home:    homeapp.New(homeCore),
+				tran:    tranapp.New(userCore, productCore),
 			},
-			view: viewAPI{
-				product: vproductapi.New(vproductCore),
+			view: viewApp{
+				product: vproductapp.New(vproductCore),
 			},
 		},
-		core: core{
-			user:    userCore,
-			product: productCore,
-			home:    homeCore,
+		bus: business{
+			crud: crudBus{
+				user:    userCore,
+				product: productCore,
+				home:    homeCore,
+			},
 		},
 		debug: debug.Mux(),
 	}

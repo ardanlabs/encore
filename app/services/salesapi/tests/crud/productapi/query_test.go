@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/app/services/salesapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/productapp"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -25,14 +25,14 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[productapi.AppProduct]{
+			ExpResp: page.Document[productapp.AppProduct]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(prds),
 				Items:       toAppProducts(prds),
 			},
 			ExcFunc: func(ctx context.Context) any {
-				qp := productapi.QueryParams{
+				qp := productapp.QueryParams{
 					Page:    1,
 					Rows:    10,
 					OrderBy: "product_id,ASC",

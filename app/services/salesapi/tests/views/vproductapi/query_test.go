@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/app/services/salesapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/views/vproductapp"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
@@ -23,14 +23,14 @@ func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[vproductapi.AppProduct]{
+			ExpResp: page.Document[vproductapp.AppProduct]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(prds),
 				Items:       prds,
 			},
 			ExcFunc: func(ctx context.Context) any {
-				qp := vproductapi.QueryParams{
+				qp := vproductapp.QueryParams{
 					Page:    1,
 					Rows:    10,
 					OrderBy: "product_id,ASC",

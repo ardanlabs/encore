@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/app/services/salesapi"
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
+	homeapp "github.com/ardanlabs/encore/app/services/salesapi/core/crud/homeapp"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -25,14 +25,14 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[homeapi.AppHome]{
+			ExpResp: page.Document[homeapp.AppHome]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(hmes),
 				Items:       toAppHomes(hmes),
 			},
 			ExcFunc: func(ctx context.Context) any {
-				qp := homeapi.QueryParams{
+				qp := homeapp.QueryParams{
 					Page:    1,
 					Rows:    10,
 					OrderBy: "home_id,ASC",

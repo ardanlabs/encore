@@ -1,5 +1,5 @@
-// Package productapi maintains the group of handlers for product access.
-package productapi
+// Package productapp maintains the app layer api for the product domain.
+package productapp
 
 import (
 	"context"

@@ -3,16 +3,16 @@ package home_test
 import (
 	"time"
 
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/homeapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/homeapp"
 	"github.com/ardanlabs/encore/business/core/crud/home"
 )
 
-func toAppHome(hme home.Home) homeapi.AppHome {
-	return homeapi.AppHome{
+func toAppHome(hme home.Home) homeapp.AppHome {
+	return homeapp.AppHome{
 		ID:     hme.ID.String(),
 		UserID: hme.UserID.String(),
 		Type:   hme.Type.Name(),
-		Address: homeapi.AppAddress{
+		Address: homeapp.AppAddress{
 			Address1: hme.Address.Address1,
 			Address2: hme.Address.Address2,
 			ZipCode:  hme.Address.ZipCode,
@@ -25,8 +25,8 @@ func toAppHome(hme home.Home) homeapi.AppHome {
 	}
 }
 
-func toAppHomes(homes []home.Home) []homeapi.AppHome {
-	items := make([]homeapi.AppHome, len(homes))
+func toAppHomes(homes []home.Home) []homeapp.AppHome {
+	items := make([]homeapp.AppHome, len(homes))
 	for i, hme := range homes {
 		items[i] = toAppHome(hme)
 	}

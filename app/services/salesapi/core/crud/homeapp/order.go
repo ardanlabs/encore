@@ -1,28 +1,24 @@
-package userapi
+package homeapp
 
 import (
 	"errors"
 
 	"github.com/ardanlabs/encore/business/api/order"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/home"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 
 func parseOrder(qp QueryParams) (order.By, error) {
 	const (
-		orderByID      = "user_id"
-		orderByName    = "name"
-		orderByEmail   = "email"
-		orderByRoles   = "roles"
-		orderByEnabled = "enabled"
+		orderByID     = "home_id"
+		orderByType   = "type"
+		orderByUserID = "user_id"
 	)
 
 	var orderByFields = map[string]string{
-		orderByID:      user.OrderByID,
-		orderByName:    user.OrderByName,
-		orderByEmail:   user.OrderByEmail,
-		orderByRoles:   user.OrderByRoles,
-		orderByEnabled: user.OrderByEnabled,
+		orderByID:     home.OrderByID,
+		orderByType:   home.OrderByType,
+		orderByUserID: home.OrderByUserID,
 	}
 
 	orderBy, err := order.Parse(qp.OrderBy, order.NewBy(orderByID, order.ASC))

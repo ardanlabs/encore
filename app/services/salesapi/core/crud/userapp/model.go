@@ -1,4 +1,4 @@
-package userapi
+package userapp
 
 import (
 	"fmt"

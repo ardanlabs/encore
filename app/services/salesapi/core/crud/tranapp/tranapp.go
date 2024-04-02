@@ -1,5 +1,5 @@
-// Package tranapi maintains the group of handlers for transaction example.
-package tranapi
+// Package tranapp maintains the app layer api for the tran domain.
+package tranapp
 
 import (
 	"context"

@@ -3,12 +3,12 @@ package product_test
 import (
 	"time"
 
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/crud/productapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/crud/productapp"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 )
 
-func toAppProduct(prd product.Product) productapi.AppProduct {
-	return productapi.AppProduct{
+func toAppProduct(prd product.Product) productapp.AppProduct {
+	return productapp.AppProduct{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name,
@@ -19,8 +19,8 @@ func toAppProduct(prd product.Product) productapi.AppProduct {
 	}
 }
 
-func toAppProducts(prds []product.Product) []productapi.AppProduct {
-	items := make([]productapi.AppProduct, len(prds))
+func toAppProducts(prds []product.Product) []productapp.AppProduct {
+	items := make([]productapp.AppProduct, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppProduct(prd)
 	}

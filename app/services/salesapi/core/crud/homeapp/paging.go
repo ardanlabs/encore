@@ -1,4 +1,4 @@
-package vproductapi
+package homeapp
 
 import (
 	"errors"

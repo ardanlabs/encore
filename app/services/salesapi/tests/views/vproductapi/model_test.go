@@ -3,13 +3,13 @@ package vproduct_test
 import (
 	"time"
 
-	"github.com/ardanlabs/encore/app/services/salesapi/apis/views/vproductapi"
+	"github.com/ardanlabs/encore/app/services/salesapi/core/views/vproductapp"
 	"github.com/ardanlabs/encore/business/core/crud/product"
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 
-func toAppVProduct(usr user.User, prd product.Product) vproductapi.AppProduct {
-	return vproductapi.AppProduct{
+func toAppVProduct(usr user.User, prd product.Product) vproductapp.AppProduct {
+	return vproductapp.AppProduct{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name,
@@ -21,8 +21,8 @@ func toAppVProduct(usr user.User, prd product.Product) vproductapi.AppProduct {
 	}
 }
 
-func toAppVProducts(usr user.User, prds []product.Product) []vproductapi.AppProduct {
-	items := make([]vproductapi.AppProduct, len(prds))
+func toAppVProducts(usr user.User, prds []product.Product) []vproductapp.AppProduct {
+	items := make([]vproductapp.AppProduct, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppVProduct(usr, prd)
 	}
