@@ -17,26 +17,26 @@ var (
 	ErrInvalidID = errors.New("ID is not in its proper form")
 )
 
-// Handlers manages the set of handler functions for this domain.
-type Handlers struct {
+// API manages the set of handler functions for this domain.
+type API struct {
 	home *home.Core
 }
 
 // New constructs a Handlers for use.
-func New(home *home.Core) *Handlers {
-	return &Handlers{
+func New(home *home.Core) *API {
+	return &API{
 		home: home,
 	}
 }
 
 // Create adds a new home to the system.
-func (h *Handlers) Create(ctx context.Context, app AppNewHome) (AppHome, error) {
+func (api *API) Create(ctx context.Context, app AppNewHome) (AppHome, error) {
 	nh, err := toCoreNewHome(ctx, app)
 	if err != nil {
 		return AppHome{}, errs.New(http.StatusBadRequest, err)
 	}
 
-	hme, err := h.home.Create(ctx, nh)
+	hme, err := api.home.Create(ctx, nh)
 	if err != nil {
 		return AppHome{}, errs.Newf(http.StatusInternalServerError, "create: hme[%+v]: %s", app, err)
 	}
@@ -45,7 +45,7 @@ func (h *Handlers) Create(ctx context.Context, app AppNewHome) (AppHome, error) 
 }
 
 // Update updates an existing home.
-func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateHome) (AppHome, error) {
+func (api *API) Update(ctx context.Context, userID string, app AppUpdateHome) (AppHome, error) {
 	uh, err := toCoreUpdateHome(app)
 	if err != nil {
 		return AppHome{}, errs.New(http.StatusBadRequest, err)
@@ -56,7 +56,7 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateHome)
 		return AppHome{}, errs.Newf(http.StatusInternalServerError, "home missing in context: %s", err)
 	}
 
-	updUsr, err := h.home.Update(ctx, hme, uh)
+	updUsr, err := api.home.Update(ctx, hme, uh)
 	if err != nil {
 		return AppHome{}, errs.Newf(http.StatusInternalServerError, "update: homeID[%s] uh[%+v]: %s", hme.ID, uh, err)
 	}
@@ -65,13 +65,13 @@ func (h *Handlers) Update(ctx context.Context, userID string, app AppUpdateHome)
 }
 
 // Delete removes a home from the system.
-func (h *Handlers) Delete(ctx context.Context, homeID string) error {
+func (api *API) Delete(ctx context.Context, homeID string) error {
 	hme, err := mid.GetHome(ctx)
 	if err != nil {
 		return errs.Newf(http.StatusInternalServerError, "homeID[%s] missing in context: %s", homeID, err)
 	}
 
-	if err := h.home.Delete(ctx, hme); err != nil {
+	if err := api.home.Delete(ctx, hme); err != nil {
 		return errs.Newf(http.StatusInternalServerError, "delete: homeID[%s]: %s", hme.ID, err)
 	}
 
@@ -79,7 +79,7 @@ func (h *Handlers) Delete(ctx context.Context, homeID string) error {
 }
 
 // Query returns a list of homes with paging.
-func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[AppHome], error) {
+func (api *API) Query(ctx context.Context, qp QueryParams) (page.Document[AppHome], error) {
 	if err := validatePaging(qp); err != nil {
 		return page.Document[AppHome]{}, err
 	}
@@ -94,12 +94,12 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[App
 		return page.Document[AppHome]{}, err
 	}
 
-	hmes, err := h.home.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	hmes, err := api.home.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
 		return page.Document[AppHome]{}, errs.Newf(http.StatusInternalServerError, "query: %s", err)
 	}
 
-	total, err := h.home.Count(ctx, filter)
+	total, err := api.home.Count(ctx, filter)
 	if err != nil {
 		return page.Document[AppHome]{}, errs.Newf(http.StatusInternalServerError, "count: %s", err)
 	}
@@ -108,7 +108,7 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[App
 }
 
 // QueryByID returns a home by its ID.
-func (h *Handlers) QueryByID(ctx context.Context, homeID string) (AppHome, error) {
+func (api *API) QueryByID(ctx context.Context, homeID string) (AppHome, error) {
 	hme, err := mid.GetHome(ctx)
 	if err != nil {
 		return AppHome{}, errs.Newf(http.StatusInternalServerError, "querybyid: homeID[%s]: %s", homeID, err)

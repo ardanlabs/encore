@@ -12,10 +12,10 @@ import (
 )
 
 type coreAPI struct {
-	home    *homeapi.Handlers
-	product *productapi.Handlers
-	tran    *tranapi.Handlers
-	user    *userapi.Handlers
+	home    *homeapi.API
+	product *productapi.API
+	tran    *tranapi.API
+	user    *userapi.API
 }
 
 type viewAPI struct {

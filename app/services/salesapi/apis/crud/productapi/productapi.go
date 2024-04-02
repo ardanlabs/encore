@@ -17,26 +17,26 @@ var (
 	ErrInvalidID = errors.New("ID is not in its proper form")
 )
 
-// Handlers manages the set of handler functions for this domain.
-type Handlers struct {
+// API manages the set of handler functions for this domain.
+type API struct {
 	product *product.Core
 }
 
 // New constructs a Handlers for use.
-func New(product *product.Core) *Handlers {
-	return &Handlers{
+func New(product *product.Core) *API {
+	return &API{
 		product: product,
 	}
 }
 
 // Create adds a new product to the system.
-func (h *Handlers) Create(ctx context.Context, app AppNewProduct) (AppProduct, error) {
+func (api *API) Create(ctx context.Context, app AppNewProduct) (AppProduct, error) {
 	np, err := toCoreNewProduct(ctx, app)
 	if err != nil {
 		return AppProduct{}, errs.New(http.StatusBadRequest, err)
 	}
 
-	prd, err := h.product.Create(ctx, np)
+	prd, err := api.product.Create(ctx, np)
 	if err != nil {
 		return AppProduct{}, errs.Newf(http.StatusInternalServerError, "create: prd[%+v]: %s", prd, err)
 	}
@@ -45,13 +45,13 @@ func (h *Handlers) Create(ctx context.Context, app AppNewProduct) (AppProduct, e
 }
 
 // Update updates an existing product.
-func (h *Handlers) Update(ctx context.Context, productID string, app AppUpdateProduct) (AppProduct, error) {
+func (api *API) Update(ctx context.Context, productID string, app AppUpdateProduct) (AppProduct, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return AppProduct{}, errs.Newf(http.StatusInternalServerError, "product missing in context: %s", err)
 	}
 
-	updPrd, err := h.product.Update(ctx, prd, toCoreUpdateProduct(app))
+	updPrd, err := api.product.Update(ctx, prd, toCoreUpdateProduct(app))
 	if err != nil {
 		return AppProduct{}, errs.Newf(http.StatusInternalServerError, "update: productID[%s] up[%+v]: %s", prd.ID, app, err)
 	}
@@ -60,13 +60,13 @@ func (h *Handlers) Update(ctx context.Context, productID string, app AppUpdatePr
 }
 
 // Delete removes a product from the system.
-func (h *Handlers) Delete(ctx context.Context, productID string) error {
+func (api *API) Delete(ctx context.Context, productID string) error {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return errs.Newf(http.StatusInternalServerError, "productID[%s] missing in context: %s", productID, err)
 	}
 
-	if err := h.product.Delete(ctx, prd); err != nil {
+	if err := api.product.Delete(ctx, prd); err != nil {
 		return errs.Newf(http.StatusInternalServerError, "delete: productID[%s]: %s", prd.ID, err)
 	}
 
@@ -74,7 +74,7 @@ func (h *Handlers) Delete(ctx context.Context, productID string) error {
 }
 
 // Query returns a list of products with paging.
-func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[AppProduct], error) {
+func (api *API) Query(ctx context.Context, qp QueryParams) (page.Document[AppProduct], error) {
 	if err := validatePaging(qp); err != nil {
 		return page.Document[AppProduct]{}, err
 	}
@@ -89,12 +89,12 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[App
 		return page.Document[AppProduct]{}, err
 	}
 
-	prds, err := h.product.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	prds, err := api.product.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
 		return page.Document[AppProduct]{}, errs.Newf(http.StatusInternalServerError, "query: %s", err)
 	}
 
-	total, err := h.product.Count(ctx, filter)
+	total, err := api.product.Count(ctx, filter)
 	if err != nil {
 		return page.Document[AppProduct]{}, errs.Newf(http.StatusInternalServerError, "count: %s", err)
 	}
@@ -103,7 +103,7 @@ func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[App
 }
 
 // QueryByID returns a product by its ID.
-func (h *Handlers) QueryByID(ctx context.Context, productID string) (AppProduct, error) {
+func (api *API) QueryByID(ctx context.Context, productID string) (AppProduct, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return AppProduct{}, errs.Newf(http.StatusInternalServerError, "querybyid: productID[%s]: %s", productID, err)

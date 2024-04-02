@@ -11,23 +11,23 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 
-// Handlers manages the set of handler functions for this domain.
-type Handlers struct {
+// API manages the set of handler functions for this domain.
+type API struct {
 	user    *user.Core
 	product *product.Core
 }
 
 // New constructs a Handlers for use.
-func New(user *user.Core, product *product.Core) *Handlers {
-	return &Handlers{
+func New(user *user.Core, product *product.Core) *API {
+	return &API{
 		user:    user,
 		product: product,
 	}
 }
 
 // Create adds a new user and product at the same time under a single transaction.
-func (h *Handlers) Create(ctx context.Context, app AppNewTran) (AppProduct, error) {
-	h, err := h.executeUnderTransaction(ctx)
+func (api *API) Create(ctx context.Context, app AppNewTran) (AppProduct, error) {
+	h, err := api.executeUnderTransaction(ctx)
 	if err != nil {
 		return AppProduct{}, errs.New(http.StatusInternalServerError, err)
 	}
