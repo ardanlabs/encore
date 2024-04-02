@@ -12,10 +12,10 @@ import (
 )
 
 type crudApp struct {
-	home    *homeapp.API
-	product *productapp.API
-	tran    *tranapp.API
-	user    *userapp.API
+	home    *homeapp.Core
+	product *productapp.Core
+	tran    *tranapp.Core
+	user    *userapp.Core
 }
 
 type viewApp struct {

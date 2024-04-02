@@ -17,26 +17,26 @@ var (
 	ErrInvalidID = errors.New("ID is not in its proper form")
 )
 
-// API manages the set of handler functions for this domain.
-type API struct {
+// Core manages the set of handler functions for this domain.
+type Core struct {
 	product *product.Core
 }
 
 // New constructs a Handlers for use.
-func New(product *product.Core) *API {
-	return &API{
+func New(product *product.Core) *Core {
+	return &Core{
 		product: product,
 	}
 }
 
 // Create adds a new product to the system.
-func (api *API) Create(ctx context.Context, app AppNewProduct) (AppProduct, error) {
+func (c *Core) Create(ctx context.Context, app AppNewProduct) (AppProduct, error) {
 	np, err := toCoreNewProduct(ctx, app)
 	if err != nil {
 		return AppProduct{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
-	prd, err := api.product.Create(ctx, np)
+	prd, err := c.product.Create(ctx, np)
 	if err != nil {
 		return AppProduct{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
@@ -45,13 +45,13 @@ func (api *API) Create(ctx context.Context, app AppNewProduct) (AppProduct, erro
 }
 
 // Update updates an existing product.
-func (api *API) Update(ctx context.Context, productID string, app AppUpdateProduct) (AppProduct, error) {
+func (c *Core) Update(ctx context.Context, productID string, app AppUpdateProduct) (AppProduct, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return AppProduct{}, errs.Newf(eerrs.Internal, "product missing in context: %s", err)
 	}
 
-	updPrd, err := api.product.Update(ctx, prd, toCoreUpdateProduct(app))
+	updPrd, err := c.product.Update(ctx, prd, toCoreUpdateProduct(app))
 	if err != nil {
 		return AppProduct{}, errs.Newf(eerrs.Internal, "update: productID[%s] up[%+v]: %s", prd.ID, app, err)
 	}
@@ -60,13 +60,13 @@ func (api *API) Update(ctx context.Context, productID string, app AppUpdateProdu
 }
 
 // Delete removes a product from the system.
-func (api *API) Delete(ctx context.Context, productID string) error {
+func (c *Core) Delete(ctx context.Context, productID string) error {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return errs.Newf(eerrs.Internal, "productID[%s] missing in context: %s", productID, err)
 	}
 
-	if err := api.product.Delete(ctx, prd); err != nil {
+	if err := c.product.Delete(ctx, prd); err != nil {
 		return errs.Newf(eerrs.Internal, "delete: productID[%s]: %s", prd.ID, err)
 	}
 
@@ -74,7 +74,7 @@ func (api *API) Delete(ctx context.Context, productID string) error {
 }
 
 // Query returns a list of products with paging.
-func (api *API) Query(ctx context.Context, qp QueryParams) (page.Document[AppProduct], error) {
+func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[AppProduct], error) {
 	if err := validatePaging(qp); err != nil {
 		return page.Document[AppProduct]{}, err
 	}
@@ -89,12 +89,12 @@ func (api *API) Query(ctx context.Context, qp QueryParams) (page.Document[AppPro
 		return page.Document[AppProduct]{}, err
 	}
 
-	prds, err := api.product.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	prds, err := c.product.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
 		return page.Document[AppProduct]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
-	total, err := api.product.Count(ctx, filter)
+	total, err := c.product.Count(ctx, filter)
 	if err != nil {
 		return page.Document[AppProduct]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
@@ -103,7 +103,7 @@ func (api *API) Query(ctx context.Context, qp QueryParams) (page.Document[AppPro
 }
 
 // QueryByID returns a product by its ID.
-func (api *API) QueryByID(ctx context.Context, productID string) (AppProduct, error) {
+func (c *Core) QueryByID(ctx context.Context, productID string) (AppProduct, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return AppProduct{}, errs.Newf(eerrs.Internal, "querybyid: productID[%s]: %s", productID, err)

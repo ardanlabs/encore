@@ -8,19 +8,19 @@ import (
 
 // executeUnderTransaction constructs a new Handlers value with the core apis
 // using a store transaction that was created via middleware.
-func (api *API) executeUnderTransaction(ctx context.Context) (*API, error) {
+func (c *Core) executeUnderTransaction(ctx context.Context) (*Core, error) {
 	if tx, ok := transaction.Get(ctx); ok {
-		user, err := api.user.ExecuteUnderTransaction(tx)
+		user, err := c.user.ExecuteUnderTransaction(tx)
 		if err != nil {
 			return nil, err
 		}
 
-		product, err := api.product.ExecuteUnderTransaction(tx)
+		product, err := c.product.ExecuteUnderTransaction(tx)
 		if err != nil {
 			return nil, err
 		}
 
-		handlers := API{
+		handlers := Core{
 			user:    user,
 			product: product,
 		}
@@ -28,5 +28,5 @@ func (api *API) executeUnderTransaction(ctx context.Context) (*API, error) {
 		return &handlers, nil
 	}
 
-	return api, nil
+	return c, nil
 }
