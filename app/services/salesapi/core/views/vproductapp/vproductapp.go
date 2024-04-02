@@ -23,29 +23,29 @@ func New(vproduct *vproduct.Core) *Handlers {
 }
 
 // Query returns a list of products with paging.
-func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[AppProduct], error) {
+func (h *Handlers) Query(ctx context.Context, qp QueryParams) (page.Document[Product], error) {
 	if err := validatePaging(qp); err != nil {
-		return page.Document[AppProduct]{}, err
+		return page.Document[Product]{}, err
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return page.Document[AppProduct]{}, err
+		return page.Document[Product]{}, err
 	}
 
 	orderBy, err := parseOrder(qp)
 	if err != nil {
-		return page.Document[AppProduct]{}, err
+		return page.Document[Product]{}, err
 	}
 
 	prds, err := h.vproduct.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
-		return page.Document[AppProduct]{}, errs.Newf(eerrs.Internal, "query: %s", err)
+		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
 	total, err := h.vproduct.Count(ctx, filter)
 	if err != nil {
-		return page.Document[AppProduct]{}, errs.Newf(eerrs.Internal, "count: %s", err)
+		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
 
 	return page.NewDocument(toAppProducts(prds), total, qp.Page, qp.Rows), nil

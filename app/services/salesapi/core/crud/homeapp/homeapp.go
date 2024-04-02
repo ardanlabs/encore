@@ -30,35 +30,35 @@ func New(home *home.Core) *Core {
 }
 
 // Create adds a new home to the system.
-func (c *Core) Create(ctx context.Context, app AppNewHome) (AppHome, error) {
-	nh, err := toCoreNewHome(ctx, app)
+func (c *Core) Create(ctx context.Context, app NewHome) (Home, error) {
+	nh, err := toBusNewHome(ctx, app)
 	if err != nil {
-		return AppHome{}, errs.New(eerrs.FailedPrecondition, err)
+		return Home{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	hme, err := c.home.Create(ctx, nh)
 	if err != nil {
-		return AppHome{}, errs.Newf(eerrs.Internal, "create: hme[%+v]: %s", app, err)
+		return Home{}, errs.Newf(eerrs.Internal, "create: hme[%+v]: %s", app, err)
 	}
 
 	return toAppHome(hme), nil
 }
 
 // Update updates an existing home.
-func (c *Core) Update(ctx context.Context, userID string, app AppUpdateHome) (AppHome, error) {
-	uh, err := toCoreUpdateHome(app)
+func (c *Core) Update(ctx context.Context, userID string, app UpdateHome) (Home, error) {
+	uh, err := toBusUpdateHome(app)
 	if err != nil {
-		return AppHome{}, errs.New(eerrs.FailedPrecondition, err)
+		return Home{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	hme, err := mid.GetHome(ctx)
 	if err != nil {
-		return AppHome{}, errs.Newf(eerrs.Internal, "home missing in context: %s", err)
+		return Home{}, errs.Newf(eerrs.Internal, "home missing in context: %s", err)
 	}
 
 	updUsr, err := c.home.Update(ctx, hme, uh)
 	if err != nil {
-		return AppHome{}, errs.Newf(eerrs.Internal, "update: homeID[%s] uh[%+v]: %s", hme.ID, uh, err)
+		return Home{}, errs.Newf(eerrs.Internal, "update: homeID[%s] uh[%+v]: %s", hme.ID, uh, err)
 	}
 
 	return toAppHome(updUsr), nil
@@ -79,39 +79,39 @@ func (c *Core) Delete(ctx context.Context, homeID string) error {
 }
 
 // Query returns a list of homes with paging.
-func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[AppHome], error) {
+func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Home], error) {
 	if err := validatePaging(qp); err != nil {
-		return page.Document[AppHome]{}, err
+		return page.Document[Home]{}, err
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return page.Document[AppHome]{}, err
+		return page.Document[Home]{}, err
 	}
 
 	orderBy, err := parseOrder(qp)
 	if err != nil {
-		return page.Document[AppHome]{}, err
+		return page.Document[Home]{}, err
 	}
 
 	hmes, err := c.home.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
-		return page.Document[AppHome]{}, errs.Newf(eerrs.Internal, "query: %s", err)
+		return page.Document[Home]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
 	total, err := c.home.Count(ctx, filter)
 	if err != nil {
-		return page.Document[AppHome]{}, errs.Newf(eerrs.Internal, "count: %s", err)
+		return page.Document[Home]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
 
 	return page.NewDocument(toAppHomes(hmes), total, qp.Page, qp.Rows), nil
 }
 
 // QueryByID returns a home by its ID.
-func (c *Core) QueryByID(ctx context.Context, homeID string) (AppHome, error) {
+func (c *Core) QueryByID(ctx context.Context, homeID string) (Home, error) {
 	hme, err := mid.GetHome(ctx)
 	if err != nil {
-		return AppHome{}, errs.Newf(eerrs.Internal, "querybyid: homeID[%s]: %s", homeID, err)
+		return Home{}, errs.Newf(eerrs.Internal, "querybyid: homeID[%s]: %s", homeID, err)
 	}
 
 	return toAppHome(hme), nil

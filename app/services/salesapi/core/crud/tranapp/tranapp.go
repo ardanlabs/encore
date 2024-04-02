@@ -26,35 +26,35 @@ func New(user *user.Core, product *product.Core) *Core {
 }
 
 // Create adds a new user and product at the same time under a single transaction.
-func (c *Core) Create(ctx context.Context, app AppNewTran) (AppProduct, error) {
+func (c *Core) Create(ctx context.Context, app NewTran) (Product, error) {
 	h, err := c.executeUnderTransaction(ctx)
 	if err != nil {
-		return AppProduct{}, errs.New(eerrs.Internal, err)
+		return Product{}, errs.New(eerrs.Internal, err)
 	}
 
-	np, err := toCoreNewProduct(app.Product)
+	np, err := toBusNewProduct(app.Product)
 	if err != nil {
-		return AppProduct{}, errs.New(eerrs.FailedPrecondition, err)
+		return Product{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
-	nu, err := toCoreNewUser(app.User)
+	nu, err := toBusNewUser(app.User)
 	if err != nil {
-		return AppProduct{}, errs.New(eerrs.FailedPrecondition, err)
+		return Product{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
 	usr, err := h.user.Create(ctx, nu)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
-			return AppProduct{}, errs.New(eerrs.Aborted, user.ErrUniqueEmail)
+			return Product{}, errs.New(eerrs.Aborted, user.ErrUniqueEmail)
 		}
-		return AppProduct{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
+		return Product{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
 
 	np.UserID = usr.ID
 
 	prd, err := h.product.Create(ctx, np)
 	if err != nil {
-		return AppProduct{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
+		return Product{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
 	return toAppProduct(prd), nil

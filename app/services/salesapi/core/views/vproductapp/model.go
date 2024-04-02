@@ -18,9 +18,9 @@ type QueryParams struct {
 	UserName string `query:"user_name"`
 }
 
-// AppProduct represents information about an individual product with
+// Product represents information about an individual product with
 // extended information.
-type AppProduct struct {
+type Product struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
 	Name        string  `json:"name"`
@@ -31,8 +31,8 @@ type AppProduct struct {
 	UserName    string  `json:"userName"`
 }
 
-func toAppProduct(prd vproduct.Product) AppProduct {
-	return AppProduct{
+func toAppProduct(prd vproduct.Product) Product {
+	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name,
@@ -44,8 +44,8 @@ func toAppProduct(prd vproduct.Product) AppProduct {
 	}
 }
 
-func toAppProducts(prds []vproduct.Product) []AppProduct {
-	items := make([]AppProduct, len(prds))
+func toAppProducts(prds []vproduct.Product) []Product {
+	items := make([]Product, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppProduct(prd)
 	}

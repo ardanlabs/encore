@@ -23,8 +23,8 @@ type QueryParams struct {
 	Quantity string `query:"quantity"`
 }
 
-// AppProduct represents information about an individual product.
-type AppProduct struct {
+// Product represents information about an individual product.
+type Product struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
 	Name        string  `json:"name"`
@@ -34,8 +34,8 @@ type AppProduct struct {
 	DateUpdated string  `json:"dateUpdated"`
 }
 
-func toAppProduct(prd product.Product) AppProduct {
-	return AppProduct{
+func toAppProduct(prd product.Product) Product {
+	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name,
@@ -46,8 +46,8 @@ func toAppProduct(prd product.Product) AppProduct {
 	}
 }
 
-func toAppProducts(prds []product.Product) []AppProduct {
-	items := make([]AppProduct, len(prds))
+func toAppProducts(prds []product.Product) []Product {
+	items := make([]Product, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppProduct(prd)
 	}
@@ -55,14 +55,14 @@ func toAppProducts(prds []product.Product) []AppProduct {
 	return items
 }
 
-// AppNewProduct defines the data needed to add a new product.
-type AppNewProduct struct {
+// NewProduct defines the data needed to add a new product.
+type NewProduct struct {
 	Name     string  `json:"name" validate:"required"`
 	Cost     float64 `json:"cost" validate:"required,gte=0"`
 	Quantity int     `json:"quantity" validate:"required,gte=1"`
 }
 
-func toCoreNewProduct(ctx context.Context, app AppNewProduct) (product.NewProduct, error) {
+func toBusNewProduct(ctx context.Context, app NewProduct) (product.NewProduct, error) {
 	userID, err := mid.GetUserID(ctx)
 	if err != nil {
 		return product.NewProduct{}, fmt.Errorf("getuserid: %w", err)
@@ -79,7 +79,7 @@ func toCoreNewProduct(ctx context.Context, app AppNewProduct) (product.NewProduc
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppNewProduct) Validate() error {
+func (app NewProduct) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}
@@ -87,14 +87,14 @@ func (app AppNewProduct) Validate() error {
 	return nil
 }
 
-// AppUpdateProduct defines the data needed to update a product.
-type AppUpdateProduct struct {
+// UpdateProduct defines the data needed to update a product.
+type UpdateProduct struct {
 	Name     *string  `json:"name"`
 	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
 	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
 }
 
-func toCoreUpdateProduct(app AppUpdateProduct) product.UpdateProduct {
+func toBusUpdateProduct(app UpdateProduct) product.UpdateProduct {
 	core := product.UpdateProduct{
 		Name:     app.Name,
 		Cost:     app.Cost,
@@ -105,7 +105,7 @@ func toCoreUpdateProduct(app AppUpdateProduct) product.UpdateProduct {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppUpdateProduct) Validate() error {
+func (app UpdateProduct) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}

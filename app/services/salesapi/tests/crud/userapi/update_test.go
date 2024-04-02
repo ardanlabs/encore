@@ -17,7 +17,7 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "basic",
 			Token: sd.Users[0].Token,
-			ExpResp: userapp.AppUser{
+			ExpResp: userapp.User{
 				ID:          sd.Users[0].ID.String(),
 				Name:        "Jack Kennedy",
 				Email:       "jack@ardanlabs.com",
@@ -28,7 +28,7 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 				DateUpdated: sd.Users[0].DateCreated.Format(time.RFC3339),
 			},
 			ExcFunc: func(ctx context.Context) any {
-				app := userapp.AppUpdateUser{
+				app := userapp.UpdateUser{
 					Name:            dbtest.StringPointer("Jack Kennedy"),
 					Email:           dbtest.StringPointer("jack@ardanlabs.com"),
 					Department:      dbtest.StringPointer("IT"),
@@ -61,7 +61,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
 			ExcFunc: func(ctx context.Context) any {
-				app := userapp.AppUpdateUser{
+				app := userapp.UpdateUser{
 					Email:           dbtest.StringPointer("jack@"),
 					PasswordConfirm: dbtest.StringPointer("123"),
 				}
@@ -80,7 +80,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token,
 			ExpResp: errs.Newf(eerrs.FailedPrecondition, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
-				app := userapp.AppUpdateUserRole{
+				app := userapp.UpdateUserRole{
 					Roles: []string{"BAD ROLE"},
 				}
 
@@ -105,7 +105,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserUpdate(ctx, "", userapp.AppUpdateUser{})
+				resp, err := salesapi.UserUpdate(ctx, "", userapp.UpdateUser{})
 				if err != nil {
 					return err
 				}
@@ -119,7 +119,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.AppUpdateUser{})
+				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
 				if err != nil {
 					return err
 				}
@@ -133,7 +133,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.AppUpdateUser{})
+				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
 				if err != nil {
 					return err
 				}
@@ -147,7 +147,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				app := userapp.AppUpdateUser{
+				app := userapp.UpdateUser{
 					Name:            dbtest.StringPointer("Jack Kennedy"),
 					Email:           dbtest.StringPointer("jack2@ardanlabs.com"),
 					Department:      dbtest.StringPointer("IT"),
@@ -169,7 +169,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				app := userapp.AppUpdateUserRole{
+				app := userapp.UpdateUserRole{
 					Roles: []string{"ADMIN"},
 				}
 

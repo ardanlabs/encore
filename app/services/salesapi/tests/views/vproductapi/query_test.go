@@ -23,7 +23,7 @@ func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[vproductapp.AppProduct]{
+			ExpResp: page.Document[vproductapp.Product]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(prds),

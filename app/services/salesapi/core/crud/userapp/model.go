@@ -23,8 +23,8 @@ type QueryParams struct {
 	EndCreatedDate   string `query:"end_created_date"`
 }
 
-// AppUser represents information about an individual user.
-type AppUser struct {
+// User represents information about an individual user.
+type User struct {
 	ID           string   `json:"id"`
 	Name         string   `json:"name"`
 	Email        string   `json:"email"`
@@ -36,13 +36,13 @@ type AppUser struct {
 	DateUpdated  string   `json:"dateUpdated"`
 }
 
-func toAppUser(usr user.User) AppUser {
+func toAppUser(usr user.User) User {
 	roles := make([]string, len(usr.Roles))
 	for i, role := range usr.Roles {
 		roles[i] = role.Name()
 	}
 
-	return AppUser{
+	return User{
 		ID:           usr.ID.String(),
 		Name:         usr.Name,
 		Email:        usr.Email.Address,
@@ -55,8 +55,8 @@ func toAppUser(usr user.User) AppUser {
 	}
 }
 
-func toAppUsers(users []user.User) []AppUser {
-	items := make([]AppUser, len(users))
+func toAppUsers(users []user.User) []User {
+	items := make([]User, len(users))
 	for i, usr := range users {
 		items[i] = toAppUser(usr)
 	}
@@ -64,8 +64,8 @@ func toAppUsers(users []user.User) []AppUser {
 	return items
 }
 
-// AppNewUser defines the data needed to add a new user.
-type AppNewUser struct {
+// NewUser defines the data needed to add a new user.
+type NewUser struct {
 	Name            string   `json:"name" validate:"required"`
 	Email           string   `json:"email" validate:"required,email"`
 	Roles           []string `json:"roles" validate:"required"`
@@ -74,7 +74,7 @@ type AppNewUser struct {
 	PasswordConfirm string   `json:"passwordConfirm" validate:"eqfield=Password"`
 }
 
-func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
+func toBusNewUser(app NewUser) (user.NewUser, error) {
 	roles := make([]user.Role, len(app.Roles))
 	for i, roleStr := range app.Roles {
 		role, err := user.ParseRole(roleStr)
@@ -102,7 +102,7 @@ func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppNewUser) Validate() error {
+func (app NewUser) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}
@@ -110,12 +110,12 @@ func (app AppNewUser) Validate() error {
 	return nil
 }
 
-// AppUpdateUserRole defines the data needed to update a user role.
-type AppUpdateUserRole struct {
+// UpdateUserRole defines the data needed to update a user role.
+type UpdateUserRole struct {
 	Roles []string `json:"roles"`
 }
 
-func toCoreUpdateUserRole(app AppUpdateUserRole) (user.UpdateUser, error) {
+func toBusUpdateUserRole(app UpdateUserRole) (user.UpdateUser, error) {
 	var roles []user.Role
 	if app.Roles != nil {
 		roles = make([]user.Role, len(app.Roles))
@@ -135,8 +135,8 @@ func toCoreUpdateUserRole(app AppUpdateUserRole) (user.UpdateUser, error) {
 	return nu, nil
 }
 
-// AppUpdateUser defines the data needed to update a user.
-type AppUpdateUser struct {
+// UpdateUser defines the data needed to update a user.
+type UpdateUser struct {
 	Name            *string `json:"name"`
 	Email           *string `json:"email" validate:"omitempty,email"`
 	Department      *string `json:"department"`
@@ -145,7 +145,7 @@ type AppUpdateUser struct {
 	Enabled         *bool   `json:"enabled"`
 }
 
-func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
+func toBusUpdateUser(app UpdateUser) (user.UpdateUser, error) {
 	var addr *mail.Address
 	if app.Email != nil {
 		var err error
@@ -168,7 +168,7 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppUpdateUser) Validate() error {
+func (app UpdateUser) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}

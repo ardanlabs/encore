@@ -7,12 +7,12 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/home"
 )
 
-func toAppHome(hme home.Home) homeapp.AppHome {
-	return homeapp.AppHome{
+func toAppHome(hme home.Home) homeapp.Home {
+	return homeapp.Home{
 		ID:     hme.ID.String(),
 		UserID: hme.UserID.String(),
 		Type:   hme.Type.Name(),
-		Address: homeapp.AppAddress{
+		Address: homeapp.Address{
 			Address1: hme.Address.Address1,
 			Address2: hme.Address.Address2,
 			ZipCode:  hme.Address.ZipCode,
@@ -25,8 +25,8 @@ func toAppHome(hme home.Home) homeapp.AppHome {
 	}
 }
 
-func toAppHomes(homes []home.Home) []homeapp.AppHome {
-	items := make([]homeapp.AppHome, len(homes))
+func toAppHomes(homes []home.Home) []homeapp.Home {
+	items := make([]homeapp.Home, len(homes))
 	for i, hme := range homes {
 		items[i] = toAppHome(hme)
 	}

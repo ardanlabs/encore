@@ -24,8 +24,8 @@ type QueryParams struct {
 	EndCreatedDate   string `query:"end_created_date"`
 }
 
-// AppAddress represents information about an individual address.
-type AppAddress struct {
+// Address represents information about an individual address.
+type Address struct {
 	Address1 string `json:"address1"`
 	Address2 string `json:"address2"`
 	ZipCode  string `json:"zipCode"`
@@ -34,22 +34,22 @@ type AppAddress struct {
 	Country  string `json:"country"`
 }
 
-// AppHome represents information about an individual home.
-type AppHome struct {
-	ID          string     `json:"id"`
-	UserID      string     `json:"userID"`
-	Type        string     `json:"type"`
-	Address     AppAddress `json:"address"`
-	DateCreated string     `json:"dateCreated"`
-	DateUpdated string     `json:"dateUpdated"`
+// Home represents information about an individual home.
+type Home struct {
+	ID          string  `json:"id"`
+	UserID      string  `json:"userID"`
+	Type        string  `json:"type"`
+	Address     Address `json:"address"`
+	DateCreated string  `json:"dateCreated"`
+	DateUpdated string  `json:"dateUpdated"`
 }
 
-func toAppHome(hme home.Home) AppHome {
-	return AppHome{
+func toAppHome(hme home.Home) Home {
+	return Home{
 		ID:     hme.ID.String(),
 		UserID: hme.UserID.String(),
 		Type:   hme.Type.Name(),
-		Address: AppAddress{
+		Address: Address{
 			Address1: hme.Address.Address1,
 			Address2: hme.Address.Address2,
 			ZipCode:  hme.Address.ZipCode,
@@ -62,8 +62,8 @@ func toAppHome(hme home.Home) AppHome {
 	}
 }
 
-func toAppHomes(homes []home.Home) []AppHome {
-	items := make([]AppHome, len(homes))
+func toAppHomes(homes []home.Home) []Home {
+	items := make([]Home, len(homes))
 	for i, hme := range homes {
 		items[i] = toAppHome(hme)
 	}
@@ -71,8 +71,8 @@ func toAppHomes(homes []home.Home) []AppHome {
 	return items
 }
 
-// AppNewAddress defines the data needed to add a new address.
-type AppNewAddress struct {
+// NewAddress defines the data needed to add a new address.
+type NewAddress struct {
 	Address1 string `json:"address1" validate:"required,min=1,max=70"`
 	Address2 string `json:"address2" validate:"omitempty,max=70"`
 	ZipCode  string `json:"zipCode" validate:"required,numeric"`
@@ -81,13 +81,13 @@ type AppNewAddress struct {
 	Country  string `json:"country" validate:"required,iso3166_1_alpha2"`
 }
 
-// AppNewHome defines the data needed to add a new home.
-type AppNewHome struct {
-	Type    string        `json:"type" validate:"required"`
-	Address AppNewAddress `json:"address"`
+// NewHome defines the data needed to add a new home.
+type NewHome struct {
+	Type    string     `json:"type" validate:"required"`
+	Address NewAddress `json:"address"`
 }
 
-func toCoreNewHome(ctx context.Context, app AppNewHome) (home.NewHome, error) {
+func toBusNewHome(ctx context.Context, app NewHome) (home.NewHome, error) {
 	userID, err := mid.GetUserID(ctx)
 	if err != nil {
 		return home.NewHome{}, fmt.Errorf("getuserid: %w", err)
@@ -115,7 +115,7 @@ func toCoreNewHome(ctx context.Context, app AppNewHome) (home.NewHome, error) {
 }
 
 // Validate checks if the data in the model is considered clean.
-func (app AppNewHome) Validate() error {
+func (app NewHome) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}
@@ -123,8 +123,8 @@ func (app AppNewHome) Validate() error {
 	return nil
 }
 
-// AppUpdateAddress defines the data needed to update an address.
-type AppUpdateAddress struct {
+// UpdateAddress defines the data needed to update an address.
+type UpdateAddress struct {
 	Address1 *string `json:"address1" validate:"omitempty,min=1,max=70"`
 	Address2 *string `json:"address2" validate:"omitempty,max=70"`
 	ZipCode  *string `json:"zipCode" validate:"omitempty,numeric"`
@@ -134,7 +134,7 @@ type AppUpdateAddress struct {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppUpdateAddress) Validate() error {
+func (app UpdateAddress) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return err
 	}
@@ -142,13 +142,13 @@ func (app AppUpdateAddress) Validate() error {
 	return nil
 }
 
-// AppUpdateHome defines the data needed to update a home.
-type AppUpdateHome struct {
-	Type    *string           `json:"type"`
-	Address *AppUpdateAddress `json:"address"`
+// UpdateHome defines the data needed to update a home.
+type UpdateHome struct {
+	Type    *string        `json:"type"`
+	Address *UpdateAddress `json:"address"`
 }
 
-func toCoreUpdateHome(app AppUpdateHome) (home.UpdateHome, error) {
+func toBusUpdateHome(app UpdateHome) (home.UpdateHome, error) {
 	var typ home.Type
 	if app.Type != nil {
 		var err error
@@ -177,7 +177,7 @@ func toCoreUpdateHome(app AppUpdateHome) (home.UpdateHome, error) {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppUpdateHome) Validate() error {
+func (app UpdateHome) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
 	}

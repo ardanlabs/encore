@@ -31,7 +31,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[userapp.AppUser]{
+			ExpResp: page.Document[userapp.User]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(usrs),

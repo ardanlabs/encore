@@ -25,7 +25,7 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[productapp.AppProduct]{
+			ExpResp: page.Document[productapp.Product]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(prds),

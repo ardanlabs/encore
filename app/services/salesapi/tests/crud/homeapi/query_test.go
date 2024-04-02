@@ -25,7 +25,7 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[homeapp.AppHome]{
+			ExpResp: page.Document[homeapp.Home]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(hmes),

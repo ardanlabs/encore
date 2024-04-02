@@ -10,8 +10,8 @@ import (
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 
-// AppProduct represents an individual product.
-type AppProduct struct {
+// Product represents an individual product.
+type Product struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
 	Name        string  `json:"name"`
@@ -21,8 +21,8 @@ type AppProduct struct {
 	DateUpdated string  `json:"dateUpdated"`
 }
 
-func toAppProduct(prd product.Product) AppProduct {
-	return AppProduct{
+func toAppProduct(prd product.Product) Product {
+	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name,
@@ -33,15 +33,15 @@ func toAppProduct(prd product.Product) AppProduct {
 	}
 }
 
-// AppNewTran represents an example of cross domain transaction at the
+// NewTran represents an example of cross domain transaction at the
 // application layer.
-type AppNewTran struct {
-	Product AppNewProduct `json:"product"`
-	User    AppNewUser    `json:"user"`
+type NewTran struct {
+	Product NewProduct `json:"product"`
+	User    NewUser    `json:"user"`
 }
 
-// AppNewUser contains information needed to create a new user.
-type AppNewUser struct {
+// NewUser contains information needed to create a new user.
+type NewUser struct {
 	Name            string   `json:"name" validate:"required"`
 	Email           string   `json:"email" validate:"required,email"`
 	Roles           []string `json:"roles" validate:"required"`
@@ -50,7 +50,7 @@ type AppNewUser struct {
 	PasswordConfirm string   `json:"passwordConfirm" validate:"eqfield=Password"`
 }
 
-func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
+func toBusNewUser(app NewUser) (user.NewUser, error) {
 	roles := make([]user.Role, len(app.Roles))
 	for i, roleStr := range app.Roles {
 		role, err := user.ParseRole(roleStr)
@@ -78,7 +78,7 @@ func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppNewUser) Validate() error {
+func (app NewUser) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return err
 	}
@@ -86,14 +86,14 @@ func (app AppNewUser) Validate() error {
 	return nil
 }
 
-// AppNewProduct is what we require from clients when adding a Product.
-type AppNewProduct struct {
+// NewProduct is what we require from clients when adding a Product.
+type NewProduct struct {
 	Name     string  `json:"name" validate:"required"`
 	Cost     float64 `json:"cost" validate:"required,gte=0"`
 	Quantity int     `json:"quantity" validate:"required,gte=1"`
 }
 
-func toCoreNewProduct(app AppNewProduct) (product.NewProduct, error) {
+func toBusNewProduct(app NewProduct) (product.NewProduct, error) {
 	prd := product.NewProduct{
 		Name:     app.Name,
 		Cost:     app.Cost,
@@ -104,7 +104,7 @@ func toCoreNewProduct(app AppNewProduct) (product.NewProduct, error) {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app AppNewProduct) Validate() error {
+func (app NewProduct) Validate() error {
 	if err := validate.Check(app); err != nil {
 		return err
 	}

@@ -8,8 +8,8 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 
-func toAppVProduct(usr user.User, prd product.Product) vproductapp.AppProduct {
-	return vproductapp.AppProduct{
+func toAppVProduct(usr user.User, prd product.Product) vproductapp.Product {
+	return vproductapp.Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name,
@@ -21,8 +21,8 @@ func toAppVProduct(usr user.User, prd product.Product) vproductapp.AppProduct {
 	}
 }
 
-func toAppVProducts(usr user.User, prds []product.Product) []vproductapp.AppProduct {
-	items := make([]vproductapp.AppProduct, len(prds))
+func toAppVProducts(usr user.User, prds []product.Product) []vproductapp.Product {
+	items := make([]vproductapp.Product, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppVProduct(usr, prd)
 	}
