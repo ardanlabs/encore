@@ -40,12 +40,13 @@ import (
 //
 //encore:service
 type Service struct {
-	mtrcs *metrics.Values
-	db    *sqlx.DB
-	auth  *auth.Auth
-	app   app
-	bus   business
-	debug http.Handler
+	mtrcs   *metrics.Values
+	db      *sqlx.DB
+	auth    *auth.Auth
+	appCrud appCrud
+	appView appView
+	busCrud busCrud
+	debug   http.Handler
 }
 
 // NewService is called to create a new encore Service.
@@ -60,23 +61,19 @@ func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 		mtrcs: newMetrics(),
 		db:    db,
 		auth:  ath,
-		app: app{
-			crud: crudApp{
-				user:    userapp.New(userCore, ath),
-				product: productapp.New(productCore),
-				home:    homeapp.New(homeCore),
-				tran:    tranapp.New(userCore, productCore),
-			},
-			view: viewApp{
-				product: vproductapp.New(vproductCore),
-			},
+		appCrud: appCrud{
+			user:    userapp.NewCore(userCore, ath),
+			product: productapp.NewCore(productCore),
+			home:    homeapp.NewCore(homeCore),
+			tran:    tranapp.NewCore(userCore, productCore),
 		},
-		bus: business{
-			crud: crudBus{
-				user:    userCore,
-				product: productCore,
-				home:    homeCore,
-			},
+		appView: appView{
+			product: vproductapp.NewCore(vproductCore),
+		},
+		busCrud: busCrud{
+			user:    userCore,
+			product: productCore,
+			home:    homeCore,
 		},
 		debug: debug.Mux(),
 	}

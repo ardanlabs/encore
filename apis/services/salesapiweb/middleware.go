@@ -15,7 +15,7 @@ import (
 //lint:ignore U1000 "called by encore"
 //encore:authhandler
 func (s *Service) AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
-	return mid.AuthHandler(ctx, s.auth, s.bus.crud.user, ap)
+	return mid.AuthHandler(ctx, s.auth, s.busCrud.user, ap)
 }
 
 // =============================================================================
@@ -48,17 +48,17 @@ func (s *Service) authorize(req middleware.Request, next middleware.Next) middle
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_user
 func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeUser(s.auth, s.bus.crud.user, req, next)
+	return mid.AuthorizeUser(s.auth, s.busCrud.user, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_product
 func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeProduct(s.auth, s.bus.crud.product, req, next)
+	return mid.AuthorizeProduct(s.auth, s.busCrud.product, req, next)
 }
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_home
 func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.AuthorizeHome(s.auth, s.bus.crud.home, req, next)
+	return mid.AuthorizeHome(s.auth, s.busCrud.home, req, next)
 }

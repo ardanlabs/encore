@@ -11,28 +11,19 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 
-type crudApp struct {
+type appCrud struct {
 	home    *homeapp.Core
 	product *productapp.Core
 	tran    *tranapp.Core
 	user    *userapp.Core
 }
 
-type viewApp struct {
-	product *vproductapp.Handlers
+type appView struct {
+	product *vproductapp.Core
 }
 
-type app struct {
-	crud crudApp
-	view viewApp
-}
-
-type crudBus struct {
+type busCrud struct {
 	home    *home.Core
 	product *product.Core
 	user    *user.Core
-}
-
-type business struct {
-	crud crudBus
 }

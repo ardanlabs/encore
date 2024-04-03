@@ -62,7 +62,7 @@ func Test_User(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}
-	et.MockService("salesapi", service, et.RunMiddleware(true))
+	et.MockService("salesapiweb", service, et.RunMiddleware(true))
 
 	app := dbtest.AppTest{
 		Service: service,
