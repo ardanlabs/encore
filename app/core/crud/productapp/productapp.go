@@ -3,7 +3,6 @@ package productapp
 
 import (
 	"context"
-	"errors"
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/errs"
@@ -12,12 +11,7 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/product"
 )
 
-// Set of error variables for handling product group errors.
-var (
-	ErrInvalidID = errors.New("ID is not in its proper form")
-)
-
-// Core manages the set of handler functions for this domain.
+// Core manages the set of app layer api functions for the product domain.
 type Core struct {
 	product *product.Core
 }

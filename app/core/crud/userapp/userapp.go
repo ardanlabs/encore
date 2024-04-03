@@ -14,7 +14,7 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/user"
 )
 
-// Core manages the set of handler functions for this domain.
+// Core manages the set of app layer api functions for the user domain.
 type Core struct {
 	user *user.Core
 	auth *auth.Auth

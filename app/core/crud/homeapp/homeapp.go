@@ -3,7 +3,6 @@ package homeapp
 
 import (
 	"context"
-	"errors"
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/errs"
@@ -12,12 +11,7 @@ import (
 	"github.com/ardanlabs/encore/business/core/crud/home"
 )
 
-// Set of error variables for handling home group errors.
-var (
-	ErrInvalidID = errors.New("ID is not in its proper form")
-)
-
-// Core manages the set of handler functions for this domain.
+// Core manages the set of app layer api functions for the home domain.
 type Core struct {
 	home *home.Core
 }
