@@ -1,23 +1,23 @@
-package user_test
+package home_test
 
 import (
 	"context"
 
 	eerrs "encore.dev/beta/errs"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
+func homeDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:    "user",
-			Token:   sd.Users[1].Token,
+			Token:   sd.Users[0].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := salesapi.UserDelete(ctx, sd.Users[1].ID.String()); err != nil {
+				if err := salesapiweb.HomeDelete(ctx, sd.Users[0].Homes[1].ID.String()); err != nil {
 					return err
 				}
 
@@ -29,10 +29,10 @@ func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 		},
 		{
 			Name:    "admin",
-			Token:   sd.Admins[1].Token,
+			Token:   sd.Admins[0].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := salesapi.UserDelete(ctx, sd.Admins[1].ID.String()); err != nil {
+				if err := salesapiweb.HomeDelete(ctx, sd.Admins[0].Homes[1].ID.String()); err != nil {
 					return err
 				}
 
@@ -47,14 +47,14 @@ func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
+func homeDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 	table := []dbtest.AppTable{
 		{
 			Name:    "emptytoken",
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				err := salesapi.UserDelete(ctx, "")
+				err := salesapiweb.HomeDelete(ctx, "")
 				if err != nil {
 					return err
 				}
@@ -68,7 +68,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				err := salesapi.UserDelete(ctx, "")
+				err := salesapiweb.HomeDelete(ctx, "")
 				if err != nil {
 					return err
 				}
@@ -79,10 +79,10 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 		},
 		{
 			Name:    "wronguser",
-			Token:   sd.Users[1].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "user not enabled : query user: query: userID["+sd.Users[1].ID.String()+"]: db: user not found"),
+			Token:   sd.Users[0].Token,
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				err := salesapi.UserDelete(ctx, sd.Users[0].ID.String())
+				err := salesapiweb.HomeDelete(ctx, sd.Admins[0].Homes[0].ID.String())
 				if err != nil {
 					return err
 				}

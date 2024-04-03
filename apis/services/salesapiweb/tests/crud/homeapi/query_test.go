@@ -4,7 +4,7 @@ import (
 	"context"
 	"sort"
 
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/homeapp"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/home"
@@ -38,7 +38,7 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 					OrderBy: "home_id,ASC",
 				}
 
-				resp, err := salesapi.HomeQuery(ctx, qp)
+				resp, err := salesapiweb.HomeQuery(ctx, qp)
 				if err != nil {
 					return err
 				}
@@ -61,7 +61,7 @@ func homeQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: toAppHome(sd.Users[0].Homes[0]),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeQueryByID(ctx, sd.Users[0].Homes[0].ID.String())
+				resp, err := salesapiweb.HomeQueryByID(ctx, sd.Users[0].Homes[0].ID.String())
 				if err != nil {
 					return err
 				}

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	eerrs "encore.dev/beta/errs"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/homeapp"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -45,7 +45,7 @@ func homeUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 					},
 				}
 
-				resp, err := salesapi.HomeUpdate(ctx, sd.Users[0].Homes[0].ID.String(), app)
+				resp, err := salesapiweb.HomeUpdate(ctx, sd.Users[0].Homes[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -81,7 +81,7 @@ func homeUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 					},
 				}
 
-				resp, err := salesapi.HomeUpdate(ctx, sd.Users[0].Homes[0].ID.String(), app)
+				resp, err := salesapiweb.HomeUpdate(ctx, sd.Users[0].Homes[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -99,7 +99,7 @@ func homeUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 					Type: dbtest.StringPointer("BAD TYPE"),
 				}
 
-				resp, err := salesapi.HomeUpdate(ctx, sd.Users[0].Homes[0].ID.String(), app)
+				resp, err := salesapiweb.HomeUpdate(ctx, sd.Users[0].Homes[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -120,7 +120,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeUpdate(ctx, "", homeapp.UpdateHome{})
+				resp, err := salesapiweb.HomeUpdate(ctx, "", homeapp.UpdateHome{})
 				if err != nil {
 					return err
 				}
@@ -134,7 +134,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeUpdate(ctx, "", homeapp.UpdateHome{})
+				resp, err := salesapiweb.HomeUpdate(ctx, "", homeapp.UpdateHome{})
 				if err != nil {
 					return err
 				}
@@ -148,7 +148,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeUpdate(ctx, "", homeapp.UpdateHome{})
+				resp, err := salesapiweb.HomeUpdate(ctx, "", homeapp.UpdateHome{})
 				if err != nil {
 					return err
 				}
@@ -174,7 +174,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					},
 				}
 
-				resp, err := salesapi.HomeUpdate(ctx, sd.Admins[0].Homes[0].ID.String(), app)
+				resp, err := salesapiweb.HomeUpdate(ctx, sd.Admins[0].Homes[0].ID.String(), app)
 				if err != nil {
 					return err
 				}

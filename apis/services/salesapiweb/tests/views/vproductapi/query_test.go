@@ -4,7 +4,7 @@ import (
 	"context"
 	"sort"
 
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/views/vproductapp"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -37,7 +37,7 @@ func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 					Name:    "Name",
 				}
 
-				resp, err := salesapi.VProductQuery(ctx, qp)
+				resp, err := salesapiweb.VProductQuery(ctx, qp)
 				if err != nil {
 					return err
 				}

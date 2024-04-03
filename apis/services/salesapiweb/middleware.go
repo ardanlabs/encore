@@ -1,4 +1,4 @@
-package salesapi
+package salesapiweb
 
 import (
 	"context"

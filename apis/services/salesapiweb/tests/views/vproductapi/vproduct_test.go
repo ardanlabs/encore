@@ -1,4 +1,4 @@
-package home_test
+package vproduct_test
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"encore.dev/et"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
@@ -39,10 +39,10 @@ func run(m *testing.M) (code int, err error) {
 
 // =============================================================================
 
-func Test_Home(t *testing.T) {
+func Test_VProduct(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_Home")
+	dbTest := dbtest.NewTest(t, url, "Test_VProduct")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -58,7 +58,7 @@ func Test_Home(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
+	service, err := salesapiweb.NewService(dbTest.DB, dbTest.Auth)
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}
@@ -70,17 +70,5 @@ func Test_Home(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	app.Test(t, homeQueryOk(sd), "home-query-ok")
-	app.Test(t, homeQueryByIDOk(sd), "home-querybyid-ok")
-
-	app.Test(t, homeCreateOk(sd), "home-create-ok")
-	app.Test(t, homeCreateBad(sd), "home-create-bad")
-	app.Test(t, homeCreateAuth(sd), "home-create-auth")
-
-	app.Test(t, homeUpdateOk(sd), "home-update-ok")
-	app.Test(t, homeUpdateBad(sd), "home-update-bad")
-	app.Test(t, homeUpdateAuth(sd), "home-update-auth")
-
-	app.Test(t, homeDeleteOk(sd), "home-delete-ok")
-	app.Test(t, homeDeleteAuth(sd), "home-delete-auth")
+	app.Test(t, vproductQueryOk(sd), "vproduct-query-ok")
 }

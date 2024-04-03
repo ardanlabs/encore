@@ -1,5 +1,5 @@
-// Package salesapi represent the encore application.
-package salesapi
+// Package salesapiweb represent the encore application.
+package salesapiweb
 
 import (
 	"context"

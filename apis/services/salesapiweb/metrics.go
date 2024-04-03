@@ -1,4 +1,4 @@
-package salesapi
+package salesapiweb
 
 import (
 	emetrics "encore.dev/metrics"

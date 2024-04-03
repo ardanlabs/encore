@@ -5,7 +5,7 @@ import (
 	"time"
 
 	eerrs "encore.dev/beta/errs"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/productapp"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -33,7 +33,7 @@ func productUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 					Quantity: dbtest.IntPointer(10),
 				}
 
-				resp, err := salesapi.ProductUpdate(ctx, sd.Users[0].Products[0].ID.String(), app)
+				resp, err := salesapiweb.ProductUpdate(ctx, sd.Users[0].Products[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -67,7 +67,7 @@ func productUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 					Quantity: dbtest.IntPointer(-10),
 				}
 
-				resp, err := salesapi.ProductUpdate(ctx, sd.Users[0].ID.String(), app)
+				resp, err := salesapiweb.ProductUpdate(ctx, sd.Users[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -88,7 +88,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.ProductUpdate(ctx, "", productapp.UpdateProduct{})
+				resp, err := salesapiweb.ProductUpdate(ctx, "", productapp.UpdateProduct{})
 				if err != nil {
 					return err
 				}
@@ -102,7 +102,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.ProductUpdate(ctx, "", productapp.UpdateProduct{})
+				resp, err := salesapiweb.ProductUpdate(ctx, "", productapp.UpdateProduct{})
 				if err != nil {
 					return err
 				}
@@ -116,7 +116,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.ProductUpdate(ctx, "", productapp.UpdateProduct{})
+				resp, err := salesapiweb.ProductUpdate(ctx, "", productapp.UpdateProduct{})
 				if err != nil {
 					return err
 				}
@@ -136,7 +136,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					Quantity: dbtest.IntPointer(10),
 				}
 
-				resp, err := salesapi.ProductUpdate(ctx, sd.Admins[0].Products[0].ID.String(), app)
+				resp, err := salesapiweb.ProductUpdate(ctx, sd.Admins[0].Products[0].ID.String(), app)
 				if err != nil {
 					return err
 				}

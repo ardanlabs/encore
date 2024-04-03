@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"encore.dev/et"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
@@ -58,7 +58,7 @@ func Test_User(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	service, err := salesapi.NewService(dbTest.DB, dbTest.Auth)
+	service, err := salesapiweb.NewService(dbTest.DB, dbTest.Auth)
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}

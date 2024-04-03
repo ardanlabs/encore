@@ -4,7 +4,7 @@ import (
 	"context"
 
 	eerrs "encore.dev/beta/errs"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/userapp"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -33,7 +33,7 @@ func userCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 					PasswordConfirm: "123",
 				}
 
-				resp, err := salesapi.UserCreate(ctx, app)
+				resp, err := salesapiweb.UserCreate(ctx, app)
 				if err != nil {
 					return err
 				}
@@ -67,7 +67,7 @@ func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token,
 			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserCreate(ctx, userapp.NewUser{})
+				resp, err := salesapiweb.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
 					return err
 				}
@@ -90,7 +90,7 @@ func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 					PasswordConfirm: "123",
 				}
 
-				resp, err := salesapi.UserCreate(ctx, app)
+				resp, err := salesapiweb.UserCreate(ctx, app)
 				if err != nil {
 					return err
 				}
@@ -111,7 +111,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserCreate(ctx, userapp.NewUser{})
+				resp, err := salesapiweb.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
 					return err
 				}
@@ -125,7 +125,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserCreate(ctx, userapp.NewUser{})
+				resp, err := salesapiweb.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
 					return err
 				}
@@ -139,7 +139,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserCreate(ctx, userapp.NewUser{})
+				resp, err := salesapiweb.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
 					return err
 				}
@@ -162,7 +162,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					PasswordConfirm: "123",
 				}
 
-				resp, err := salesapi.UserCreate(ctx, app)
+				resp, err := salesapiweb.UserCreate(ctx, app)
 				if err != nil {
 					return err
 				}

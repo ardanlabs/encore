@@ -4,7 +4,7 @@ import (
 	"context"
 	"sort"
 
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/userapp"
 	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/user"
@@ -45,7 +45,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 					Name:    "Name",
 				}
 
-				resp, err := salesapi.UserQuery(ctx, qp)
+				resp, err := salesapiweb.UserQuery(ctx, qp)
 				if err != nil {
 					return err
 				}
@@ -68,7 +68,7 @@ func userQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: toAppUser(sd.Users[0].User),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserQueryByID(ctx, sd.Users[0].ID.String())
+				resp, err := salesapiweb.UserQueryByID(ctx, sd.Users[0].ID.String())
 				if err != nil {
 					return err
 				}

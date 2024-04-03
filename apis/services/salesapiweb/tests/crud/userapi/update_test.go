@@ -5,7 +5,7 @@ import (
 	"time"
 
 	eerrs "encore.dev/beta/errs"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/userapp"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -36,7 +36,7 @@ func userUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 					PasswordConfirm: dbtest.StringPointer("123"),
 				}
 
-				resp, err := salesapi.UserUpdate(ctx, sd.Users[0].ID.String(), app)
+				resp, err := salesapiweb.UserUpdate(ctx, sd.Users[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -66,7 +66,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 					PasswordConfirm: dbtest.StringPointer("123"),
 				}
 
-				resp, err := salesapi.UserUpdate(ctx, sd.Users[0].ID.String(), app)
+				resp, err := salesapiweb.UserUpdate(ctx, sd.Users[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -84,7 +84,7 @@ func userUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 					Roles: []string{"BAD ROLE"},
 				}
 
-				resp, err := salesapi.UserUpdateRole(ctx, sd.Admins[0].ID.String(), app)
+				resp, err := salesapiweb.UserUpdateRole(ctx, sd.Admins[0].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -105,7 +105,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserUpdate(ctx, "", userapp.UpdateUser{})
+				resp, err := salesapiweb.UserUpdate(ctx, "", userapp.UpdateUser{})
 				if err != nil {
 					return err
 				}
@@ -119,7 +119,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
+				resp, err := salesapiweb.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
 				if err != nil {
 					return err
 				}
@@ -133,7 +133,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
+				resp, err := salesapiweb.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
 				if err != nil {
 					return err
 				}
@@ -155,7 +155,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					PasswordConfirm: dbtest.StringPointer("123"),
 				}
 
-				resp, err := salesapi.UserUpdate(ctx, sd.Users[1].ID.String(), app)
+				resp, err := salesapiweb.UserUpdate(ctx, sd.Users[1].ID.String(), app)
 				if err != nil {
 					return err
 				}
@@ -173,7 +173,7 @@ func userUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					Roles: []string{"ADMIN"},
 				}
 
-				resp, err := salesapi.UserUpdateRole(ctx, sd.Users[1].ID.String(), app)
+				resp, err := salesapiweb.UserUpdateRole(ctx, sd.Users[1].ID.String(), app)
 				if err != nil {
 					return err
 				}

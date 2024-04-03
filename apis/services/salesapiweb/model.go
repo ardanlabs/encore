@@ -1,4 +1,4 @@
-package salesapi
+package salesapiweb
 
 import (
 	homeapp "github.com/ardanlabs/encore/app/core/crud/homeapp"

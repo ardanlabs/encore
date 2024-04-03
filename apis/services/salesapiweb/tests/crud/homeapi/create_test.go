@@ -4,7 +4,7 @@ import (
 	"context"
 
 	eerrs "encore.dev/beta/errs"
-	salesapi "github.com/ardanlabs/encore/apis/services/salesapi/http"
+	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	homeapp "github.com/ardanlabs/encore/app/core/crud/homeapp"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
@@ -39,7 +39,7 @@ func homeCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 					},
 				}
 
-				resp, err := salesapi.HomeCreate(ctx, app)
+				resp, err := salesapiweb.HomeCreate(ctx, app)
 				if err != nil {
 					return err
 				}
@@ -73,7 +73,7 @@ func homeCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapp.NewHome{})
+				resp, err := salesapiweb.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
 					return err
 				}
@@ -98,7 +98,7 @@ func homeCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 					},
 				}
 
-				resp, err := salesapi.HomeCreate(ctx, app)
+				resp, err := salesapiweb.HomeCreate(ctx, app)
 				if err != nil {
 					return err
 				}
@@ -119,7 +119,7 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapp.NewHome{})
+				resp, err := salesapiweb.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
 					return err
 				}
@@ -133,7 +133,7 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token[:10],
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapp.NewHome{})
+				resp, err := salesapiweb.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
 					return err
 				}
@@ -147,7 +147,7 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 			Token:   sd.Admins[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := salesapi.HomeCreate(ctx, homeapp.NewHome{})
+				resp, err := salesapiweb.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
 					return err
 				}
@@ -172,7 +172,7 @@ func homeCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 					},
 				}
 
-				resp, err := salesapi.HomeCreate(ctx, app)
+				resp, err := salesapiweb.HomeCreate(ctx, app)
 				if err != nil {
 					return err
 				}
