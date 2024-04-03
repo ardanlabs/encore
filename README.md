@@ -42,6 +42,8 @@ limitations under the License.
 Ardan Labs (www.ardanlabs.com)  
 hello@ardanlabs.com
 
+You can read the [service class wiki](https://github.com/ardanlabs/service/wiki) for more information as well. This code base is a port of the service repo.
+
 ## Index
 
 * [Installation](https://github.com/ardanlabs/encore#installation)
