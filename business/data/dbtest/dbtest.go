@@ -14,14 +14,14 @@ import (
 
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
-	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/home/stores/homedb"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/product/stores/productdb"
-	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
-	"github.com/ardanlabs/encore/business/core/views/vproduct"
-	"github.com/ardanlabs/encore/business/core/views/vproduct/stores/vproductdb"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
+	"github.com/ardanlabs/encore/business/core/crud/homebus/stores/homedb"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/productbus/stores/productdb"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus/stores/userdb"
+	"github.com/ardanlabs/encore/business/core/views/vproductbus"
+	"github.com/ardanlabs/encore/business/core/views/vproductbus/stores/vproductdb"
 	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -56,14 +56,14 @@ func StopDB() error {
 // BusCrud provides core business crud apis.
 type BusCrud struct {
 	Delegate *delegate.Delegate
-	Home     *home.Core
-	Product  *product.Core
-	User     *user.Core
+	Home     *homebus.Core
+	Product  *productbus.Core
+	User     *userbus.Core
 }
 
 // BusView provides core business view apis.
 type BusView struct {
-	Product *vproduct.Core
+	Product *vproductbus.Core
 }
 
 // Core represents all the core api's needed for testing.
@@ -74,20 +74,20 @@ type Core struct {
 
 func newCoreAPIs(db *sqlx.DB) Core {
 	delegate := delegate.New()
-	userCore := user.NewCore(delegate, userdb.NewStore(db))
-	productCore := product.NewCore(userCore, delegate, productdb.NewStore(db))
-	homeCore := home.NewCore(userCore, delegate, homedb.NewStore(db))
-	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
+	userBus := userbus.NewCore(delegate, userdb.NewStore(db))
+	productBus := productbus.NewCore(userBus, delegate, productdb.NewStore(db))
+	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(db))
+	vproductBus := vproductbus.NewCore(vproductdb.NewStore(db))
 
 	return Core{
 		BusCrud: BusCrud{
 			Delegate: delegate,
-			Home:     homeCore,
-			Product:  productCore,
-			User:     userCore,
+			Home:     homeBus,
+			Product:  productBus,
+			User:     userBus,
 		},
 		BusView: BusView{
-			Product: vproductCore,
+			Product: vproductBus,
 		},
 	}
 }

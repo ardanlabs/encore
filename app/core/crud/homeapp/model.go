@@ -8,7 +8,7 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
-	"github.com/ardanlabs/encore/business/core/crud/home"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 
@@ -44,7 +44,7 @@ type Home struct {
 	DateUpdated string  `json:"dateUpdated"`
 }
 
-func toAppHome(hme home.Home) Home {
+func toAppHome(hme homebus.Home) Home {
 	return Home{
 		ID:     hme.ID.String(),
 		UserID: hme.UserID.String(),
@@ -62,7 +62,7 @@ func toAppHome(hme home.Home) Home {
 	}
 }
 
-func toAppHomes(homes []home.Home) []Home {
+func toAppHomes(homes []homebus.Home) []Home {
 	items := make([]Home, len(homes))
 	for i, hme := range homes {
 		items[i] = toAppHome(hme)
@@ -87,21 +87,21 @@ type NewHome struct {
 	Address NewAddress `json:"address"`
 }
 
-func toBusNewHome(ctx context.Context, app NewHome) (home.NewHome, error) {
+func toBusNewHome(ctx context.Context, app NewHome) (homebus.NewHome, error) {
 	userID, err := mid.GetUserID(ctx)
 	if err != nil {
-		return home.NewHome{}, fmt.Errorf("getuserid: %w", err)
+		return homebus.NewHome{}, fmt.Errorf("getuserid: %w", err)
 	}
 
-	typ, err := home.ParseType(app.Type)
+	typ, err := homebus.ParseType(app.Type)
 	if err != nil {
-		return home.NewHome{}, fmt.Errorf("parse: %w", err)
+		return homebus.NewHome{}, fmt.Errorf("parse: %w", err)
 	}
 
-	hme := home.NewHome{
+	hme := homebus.NewHome{
 		UserID: userID,
 		Type:   typ,
-		Address: home.Address{
+		Address: homebus.Address{
 			Address1: app.Address.Address1,
 			Address2: app.Address.Address2,
 			ZipCode:  app.Address.ZipCode,
@@ -148,22 +148,22 @@ type UpdateHome struct {
 	Address *UpdateAddress `json:"address"`
 }
 
-func toBusUpdateHome(app UpdateHome) (home.UpdateHome, error) {
-	var typ home.Type
+func toBusUpdateHome(app UpdateHome) (homebus.UpdateHome, error) {
+	var typ homebus.Type
 	if app.Type != nil {
 		var err error
-		typ, err = home.ParseType(*app.Type)
+		typ, err = homebus.ParseType(*app.Type)
 		if err != nil {
-			return home.UpdateHome{}, fmt.Errorf("parse: %w", err)
+			return homebus.UpdateHome{}, fmt.Errorf("parse: %w", err)
 		}
 	}
 
-	core := home.UpdateHome{
+	core := homebus.UpdateHome{
 		Type: &typ,
 	}
 
 	if app.Address != nil {
-		core.Address = &home.UpdateAddress{
+		core.Address = &homebus.UpdateAddress{
 			Address1: app.Address.Address1,
 			Address2: app.Address.Address2,
 			ZipCode:  app.Address.ZipCode,

@@ -7,9 +7,9 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 	"github.com/google/uuid"
 )
 
@@ -37,46 +37,46 @@ func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	return v, nil
 }
 
-func setUser(req middleware.Request, usr user.User) middleware.Request {
+func setUser(req middleware.Request, usr userbus.User) middleware.Request {
 	ctx := context.WithValue(req.Context(), userKey, usr)
 	return req.WithContext(ctx)
 }
 
 // GetUser extracts the user from the context.
-func GetUser(ctx context.Context) (user.User, error) {
-	v, ok := ctx.Value(userKey).(user.User)
+func GetUser(ctx context.Context) (userbus.User, error) {
+	v, ok := ctx.Value(userKey).(userbus.User)
 	if !ok {
-		return user.User{}, errors.New("user not found")
+		return userbus.User{}, errors.New("user not found")
 	}
 
 	return v, nil
 }
 
-func setProduct(req middleware.Request, prd product.Product) middleware.Request {
+func setProduct(req middleware.Request, prd productbus.Product) middleware.Request {
 	ctx := context.WithValue(req.Context(), productKey, prd)
 	return req.WithContext(ctx)
 }
 
 // GetProduct returns the product from the context.
-func GetProduct(ctx context.Context) (product.Product, error) {
-	v, ok := ctx.Value(productKey).(product.Product)
+func GetProduct(ctx context.Context) (productbus.Product, error) {
+	v, ok := ctx.Value(productKey).(productbus.Product)
 	if !ok {
-		return product.Product{}, errors.New("product not found in context")
+		return productbus.Product{}, errors.New("product not found in context")
 	}
 
 	return v, nil
 }
 
-func setHome(req middleware.Request, hme home.Home) middleware.Request {
+func setHome(req middleware.Request, hme homebus.Home) middleware.Request {
 	ctx := context.WithValue(req.Context(), homeKey, hme)
 	return req.WithContext(ctx)
 }
 
 // GetHome returns the home from the context.
-func GetHome(ctx context.Context) (home.Home, error) {
-	v, ok := ctx.Value(homeKey).(home.Home)
+func GetHome(ctx context.Context) (homebus.Home, error) {
+	v, ok := ctx.Value(homeKey).(homebus.Home)
 	if !ok {
-		return home.Home{}, errors.New("home not found in context")
+		return homebus.Home{}, errors.New("home not found in context")
 	}
 
 	return v, nil

@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/ardanlabs/encore/business/api/order"
-	"github.com/ardanlabs/encore/business/core/views/vproduct"
+	"github.com/ardanlabs/encore/business/core/views/vproductbus"
 	"github.com/ardanlabs/encore/foundation/validate"
 )
 
@@ -19,12 +19,12 @@ func parseOrder(qp QueryParams) (order.By, error) {
 	)
 
 	var orderByFields = map[string]string{
-		orderByProductID: vproduct.OrderByProductID,
-		orderByUserID:    vproduct.OrderByUserID,
-		orderByName:      vproduct.OrderByName,
-		orderByCost:      vproduct.OrderByCost,
-		orderByQuantity:  vproduct.OrderByQuantity,
-		orderByUserName:  vproduct.OrderByUserName,
+		orderByProductID: vproductbus.OrderByProductID,
+		orderByUserID:    vproductbus.OrderByUserID,
+		orderByName:      vproductbus.OrderByName,
+		orderByCost:      vproductbus.OrderByCost,
+		orderByQuantity:  vproductbus.OrderByQuantity,
+		orderByUserName:  vproductbus.OrderByUserName,
 	}
 
 	orderBy, err := order.Parse(qp.OrderBy, order.NewBy(orderByProductID, order.ASC))

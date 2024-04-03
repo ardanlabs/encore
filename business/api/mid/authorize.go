@@ -8,9 +8,9 @@ import (
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/errs"
-	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +38,7 @@ func Authorize(a *auth.Auth, req middleware.Request, next middleware.Next) middl
 
 // AuthorizeUser checks the user making the call has specified a user id on
 // the route that matches the claims.
-func AuthorizeUser(a *auth.Auth, userCore *user.Core, req middleware.Request, next middleware.Next) middleware.Response {
+func AuthorizeUser(a *auth.Auth, userBus *userbus.Core, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -59,10 +59,10 @@ func AuthorizeUser(a *auth.Auth, userCore *user.Core, req middleware.Request, ne
 			return errs.NewResponse(eerrs.Unauthenticated, ErrInvalidID)
 		}
 
-		usr, err := userCore.QueryByID(ctx, userID)
+		usr, err := userBus.QueryByID(ctx, userID)
 		if err != nil {
 			switch {
-			case errors.Is(err, user.ErrNotFound):
+			case errors.Is(err, userbus.ErrNotFound):
 				return errs.NewResponse(eerrs.Unauthenticated, err)
 
 			default:
@@ -84,7 +84,7 @@ func AuthorizeUser(a *auth.Auth, userCore *user.Core, req middleware.Request, ne
 
 // AuthorizeProduct checks the user making the call has specified a product id on
 // the route that matches the claims.
-func AuthorizeProduct(a *auth.Auth, productCore *product.Core, req middleware.Request, next middleware.Next) middleware.Response {
+func AuthorizeProduct(a *auth.Auth, productCore *productbus.Core, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -99,7 +99,7 @@ func AuthorizeProduct(a *auth.Auth, productCore *product.Core, req middleware.Re
 		prd, err := productCore.QueryByID(ctx, productID)
 		if err != nil {
 			switch {
-			case errors.Is(err, product.ErrNotFound):
+			case errors.Is(err, productbus.ErrNotFound):
 				return errs.NewResponse(eerrs.Unauthenticated, err)
 
 			default:
@@ -122,7 +122,7 @@ func AuthorizeProduct(a *auth.Auth, productCore *product.Core, req middleware.Re
 
 // AuthorizeHome checks the user making the call has specified a home id on
 // the route that matches the claims.
-func AuthorizeHome(a *auth.Auth, homeCore *home.Core, req middleware.Request, next middleware.Next) middleware.Response {
+func AuthorizeHome(a *auth.Auth, homeCore *homebus.Core, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -137,7 +137,7 @@ func AuthorizeHome(a *auth.Auth, homeCore *home.Core, req middleware.Request, ne
 		hme, err := homeCore.QueryByID(ctx, homeID)
 		if err != nil {
 			switch {
-			case errors.Is(err, home.ErrNotFound):
+			case errors.Is(err, homebus.ErrNotFound):
 				return errs.NewResponse(eerrs.Unauthenticated, err)
 
 			default:

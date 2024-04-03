@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/ardanlabs/encore/app/core/crud/userapp"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 )
 
-func toAppUser(usr user.User) userapp.User {
+func toAppUser(usr userbus.User) userapp.User {
 	roles := make([]string, len(usr.Roles))
 	for i, role := range usr.Roles {
 		roles[i] = role.Name()
@@ -26,7 +26,7 @@ func toAppUser(usr user.User) userapp.User {
 	}
 }
 
-func toAppUsers(users []user.User) []userapp.User {
+func toAppUsers(users []userbus.User) []userapp.User {
 	items := make([]userapp.User, len(users))
 	for i, usr := range users {
 		items[i] = toAppUser(usr)

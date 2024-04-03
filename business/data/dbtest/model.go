@@ -1,17 +1,17 @@
 package dbtest
 
 import (
-	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 )
 
 // User represents an app user specified for the test.
 type User struct {
-	user.User
+	userbus.User
 	Token    string
-	Products []product.Product
-	Homes    []home.Home
+	Products []productbus.Product
+	Homes    []homebus.Home
 }
 
 // SeedData represents data that was seeded for the test.

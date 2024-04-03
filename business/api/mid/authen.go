@@ -13,7 +13,7 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/errs"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -29,7 +29,7 @@ type AuthParams struct {
 // =============================================================================
 
 // AuthHandler is used to provide initial auth for JWT's and basic user:password.
-func AuthHandler(ctx context.Context, a *auth.Auth, userCore *user.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
+func AuthHandler(ctx context.Context, a *auth.Auth, userBus *userbus.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 	if len(parts) != 2 {
 		return "", nil, errs.Newf(eerrs.Unauthenticated, "invalid authorization value")
@@ -40,7 +40,7 @@ func AuthHandler(ctx context.Context, a *auth.Auth, userCore *user.Core, ap *Aut
 		return processJWT(ctx, a, ap.Authorization)
 
 	case "Basic":
-		return processBasic(ctx, userCore, ap.Authorization)
+		return processBasic(ctx, userBus, ap.Authorization)
 	}
 
 	return "", nil, errs.Newf(eerrs.Unauthenticated, eerrs.Unauthenticated.String())
@@ -66,7 +66,7 @@ func processJWT(ctx context.Context, a *auth.Auth, token string) (eauth.UID, *au
 	return eauth.UID(subjectID.String()), &claims, nil
 }
 
-func processBasic(ctx context.Context, userCore *user.Core, basic string) (eauth.UID, *auth.Claims, error) {
+func processBasic(ctx context.Context, userBus *userbus.Core, basic string) (eauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(basic)
 	if !ok {
 		return "", nil, errs.Newf(eerrs.Unauthenticated, "invalid Basic auth")
@@ -77,7 +77,7 @@ func processBasic(ctx context.Context, userCore *user.Core, basic string) (eauth
 		return "", nil, errs.New(eerrs.Unauthenticated, err)
 	}
 
-	usr, err := userCore.Authenticate(ctx, *addr, pass)
+	usr, err := userBus.Authenticate(ctx, *addr, pass)
 	if err != nil {
 		return "", nil, errs.New(eerrs.Unauthenticated, err)
 	}

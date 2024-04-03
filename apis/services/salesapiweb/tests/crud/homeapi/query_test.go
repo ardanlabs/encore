@@ -7,13 +7,13 @@ import (
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/homeapp"
 	"github.com/ardanlabs/encore/business/api/page"
-	"github.com/ardanlabs/encore/business/core/crud/home"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
 func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
-	hmes := make([]home.Home, 0, len(sd.Admins[0].Homes)+len(sd.Users[0].Homes))
+	hmes := make([]homebus.Home, 0, len(sd.Admins[0].Homes)+len(sd.Users[0].Homes))
 	hmes = append(hmes, sd.Admins[0].Homes...)
 	hmes = append(hmes, sd.Users[0].Homes...)
 

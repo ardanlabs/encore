@@ -11,20 +11,20 @@ import (
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/api/page"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 )
 
 // Core manages the set of app layer api functions for the user domain.
 type Core struct {
-	user *user.Core
-	auth *auth.Auth
+	userBus *userbus.Core
+	auth    *auth.Auth
 }
 
 // NewCore constructs a user core API for use.
-func NewCore(user *user.Core, auth *auth.Auth) *Core {
+func NewCore(userBus *userbus.Core, auth *auth.Auth) *Core {
 	return &Core{
-		user: user,
-		auth: auth,
+		userBus: userBus,
+		auth:    auth,
 	}
 }
 
@@ -47,10 +47,10 @@ func (c *Core) Create(ctx context.Context, app NewUser) (User, error) {
 		return User{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
-	usr, err := c.user.Create(ctx, nc)
+	usr, err := c.userBus.Create(ctx, nc)
 	if err != nil {
-		if errors.Is(err, user.ErrUniqueEmail) {
-			return User{}, errs.New(eerrs.Aborted, user.ErrUniqueEmail)
+		if errors.Is(err, userbus.ErrUniqueEmail) {
+			return User{}, errs.New(eerrs.Aborted, userbus.ErrUniqueEmail)
 		}
 		return User{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
@@ -70,7 +70,7 @@ func (c *Core) Update(ctx context.Context, userID string, app UpdateUser) (User,
 		return User{}, errs.Newf(eerrs.Internal, "user missing in context: %s", err)
 	}
 
-	updUsr, err := c.user.Update(ctx, usr, uu)
+	updUsr, err := c.userBus.Update(ctx, usr, uu)
 	if err != nil {
 		return User{}, errs.Newf(eerrs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
@@ -90,7 +90,7 @@ func (c *Core) UpdateRole(ctx context.Context, userID string, app UpdateUserRole
 		return User{}, errs.Newf(eerrs.Internal, "user missing in context: %s", err)
 	}
 
-	updUsr, err := c.user.Update(ctx, usr, uu)
+	updUsr, err := c.userBus.Update(ctx, usr, uu)
 	if err != nil {
 		return User{}, errs.Newf(eerrs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
@@ -105,7 +105,7 @@ func (c *Core) Delete(ctx context.Context, userID string) error {
 		return errs.Newf(eerrs.Internal, "userID[%s] missing in context: %s", userID, err)
 	}
 
-	if err := c.user.Delete(ctx, usr); err != nil {
+	if err := c.userBus.Delete(ctx, usr); err != nil {
 		return errs.Newf(eerrs.Internal, "delete: userID[%s]: %s", usr.ID, err)
 	}
 
@@ -128,12 +128,12 @@ func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[User], 
 		return page.Document[User]{}, err
 	}
 
-	usrs, err := c.user.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	usrs, err := c.userBus.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
 		return page.Document[User]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
-	total, err := c.user.Count(ctx, filter)
+	total, err := c.userBus.Count(ctx, filter)
 	if err != nil {
 		return page.Document[User]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}

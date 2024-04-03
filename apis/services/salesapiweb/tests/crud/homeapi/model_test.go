@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/ardanlabs/encore/app/core/crud/homeapp"
-	"github.com/ardanlabs/encore/business/core/crud/home"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
 )
 
-func toAppHome(hme home.Home) homeapp.Home {
+func toAppHome(hme homebus.Home) homeapp.Home {
 	return homeapp.Home{
 		ID:     hme.ID.String(),
 		UserID: hme.UserID.String(),
@@ -25,7 +25,7 @@ func toAppHome(hme home.Home) homeapp.Home {
 	}
 }
 
-func toAppHomes(homes []home.Home) []homeapp.Home {
+func toAppHomes(homes []homebus.Home) []homeapp.Home {
 	items := make([]homeapp.Home, len(homes))
 	for i, hme := range homes {
 		items[i] = toAppHome(hme)

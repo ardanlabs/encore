@@ -7,21 +7,21 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/business/api/errs"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 )
 
 // Core manages the set of app layer api functions for the tran domain.
 type Core struct {
-	user    *user.Core
-	product *product.Core
+	userBus    *userbus.Core
+	productBus *productbus.Core
 }
 
 // NewCore constructs a tran core API for use.
-func NewCore(user *user.Core, product *product.Core) *Core {
+func NewCore(userBus *userbus.Core, productBus *productbus.Core) *Core {
 	return &Core{
-		user:    user,
-		product: product,
+		userBus:    userBus,
+		productBus: productBus,
 	}
 }
 
@@ -42,17 +42,17 @@ func (c *Core) Create(ctx context.Context, app NewTran) (Product, error) {
 		return Product{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
-	usr, err := h.user.Create(ctx, nu)
+	usr, err := h.userBus.Create(ctx, nu)
 	if err != nil {
-		if errors.Is(err, user.ErrUniqueEmail) {
-			return Product{}, errs.New(eerrs.Aborted, user.ErrUniqueEmail)
+		if errors.Is(err, userbus.ErrUniqueEmail) {
+			return Product{}, errs.New(eerrs.Aborted, userbus.ErrUniqueEmail)
 		}
 		return Product{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
 
 	np.UserID = usr.ID
 
-	prd, err := h.product.Create(ctx, np)
+	prd, err := h.productBus.Create(ctx, np)
 	if err != nil {
 		return Product{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
 	}

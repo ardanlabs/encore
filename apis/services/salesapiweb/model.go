@@ -6,9 +6,9 @@ import (
 	"github.com/ardanlabs/encore/app/core/crud/tranapp"
 	"github.com/ardanlabs/encore/app/core/crud/userapp"
 	"github.com/ardanlabs/encore/app/core/views/vproductapp"
-	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 )
 
 type appCrud struct {
@@ -23,7 +23,7 @@ type appView struct {
 }
 
 type busCrud struct {
-	home    *home.Core
-	product *product.Core
-	user    *user.Core
+	home    *homebus.Core
+	product *productbus.Core
+	user    *userbus.Core
 }

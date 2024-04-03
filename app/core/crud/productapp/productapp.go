@@ -8,18 +8,18 @@ import (
 	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/api/page"
-	"github.com/ardanlabs/encore/business/core/crud/product"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
 )
 
 // Core manages the set of app layer api functions for the product domain.
 type Core struct {
-	product *product.Core
+	productBus *productbus.Core
 }
 
 // NewCore constructs a product core API for use.
-func NewCore(product *product.Core) *Core {
+func NewCore(productBus *productbus.Core) *Core {
 	return &Core{
-		product: product,
+		productBus: productBus,
 	}
 }
 
@@ -30,7 +30,7 @@ func (c *Core) Create(ctx context.Context, app NewProduct) (Product, error) {
 		return Product{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
-	prd, err := c.product.Create(ctx, np)
+	prd, err := c.productBus.Create(ctx, np)
 	if err != nil {
 		return Product{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
@@ -45,7 +45,7 @@ func (c *Core) Update(ctx context.Context, productID string, app UpdateProduct) 
 		return Product{}, errs.Newf(eerrs.Internal, "product missing in context: %s", err)
 	}
 
-	updPrd, err := c.product.Update(ctx, prd, toBusUpdateProduct(app))
+	updPrd, err := c.productBus.Update(ctx, prd, toBusUpdateProduct(app))
 	if err != nil {
 		return Product{}, errs.Newf(eerrs.Internal, "update: productID[%s] up[%+v]: %s", prd.ID, app, err)
 	}
@@ -60,7 +60,7 @@ func (c *Core) Delete(ctx context.Context, productID string) error {
 		return errs.Newf(eerrs.Internal, "productID[%s] missing in context: %s", productID, err)
 	}
 
-	if err := c.product.Delete(ctx, prd); err != nil {
+	if err := c.productBus.Delete(ctx, prd); err != nil {
 		return errs.Newf(eerrs.Internal, "delete: productID[%s]: %s", prd.ID, err)
 	}
 
@@ -83,12 +83,12 @@ func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Product
 		return page.Document[Product]{}, err
 	}
 
-	prds, err := c.product.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	prds, err := c.productBus.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
 	if err != nil {
 		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
-	total, err := c.product.Count(ctx, filter)
+	total, err := c.productBus.Count(ctx, filter)
 	if err != nil {
 		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}

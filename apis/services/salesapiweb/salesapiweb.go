@@ -21,14 +21,14 @@ import (
 	"github.com/ardanlabs/encore/business/api/debug"
 	"github.com/ardanlabs/encore/business/api/metrics"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
-	"github.com/ardanlabs/encore/business/core/crud/home"
-	"github.com/ardanlabs/encore/business/core/crud/home/stores/homedb"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/product/stores/productdb"
-	"github.com/ardanlabs/encore/business/core/crud/user"
-	"github.com/ardanlabs/encore/business/core/crud/user/stores/userdb"
-	"github.com/ardanlabs/encore/business/core/views/vproduct"
-	"github.com/ardanlabs/encore/business/core/views/vproduct/stores/vproductdb"
+	"github.com/ardanlabs/encore/business/core/crud/homebus"
+	"github.com/ardanlabs/encore/business/core/crud/homebus/stores/homedb"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/productbus/stores/productdb"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus/stores/userdb"
+	"github.com/ardanlabs/encore/business/core/views/vproductbus"
+	"github.com/ardanlabs/encore/business/core/views/vproductbus/stores/vproductdb"
 	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -52,28 +52,28 @@ type Service struct {
 // NewService is called to create a new encore Service.
 func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	delegate := delegate.New()
-	userCore := user.NewCore(delegate, userdb.NewStore(db))
-	productCore := product.NewCore(userCore, delegate, productdb.NewStore(db))
-	homeCore := home.NewCore(userCore, delegate, homedb.NewStore(db))
-	vproductCore := vproduct.NewCore(vproductdb.NewStore(db))
+	userBus := userbus.NewCore(delegate, userdb.NewStore(db))
+	productBus := productbus.NewCore(userBus, delegate, productdb.NewStore(db))
+	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(db))
+	vproductBus := vproductbus.NewCore(vproductdb.NewStore(db))
 
 	s := Service{
 		mtrcs: newMetrics(),
 		db:    db,
 		auth:  ath,
 		appCrud: appCrud{
-			user:    userapp.NewCore(userCore, ath),
-			product: productapp.NewCore(productCore),
-			home:    homeapp.NewCore(homeCore),
-			tran:    tranapp.NewCore(userCore, productCore),
+			user:    userapp.NewCore(userBus, ath),
+			product: productapp.NewCore(productBus),
+			home:    homeapp.NewCore(homeBus),
+			tran:    tranapp.NewCore(userBus, productBus),
 		},
 		appView: appView{
-			product: vproductapp.NewCore(vproductCore),
+			product: vproductapp.NewCore(vproductBus),
 		},
 		busCrud: busCrud{
-			user:    userCore,
-			product: productCore,
-			home:    homeCore,
+			user:    userBus,
+			product: productBus,
+			home:    homeBus,
 		},
 		debug: debug.Mux(),
 	}

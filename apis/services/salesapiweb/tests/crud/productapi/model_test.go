@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/ardanlabs/encore/app/core/crud/productapp"
-	"github.com/ardanlabs/encore/business/core/crud/product"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
 )
 
-func toAppProduct(prd product.Product) productapp.Product {
+func toAppProduct(prd productbus.Product) productapp.Product {
 	return productapp.Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
@@ -19,7 +19,7 @@ func toAppProduct(prd product.Product) productapp.Product {
 	}
 }
 
-func toAppProducts(prds []product.Product) []productapp.Product {
+func toAppProducts(prds []productbus.Product) []productapp.Product {
 	items := make([]productapp.Product, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppProduct(prd)

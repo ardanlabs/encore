@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/ardanlabs/encore/app/core/views/vproductapp"
-	"github.com/ardanlabs/encore/business/core/crud/product"
-	"github.com/ardanlabs/encore/business/core/crud/user"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
+	"github.com/ardanlabs/encore/business/core/crud/userbus"
 )
 
-func toAppVProduct(usr user.User, prd product.Product) vproductapp.Product {
+func toAppVProduct(usr userbus.User, prd productbus.Product) vproductapp.Product {
 	return vproductapp.Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
@@ -21,7 +21,7 @@ func toAppVProduct(usr user.User, prd product.Product) vproductapp.Product {
 	}
 }
 
-func toAppVProducts(usr user.User, prds []product.Product) []vproductapp.Product {
+func toAppVProducts(usr userbus.User, prds []productbus.Product) []vproductapp.Product {
 	items := make([]vproductapp.Product, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppVProduct(usr, prd)

@@ -7,13 +7,13 @@ import (
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
 	"github.com/ardanlabs/encore/app/core/crud/productapp"
 	"github.com/ardanlabs/encore/business/api/page"
-	"github.com/ardanlabs/encore/business/core/crud/product"
+	"github.com/ardanlabs/encore/business/core/crud/productbus"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
 func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
-	prds := make([]product.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
+	prds := make([]productbus.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
 	prds = append(prds, sd.Admins[0].Products...)
 	prds = append(prds, sd.Users[0].Products...)
 
