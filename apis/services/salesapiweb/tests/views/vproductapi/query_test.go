@@ -5,13 +5,14 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/app/core/views/vproductapp"
-	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
+func vproductQueryOk(sd dbtest.SeedData) []apptest.AppTable {
 	prds := toAppVProducts(sd.Admins[0].User, sd.Admins[0].Products)
 	prds = append(prds, toAppVProducts(sd.Users[0].User, sd.Users[0].Products)...)
 
@@ -19,7 +20,7 @@ func vproductQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		return prds[i].ID <= prds[j].ID
 	})
 
-	table := []dbtest.AppTable{
+	table := []apptest.AppTable{
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,

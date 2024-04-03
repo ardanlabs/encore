@@ -5,14 +5,15 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/app/core/crud/userapp"
-	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/userbus"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
+func userQueryOk(sd dbtest.SeedData) []apptest.AppTable {
 	usrs := make([]userbus.User, 0, len(sd.Admins)+len(sd.Users))
 
 	for _, adm := range sd.Admins {
@@ -27,7 +28,7 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		return usrs[i].ID.String() <= usrs[j].ID.String()
 	})
 
-	table := []dbtest.AppTable{
+	table := []apptest.AppTable{
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
@@ -61,8 +62,8 @@ func userQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func userQueryByIDOk(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "byid",
 			Token:   sd.Users[0].Token,

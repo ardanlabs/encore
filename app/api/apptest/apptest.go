@@ -1,4 +1,5 @@
-package dbtest
+// Package apptest contains supporting code for running app layer tests.
+package apptest
 
 import (
 	"context"
@@ -6,9 +7,9 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/app/api/errs"
+	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
-	"github.com/ardanlabs/encore/business/api/errs"
-	"github.com/ardanlabs/encore/business/api/mid"
 )
 
 // AppTable represent fields needed for running an app test.
@@ -29,7 +30,13 @@ type Service interface {
 
 // AppTest contains functions for executing an app test.
 type AppTest struct {
-	Service Service
+	service Service
+}
+
+func New(service Service) *AppTest {
+	return &AppTest{
+		service: service,
+	}
 }
 
 // Test performs the actual test logic based on the table data.
@@ -72,7 +79,7 @@ func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
 }
 
 func (at *AppTest) authHandler(ctx context.Context, token string) (context.Context, error) {
-	uid, claims, err := at.Service.AuthHandler(ctx, &mid.AuthParams{
+	uid, claims, err := at.service.AuthHandler(ctx, &mid.AuthParams{
 		Authorization: "Bearer " + token,
 	})
 

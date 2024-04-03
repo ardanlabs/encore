@@ -5,14 +5,15 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/app/core/crud/homeapp"
-	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/homebus"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
+func homeQueryOk(sd dbtest.SeedData) []apptest.AppTable {
 	hmes := make([]homebus.Home, 0, len(sd.Admins[0].Homes)+len(sd.Users[0].Homes))
 	hmes = append(hmes, sd.Admins[0].Homes...)
 	hmes = append(hmes, sd.Users[0].Homes...)
@@ -21,7 +22,7 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		return hmes[i].ID.String() <= hmes[j].ID.String()
 	})
 
-	table := []dbtest.AppTable{
+	table := []apptest.AppTable{
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
@@ -54,8 +55,8 @@ func homeQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func homeQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func homeQueryByIDOk(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "byid",
 			Token:   sd.Users[0].Token,

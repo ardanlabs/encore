@@ -5,14 +5,15 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/core/crud/userapp"
-	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func userCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func userCreateOk(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:  "basic",
 			Token: sd.Admins[0].Token,
@@ -60,8 +61,8 @@ func userCreateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func userCreateBad(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "missing",
 			Token:   sd.Admins[0].Token,
@@ -74,7 +75,7 @@ func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "role",
@@ -97,15 +98,15 @@ func userCreateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 	}
 
 	return table
 }
 
-func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func userCreateAuth(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "emptytoken",
 			Token:   "",
@@ -118,7 +119,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "token",
@@ -132,7 +133,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -146,7 +147,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -169,7 +170,7 @@ func userCreateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 	}
 

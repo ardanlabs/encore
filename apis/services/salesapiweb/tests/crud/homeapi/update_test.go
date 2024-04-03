@@ -6,14 +6,15 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/core/crud/homeapp"
-	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func homeUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func homeUpdateOk(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:  "basic",
 			Token: sd.Users[0].Token,
@@ -63,8 +64,8 @@ func homeUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func homeUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func homeUpdateBad(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "input",
 			Token:   sd.Users[0].Token,
@@ -88,7 +89,7 @@ func homeUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "type",
@@ -106,15 +107,15 @@ func homeUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 	}
 
 	return table
 }
 
-func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func homeUpdateAuth(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "emptytoken",
 			Token:   "",
@@ -127,7 +128,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "token",
@@ -141,7 +142,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -155,7 +156,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -181,7 +182,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 	}
 

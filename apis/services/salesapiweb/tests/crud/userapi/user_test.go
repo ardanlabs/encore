@@ -8,6 +8,7 @@ import (
 
 	"encore.dev/et"
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 
@@ -64,9 +65,7 @@ func Test_User(t *testing.T) {
 	}
 	et.MockService("salesapiweb", service, et.RunMiddleware(true))
 
-	app := dbtest.AppTest{
-		Service: service,
-	}
+	app := apptest.New(service)
 
 	// -------------------------------------------------------------------------
 

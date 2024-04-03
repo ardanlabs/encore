@@ -6,14 +6,15 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/core/crud/productapp"
-	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func productUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func productUpdateOk(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:  "basic",
 			Token: sd.Users[0].Token,
@@ -55,8 +56,8 @@ func productUpdateOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func productUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func productUpdateBad(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "input",
 			Token:   sd.Users[0].Token,
@@ -74,15 +75,15 @@ func productUpdateBad(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 	}
 
 	return table
 }
 
-func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func productUpdateAuth(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "emptytoken",
 			Token:   "",
@@ -95,7 +96,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "token",
@@ -109,7 +110,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -123,7 +124,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -143,7 +144,7 @@ func productUpdateAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return resp
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 	}
 

@@ -5,13 +5,14 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
-	"github.com/ardanlabs/encore/business/api/errs"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func userDeleteOk(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "user",
 			Token:   sd.Users[1].Token,
@@ -47,8 +48,8 @@ func userDeleteOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func userDeleteAuth(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "emptytoken",
 			Token:   "",
@@ -61,7 +62,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return nil
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "sig",
@@ -75,7 +76,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return nil
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 		{
 			Name:    "wronguser",
@@ -89,7 +90,7 @@ func userDeleteAuth(sd dbtest.SeedData) []dbtest.AppTable {
 
 				return nil
 			},
-			CmpFunc: dbtest.CmpAppErrors,
+			CmpFunc: apptest.CmpAppErrors,
 		},
 	}
 

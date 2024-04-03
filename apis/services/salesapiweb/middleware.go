@@ -5,8 +5,8 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
+	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
-	"github.com/ardanlabs/encore/business/api/mid"
 )
 
 // =============================================================================

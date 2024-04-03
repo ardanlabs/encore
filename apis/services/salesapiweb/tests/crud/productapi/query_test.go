@@ -5,14 +5,15 @@ import (
 	"sort"
 
 	"github.com/ardanlabs/encore/apis/services/salesapiweb"
+	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/app/core/crud/productapp"
-	"github.com/ardanlabs/encore/business/api/page"
 	"github.com/ardanlabs/encore/business/core/crud/productbus"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
+func productQueryOk(sd dbtest.SeedData) []apptest.AppTable {
 	prds := make([]productbus.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
 	prds = append(prds, sd.Admins[0].Products...)
 	prds = append(prds, sd.Users[0].Products...)
@@ -21,7 +22,7 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 		return prds[i].ID.String() <= prds[j].ID.String()
 	})
 
-	table := []dbtest.AppTable{
+	table := []apptest.AppTable{
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
@@ -55,8 +56,8 @@ func productQueryOk(sd dbtest.SeedData) []dbtest.AppTable {
 	return table
 }
 
-func productQueryByIDOk(sd dbtest.SeedData) []dbtest.AppTable {
-	table := []dbtest.AppTable{
+func productQueryByIDOk(sd dbtest.SeedData) []apptest.AppTable {
+	table := []apptest.AppTable{
 		{
 			Name:    "byid",
 			Token:   sd.Users[0].Token,
