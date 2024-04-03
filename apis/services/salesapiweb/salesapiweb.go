@@ -36,17 +36,34 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type appCrud struct {
+	homeApp    *homeapp.Core
+	productApp *productapp.Core
+	tranApp    *tranapp.Core
+	userApp    *userapp.Core
+}
+
+type appView struct {
+	vproductApp *vproductapp.Core
+}
+
+type busCrud struct {
+	homeBus    *homebus.Core
+	productBus *productbus.Core
+	userBus    *userbus.Core
+}
+
 // Service represents the encore service application.
 //
 //encore:service
 type Service struct {
-	mtrcs   *metrics.Values
-	db      *sqlx.DB
-	auth    *auth.Auth
-	appCrud appCrud
-	appView appView
-	busCrud busCrud
-	debug   http.Handler
+	mtrcs *metrics.Values
+	db    *sqlx.DB
+	auth  *auth.Auth
+	debug http.Handler
+	appCrud
+	appView
+	busCrud
 }
 
 // NewService is called to create a new encore Service.
@@ -61,21 +78,21 @@ func NewService(db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 		mtrcs: newMetrics(),
 		db:    db,
 		auth:  ath,
+		debug: debug.Mux(),
 		appCrud: appCrud{
-			user:    userapp.NewCore(userBus, ath),
-			product: productapp.NewCore(productBus),
-			home:    homeapp.NewCore(homeBus),
-			tran:    tranapp.NewCore(userBus, productBus),
+			userApp:    userapp.NewCore(userBus, ath),
+			productApp: productapp.NewCore(productBus),
+			homeApp:    homeapp.NewCore(homeBus),
+			tranApp:    tranapp.NewCore(userBus, productBus),
 		},
 		appView: appView{
-			product: vproductapp.NewCore(vproductBus),
+			vproductApp: vproductapp.NewCore(vproductBus),
 		},
 		busCrud: busCrud{
-			user:    userBus,
-			product: productBus,
-			home:    homeBus,
+			userBus:    userBus,
+			productBus: productBus,
+			homeBus:    homeBus,
 		},
-		debug: debug.Mux(),
 	}
 
 	return &s, nil

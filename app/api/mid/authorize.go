@@ -84,7 +84,7 @@ func AuthorizeUser(a *auth.Auth, userBus *userbus.Core, req middleware.Request, 
 
 // AuthorizeProduct checks the user making the call has specified a product id on
 // the route that matches the claims.
-func AuthorizeProduct(a *auth.Auth, productCore *productbus.Core, req middleware.Request, next middleware.Next) middleware.Response {
+func AuthorizeProduct(a *auth.Auth, productBus *productbus.Core, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -96,7 +96,7 @@ func AuthorizeProduct(a *auth.Auth, productCore *productbus.Core, req middleware
 			return errs.NewResponse(eerrs.Unauthenticated, ErrInvalidID)
 		}
 
-		prd, err := productCore.QueryByID(ctx, productID)
+		prd, err := productBus.QueryByID(ctx, productID)
 		if err != nil {
 			switch {
 			case errors.Is(err, productbus.ErrNotFound):
@@ -122,7 +122,7 @@ func AuthorizeProduct(a *auth.Auth, productCore *productbus.Core, req middleware
 
 // AuthorizeHome checks the user making the call has specified a home id on
 // the route that matches the claims.
-func AuthorizeHome(a *auth.Auth, homeCore *homebus.Core, req middleware.Request, next middleware.Next) middleware.Response {
+func AuthorizeHome(a *auth.Auth, homeBus *homebus.Core, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -134,7 +134,7 @@ func AuthorizeHome(a *auth.Auth, homeCore *homebus.Core, req middleware.Request,
 			return errs.NewResponse(eerrs.Unauthenticated, ErrInvalidID)
 		}
 
-		hme, err := homeCore.QueryByID(ctx, homeID)
+		hme, err := homeBus.QueryByID(ctx, homeID)
 		if err != nil {
 			switch {
 			case errors.Is(err, homebus.ErrNotFound):
