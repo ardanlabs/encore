@@ -8,8 +8,8 @@ import (
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/errs"
-	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
+	"github.com/ardanlabs/encore/business/api/mid"
 )
 
 // AppTable represent fields needed for running an app test.
@@ -22,20 +22,18 @@ type AppTable struct {
 }
 
 // Service defines the method set required to exist for any encore service type.
-type Service interface {
-	AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error)
-}
+type AuthHandler func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error)
 
 // =============================================================================
 
 // AppTest contains functions for executing an app test.
 type AppTest struct {
-	service Service
+	handler AuthHandler
 }
 
-func New(service Service) *AppTest {
+func New(handler AuthHandler) *AppTest {
 	return &AppTest{
-		service: service,
+		handler: handler,
 	}
 }
 
@@ -79,7 +77,7 @@ func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
 }
 
 func (at *AppTest) authHandler(ctx context.Context, token string) (context.Context, error) {
-	uid, claims, err := at.service.AuthHandler(ctx, &mid.AuthParams{
+	uid, claims, err := at.handler(ctx, &mid.AuthParams{
 		Authorization: "Bearer " + token,
 	})
 

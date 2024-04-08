@@ -8,9 +8,9 @@ import (
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/errs"
-	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/business/api/auth"
+	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/core/crud/userbus"
 )
 
@@ -20,24 +20,19 @@ type Core struct {
 	auth    *auth.Auth
 }
 
-// NewCore constructs a user core API for use.
-func NewCore(userBus *userbus.Core, auth *auth.Auth) *Core {
+// NewCoreWithoutAuth constructs a user core API for use.
+func NewCore(userBus *userbus.Core) *Core {
 	return &Core{
 		userBus: userBus,
-		auth:    auth,
 	}
 }
 
-// Token provides an API token for the authenticated user.
-func (c *Core) Token(ctx context.Context, kid string) (Token, error) {
-	claims := eauth.Data().(*auth.Claims)
-
-	tkn, err := c.auth.GenerateToken(kid, *claims)
-	if err != nil {
-		return Token{}, errs.New(eerrs.Internal, err)
+// NewCoreWithoutAuth constructs a user core API for use.
+func NewCoreWithAuth(userBus *userbus.Core, auth *auth.Auth) *Core {
+	return &Core{
+		auth:    auth,
+		userBus: userBus,
 	}
-
-	return toToken(tkn), nil
 }
 
 // Create adds a new user to the system.
@@ -149,4 +144,20 @@ func (c *Core) QueryByID(ctx context.Context, userID string) (User, error) {
 	}
 
 	return toAppUser(usr), nil
+}
+
+// Token provides an API token for the authenticated user.
+func (c *Core) Token(ctx context.Context, kid string) (Token, error) {
+	if c.auth == nil {
+		return Token{}, errs.Newf(eerrs.Internal, "auth not configured")
+	}
+
+	claims := eauth.Data().(*auth.Claims)
+
+	tkn, err := c.auth.GenerateToken(kid, *claims)
+	if err != nil {
+		return Token{}, errs.New(eerrs.Internal, err)
+	}
+
+	return toToken(tkn), nil
 }

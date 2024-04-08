@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/crud/productbus"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -17,13 +18,15 @@ import (
 
 // Store manages the set of APIs for product database access.
 type Store struct {
-	db sqlx.ExtContext
+	log rlog.Ctx
+	db  sqlx.ExtContext
 }
 
 // NewStore constructs the api for data access.
-func NewStore(db *sqlx.DB) *Store {
+func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
 	return &Store{
-		db: db,
+		log: log,
+		db:  db,
 	}
 }
 
@@ -51,7 +54,7 @@ func (s *Store) Create(ctx context.Context, prd productbus.Product) error {
 	VALUES
 		(:product_id, :user_id, :name, :cost, :quantity, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, toDBProduct(prd)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBProduct(prd)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -72,7 +75,7 @@ func (s *Store) Update(ctx context.Context, prd productbus.Product) error {
 	WHERE
 		product_id = :product_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, toDBProduct(prd)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBProduct(prd)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -93,7 +96,7 @@ func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
 	WHERE
 		product_id = :product_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, data); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, data); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -125,7 +128,7 @@ func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderB
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
 	var dbPrds []dbProduct
-	if err := sqldb.NamedQuerySlice(ctx, s.db, buf.String(), data, &dbPrds); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -150,7 +153,7 @@ func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, 
 		Sold    int `db:"sold"`
 		Revenue int `db:"revenue"`
 	}
-	if err := sqldb.NamedQueryStruct(ctx, s.db, buf.String(), data, &count); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
 		return 0, fmt.Errorf("db: %w", err)
 	}
 
@@ -174,7 +177,7 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 		product_id = :product_id`
 
 	var dbPrd dbProduct
-	if err := sqldb.NamedQueryStruct(ctx, s.db, q, data, &dbPrd); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbPrd); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return productbus.Product{}, fmt.Errorf("db: %w", productbus.ErrNotFound)
 		}
@@ -201,7 +204,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productb
 		user_id = :user_id`
 
 	var dbPrds []dbProduct
-	if err := sqldb.NamedQuerySlice(ctx, s.db, q, data, &dbPrds); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 

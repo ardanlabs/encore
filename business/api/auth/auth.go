@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/core/crud/userbus"
 	"github.com/ardanlabs/encore/business/core/crud/userbus/stores/userdb"
 	"github.com/golang-jwt/jwt/v4"
@@ -46,6 +47,7 @@ type KeyLookup interface {
 
 // Config represents information required to initialize auth.
 type Config struct {
+	Log       rlog.Ctx
 	DB        *sqlx.DB
 	KeyLookup KeyLookup
 	Issuer    string
@@ -68,7 +70,7 @@ func New(cfg Config) (*Auth, error) {
 	// user enabled check.
 	var userBus *userbus.Core
 	if cfg.DB != nil {
-		userBus = userbus.NewCore(nil, userdb.NewStore(cfg.DB))
+		userBus = userbus.NewCore(nil, userdb.NewStore(cfg.Log, cfg.DB))
 	}
 
 	a := Auth{

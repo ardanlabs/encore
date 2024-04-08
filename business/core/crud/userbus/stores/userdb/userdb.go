@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/mail"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/crud/userbus"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -19,13 +20,15 @@ import (
 
 // Store manages the set of APIs for user database access.
 type Store struct {
-	db sqlx.ExtContext
+	log rlog.Ctx
+	db  sqlx.ExtContext
 }
 
 // NewStore constructs the api for data access.
-func NewStore(db *sqlx.DB) *Store {
+func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
 	return &Store{
-		db: db,
+		log: log,
+		db:  db,
 	}
 }
 
@@ -52,7 +55,7 @@ func (s *Store) Create(ctx context.Context, usr userbus.User) error {
 	VALUES
 		(:user_id, :name, :email, :password_hash, :roles, :department, :enabled, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, toDBUser(usr)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
 		if errors.Is(err, sqldb.ErrDBDuplicatedEntry) {
 			return fmt.Errorf("namedexeccontext: %w", userbus.ErrUniqueEmail)
 		}
@@ -78,7 +81,7 @@ func (s *Store) Update(ctx context.Context, usr userbus.User) error {
 	WHERE
 		user_id = :user_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, toDBUser(usr)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
 		if errors.Is(err, sqldb.ErrDBDuplicatedEntry) {
 			return userbus.ErrUniqueEmail
 		}
@@ -102,7 +105,7 @@ func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
 	WHERE
 		user_id = :user_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, data); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, data); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -134,7 +137,7 @@ func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy o
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
 	var dbUsrs []dbUser
-	if err := sqldb.NamedQuerySlice(ctx, s.db, buf.String(), data, &dbUsrs); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbUsrs); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -157,7 +160,7 @@ func (s *Store) Count(ctx context.Context, filter userbus.QueryFilter) (int, err
 	var count struct {
 		Count int `db:"count"`
 	}
-	if err := sqldb.NamedQueryStruct(ctx, s.db, buf.String(), data, &count); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
 		return 0, fmt.Errorf("db: %w", err)
 	}
 
@@ -181,7 +184,7 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, 
 		user_id = :user_id`
 
 	var dbUsr dbUser
-	if err := sqldb.NamedQueryStruct(ctx, s.db, q, data, &dbUsr); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return userbus.User{}, fmt.Errorf("db: %w", userbus.ErrNotFound)
 		}
@@ -213,7 +216,7 @@ func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]userbus.
 		user_id = ANY(:user_id)`
 
 	var dbUsrs []dbUser
-	if err := sqldb.NamedQuerySlice(ctx, s.db, q, data, &dbUsrs); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbUsrs); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return nil, userbus.ErrNotFound
 		}
@@ -240,7 +243,7 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.U
 		email = :email`
 
 	var dbUsr dbUser
-	if err := sqldb.NamedQueryStruct(ctx, s.db, q, data, &dbUsr); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return userbus.User{}, fmt.Errorf("db: %w", userbus.ErrNotFound)
 		}

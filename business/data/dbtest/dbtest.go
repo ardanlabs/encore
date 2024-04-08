@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/homebus"
@@ -72,12 +73,12 @@ type Core struct {
 	BusView BusView
 }
 
-func newCoreAPIs(db *sqlx.DB) Core {
-	delegate := delegate.New()
-	userBus := userbus.NewCore(delegate, userdb.NewStore(db))
-	productBus := productbus.NewCore(userBus, delegate, productdb.NewStore(db))
-	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(db))
-	vproductBus := vproductbus.NewCore(vproductdb.NewStore(db))
+func newCoreAPIs(log rlog.Ctx, db *sqlx.DB) Core {
+	delegate := delegate.New(log)
+	userBus := userbus.NewCore(delegate, userdb.NewStore(log, db))
+	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
+	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(log, db))
+	vproductBus := vproductbus.NewCore(vproductdb.NewStore(log, db))
 
 	return Core{
 		BusCrud: BusCrud{
@@ -96,6 +97,7 @@ func newCoreAPIs(db *sqlx.DB) Core {
 
 // Test owns state for running and shutting down tests.
 type Test struct {
+	Log      rlog.Ctx
 	DB       *sqlx.DB
 	Auth     *auth.Auth
 	Core     Core
@@ -109,6 +111,8 @@ type Test struct {
 func NewTest(t *testing.T, url string, testName string) *Test {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	log := rlog.With("service", "sales-test")
 
 	dbM, err := sqldb.OpenTest(url)
 	if err != nil {
@@ -152,6 +156,7 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 	// -------------------------------------------------------------------------
 
 	a, err := auth.New(auth.Config{
+		Log:       log,
 		DB:        db,
 		KeyLookup: &keyStore{},
 	})
@@ -177,9 +182,10 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 	}
 
 	tst := Test{
+		Log:      log,
 		DB:       db,
 		Auth:     a,
-		Core:     newCoreAPIs(db),
+		Core:     newCoreAPIs(log, db),
 		Teardown: teardown,
 		t:        t,
 	}
@@ -191,7 +197,7 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 func (tst *Test) Token(email string) string {
 	addr, _ := mail.ParseAddress(email)
 
-	store := userdb.NewStore(tst.DB)
+	store := userdb.NewStore(tst.Log, tst.DB)
 	dbUsr, err := store.QueryByEmail(context.Background(), *addr)
 	if err != nil {
 		return ""
