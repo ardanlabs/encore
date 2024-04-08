@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/views/vproductbus"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -14,13 +15,15 @@ import (
 
 // Store manages the set of APIs for product view database access.
 type Store struct {
-	db sqlx.ExtContext
+	log rlog.Ctx
+	db  sqlx.ExtContext
 }
 
 // NewStore constructs the api for data access.
-func NewStore(db *sqlx.DB) *Store {
+func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
 	return &Store{
-		db: db,
+		log: log,
+		db:  db,
 	}
 }
 
@@ -56,7 +59,7 @@ func (s *Store) Query(ctx context.Context, filter vproductbus.QueryFilter, order
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
 	var dnPrd []dbProduct
-	if err := sqldb.NamedQuerySlice(ctx, s.db, buf.String(), data, &dnPrd); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dnPrd); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -79,7 +82,7 @@ func (s *Store) Count(ctx context.Context, filter vproductbus.QueryFilter) (int,
 	var count struct {
 		Count int `db:"count"`
 	}
-	if err := sqldb.NamedQueryStruct(ctx, s.db, buf.String(), data, &count); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
 		return 0, fmt.Errorf("db: %w", err)
 	}
 

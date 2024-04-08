@@ -94,21 +94,21 @@ func StatusCheck(ctx context.Context, db *sqlx.DB) error {
 
 // ExecContext is a helper function to execute a CUD operation with
 // logging and tracing.
-func ExecContext(ctx context.Context, db sqlx.ExtContext, query string) error {
-	return NamedExecContext(ctx, db, query, struct{}{})
+func ExecContext(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string) error {
+	return NamedExecContext(ctx, log, db, query, struct{}{})
 }
 
 // NamedExecContext is a helper function to execute a CUD operation with
 // logging and tracing where field replacement is necessary.
-func NamedExecContext(ctx context.Context, db sqlx.ExtContext, query string, data any) (err error) {
+func NamedExecContext(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, data any) (err error) {
 	q := queryString(query, data)
 
 	defer func() {
 		if err != nil {
 			if _, ok := data.(struct{}); ok {
-				rlog.Info("database.NamedExecContext", "query", q, "ERROR", err)
+				log.Info("database.NamedExecContext", "query", q, "ERROR", err)
 			} else {
-				rlog.Info("database.NamedExecContext", "query", q, "ERROR", err)
+				log.Info("database.NamedExecContext", "query", q, "ERROR", err)
 			}
 		}
 	}()
@@ -130,30 +130,30 @@ func NamedExecContext(ctx context.Context, db sqlx.ExtContext, query string, dat
 
 // QuerySlice is a helper function for executing queries that return a
 // collection of data to be unmarshalled into a slice.
-func QuerySlice[T any](ctx context.Context, db sqlx.ExtContext, query string, dest *[]T) error {
-	return namedQuerySlice(ctx, db, query, struct{}{}, dest, false)
+func QuerySlice[T any](ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, dest *[]T) error {
+	return namedQuerySlice(ctx, log, db, query, struct{}{}, dest, false)
 }
 
 // NamedQuerySlice is a helper function for executing queries that return a
 // collection of data to be unmarshalled into a slice where field replacement is
 // necessary.
-func NamedQuerySlice[T any](ctx context.Context, db sqlx.ExtContext, query string, data any, dest *[]T) error {
-	return namedQuerySlice(ctx, db, query, data, dest, false)
+func NamedQuerySlice[T any](ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, data any, dest *[]T) error {
+	return namedQuerySlice(ctx, log, db, query, data, dest, false)
 }
 
 // NamedQuerySliceUsingIn is a helper function for executing queries that return
 // a collection of data to be unmarshalled into a slice where field replacement
 // is necessary. Use this if the query has an IN clause.
-func NamedQuerySliceUsingIn[T any](ctx context.Context, db sqlx.ExtContext, query string, data any, dest *[]T) error {
-	return namedQuerySlice(ctx, db, query, data, dest, true)
+func NamedQuerySliceUsingIn[T any](ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, data any, dest *[]T) error {
+	return namedQuerySlice(ctx, log, db, query, data, dest, true)
 }
 
-func namedQuerySlice[T any](ctx context.Context, db sqlx.ExtContext, query string, data any, dest *[]T, withIn bool) (err error) {
+func namedQuerySlice[T any](ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, data any, dest *[]T, withIn bool) (err error) {
 	q := queryString(query, data)
 
 	defer func() {
 		if err != nil {
-			rlog.Info("database.NamedQuerySlice", "query", q, "ERROR", err)
+			log.Info("database.NamedQuerySlice", "query", q, "ERROR", err)
 		}
 	}()
 
@@ -203,29 +203,29 @@ func namedQuerySlice[T any](ctx context.Context, db sqlx.ExtContext, query strin
 
 // QueryStruct is a helper function for executing queries that return a
 // single value to be unmarshalled into a struct type where field replacement is necessary.
-func QueryStruct(ctx context.Context, db sqlx.ExtContext, query string, dest any) error {
-	return namedQueryStruct(ctx, db, query, struct{}{}, dest, false)
+func QueryStruct(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, dest any) error {
+	return namedQueryStruct(ctx, log, db, query, struct{}{}, dest, false)
 }
 
 // NamedQueryStruct is a helper function for executing queries that return a
 // single value to be unmarshalled into a struct type where field replacement is necessary.
-func NamedQueryStruct(ctx context.Context, db sqlx.ExtContext, query string, data any, dest any) error {
-	return namedQueryStruct(ctx, db, query, data, dest, false)
+func NamedQueryStruct(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, data any, dest any) error {
+	return namedQueryStruct(ctx, log, db, query, data, dest, false)
 }
 
 // NamedQueryStructUsingIn is a helper function for executing queries that return
 // a single value to be unmarshalled into a struct type where field replacement
 // is necessary. Use this if the query has an IN clause.
-func NamedQueryStructUsingIn(ctx context.Context, db sqlx.ExtContext, query string, data any, dest any) error {
-	return namedQueryStruct(ctx, db, query, data, dest, true)
+func NamedQueryStructUsingIn(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, data any, dest any) error {
+	return namedQueryStruct(ctx, log, db, query, data, dest, true)
 }
 
-func namedQueryStruct(ctx context.Context, db sqlx.ExtContext, query string, data any, dest any, withIn bool) (err error) {
+func namedQueryStruct(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, query string, data any, dest any, withIn bool) (err error) {
 	q := queryString(query, data)
 
 	defer func() {
 		if err != nil {
-			rlog.Info("database.NamedQuerySlice", "query", q, "ERROR", err)
+			log.Info("database.NamedQuerySlice", "query", q, "ERROR", err)
 		}
 	}()
 

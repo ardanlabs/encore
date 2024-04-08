@@ -59,7 +59,7 @@ func Test_Home(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	service, err := salesapiweb.NewService(dbTest.DB, dbTest.Auth)
+	service, err := salesapiweb.NewService(dbTest.Log, dbTest.DB, dbTest.Auth)
 	if err != nil {
 		t.Fatalf("Service init error: %s", err)
 	}

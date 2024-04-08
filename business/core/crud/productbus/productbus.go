@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/core/crud/userbus"
@@ -36,14 +37,16 @@ type Storer interface {
 
 // Core manages the set of APIs for product access.
 type Core struct {
+	log      rlog.Ctx
 	userBus  *userbus.Core
 	delegate *delegate.Delegate
 	storer   Storer
 }
 
 // NewCore constructs a product core API for use.
-func NewCore(userBus *userbus.Core, delegate *delegate.Delegate, storer Storer) *Core {
+func NewCore(log rlog.Ctx, userBus *userbus.Core, delegate *delegate.Delegate, storer Storer) *Core {
 	c := Core{
+		log:      log,
 		userBus:  userBus,
 		delegate: delegate,
 		storer:   storer,

@@ -18,12 +18,14 @@ type (
 // Delegate manages the set of functions to be called by core
 // packages when an import is not possible.
 type Delegate struct {
+	log   rlog.Ctx
 	funcs map[domain]map[action][]Func
 }
 
 // New constructs a delegate for indirect api access.
-func New() *Delegate {
+func New(log rlog.Ctx) *Delegate {
 	return &Delegate{
+		log:   log,
 		funcs: make(map[domain]map[action][]Func),
 	}
 }
@@ -44,16 +46,16 @@ func (d *Delegate) Register(domainType string, actionType string, fn Func) {
 // Call executes all functions registered for the specified domain and
 // action. These functions are executed synchronously on the G making the call.
 func (d *Delegate) Call(ctx context.Context, data Data) error {
-	rlog.Info("delegate call", "status", "started", "domain", data.Domain, "action", data.Action, "params", data.RawParams)
-	defer rlog.Info("delegate call", "status", "completed")
+	d.log.Info("delegate call", "status", "started", "domain", data.Domain, "action", data.Action, "params", data.RawParams)
+	defer d.log.Info("delegate call", "status", "completed")
 
 	if dMap, ok := d.funcs[domain(data.Domain)]; ok {
 		if funcs, ok := dMap[action(data.Action)]; ok {
 			for _, fn := range funcs {
-				rlog.Info("delegate call", "status", "sending")
+				d.log.Info("delegate call", "status", "sending")
 
 				if err := fn(ctx, data); err != nil {
-					rlog.Error("delegate call", "msg", err)
+					d.log.Error("delegate call", "msg", err)
 				}
 			}
 		}

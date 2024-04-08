@@ -38,10 +38,10 @@ func Get(ctx context.Context) (Transaction, bool) {
 
 // ExecuteUnderTransaction is a helper function that can be used in tests and
 // other apps to execute the core APIs under a transaction.
-func ExecuteUnderTransaction(ctx context.Context, bgn Beginner, fn func(tx Transaction) error) error {
+func ExecuteUnderTransaction(ctx context.Context, log rlog.Ctx, bgn Beginner, fn func(tx Transaction) error) error {
 	hasCommitted := false
 
-	rlog.Info("BEGIN TRANSACTION")
+	log.Info("BEGIN TRANSACTION")
 	tx, err := bgn.Begin()
 	if err != nil {
 		return err
@@ -49,14 +49,14 @@ func ExecuteUnderTransaction(ctx context.Context, bgn Beginner, fn func(tx Trans
 
 	defer func() {
 		if !hasCommitted {
-			rlog.Info("ROLLBACK TRANSACTION")
+			log.Info("ROLLBACK TRANSACTION")
 		}
 
 		if err := tx.Rollback(); err != nil {
 			if errors.Is(err, sql.ErrTxDone) {
 				return
 			}
-			rlog.Info("ROLLBACK TRANSACTION", "ERROR", err)
+			log.Info("ROLLBACK TRANSACTION", "ERROR", err)
 		}
 	}()
 
@@ -64,7 +64,7 @@ func ExecuteUnderTransaction(ctx context.Context, bgn Beginner, fn func(tx Trans
 		return fmt.Errorf("EXECUTE TRANSACTION: %w", err)
 	}
 
-	rlog.Info("COMMIT TRANSACTION")
+	log.Info("COMMIT TRANSACTION")
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("COMMIT TRANSACTION: %w", err)
 	}

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/crud/homebus"
 	"github.com/ardanlabs/encore/business/data/sqldb"
@@ -17,13 +18,15 @@ import (
 
 // Store manages the set of APIs for home database access.
 type Store struct {
-	db sqlx.ExtContext
+	log rlog.Ctx
+	db  sqlx.ExtContext
 }
 
 // NewStore constructs the api for data access.
-func NewStore(db *sqlx.DB) *Store {
+func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
 	return &Store{
-		db: db,
+		log: log,
+		db:  db,
 	}
 }
 
@@ -50,7 +53,7 @@ func (s *Store) Create(ctx context.Context, hme homebus.Home) error {
     VALUES
         (:home_id, :user_id, :type, :address_1, :address_2, :zip_code, :city, :state, :country, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, toDBHome(hme)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBHome(hme)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -71,7 +74,7 @@ func (s *Store) Delete(ctx context.Context, hme homebus.Home) error {
 	WHERE
 	  	home_id = :home_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, data); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, data); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -95,7 +98,7 @@ func (s *Store) Update(ctx context.Context, hme homebus.Home) error {
     WHERE
         home_id = :home_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.db, q, toDBHome(hme)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBHome(hme)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -127,7 +130,7 @@ func (s *Store) Query(ctx context.Context, filter homebus.QueryFilter, orderBy o
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
 	var dbHmes []dbHome
-	if err := sqldb.NamedQuerySlice(ctx, s.db, buf.String(), data, &dbHmes); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbHmes); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -155,7 +158,7 @@ func (s *Store) Count(ctx context.Context, filter homebus.QueryFilter) (int, err
 	var count struct {
 		Count int `db:"count"`
 	}
-	if err := sqldb.NamedQueryStruct(ctx, s.db, buf.String(), data, &count); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
 		return 0, fmt.Errorf("db: %w", err)
 	}
 
@@ -179,7 +182,7 @@ func (s *Store) QueryByID(ctx context.Context, homeID uuid.UUID) (homebus.Home, 
         home_id = :home_id`
 
 	var dbHme dbHome
-	if err := sqldb.NamedQueryStruct(ctx, s.db, q, data, &dbHme); err != nil {
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbHme); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return homebus.Home{}, fmt.Errorf("db: %w", homebus.ErrNotFound)
 		}
@@ -206,7 +209,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]homebus.
 		user_id = :user_id`
 
 	var dbHmes []dbHome
-	if err := sqldb.NamedQuerySlice(ctx, s.db, q, data, &dbHmes); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbHmes); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
