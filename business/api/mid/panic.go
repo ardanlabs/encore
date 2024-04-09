@@ -5,8 +5,8 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/app/api/errs"
-	"github.com/ardanlabs/encore/app/api/metrics"
+	"github.com/ardanlabs/encore/business/api/errs"
+	"github.com/ardanlabs/encore/business/api/metrics"
 )
 
 // Panics handles panics that occur when processing a request.
