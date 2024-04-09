@@ -5,7 +5,7 @@ import (
 	"time"
 
 	eerrs "encore.dev/beta/errs"
-	"github.com/ardanlabs/encore/apis/sales"
+	"github.com/ardanlabs/encore/apis/services/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/core/crud/homeapp"

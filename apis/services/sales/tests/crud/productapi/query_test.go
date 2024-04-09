@@ -4,7 +4,7 @@ import (
 	"context"
 	"sort"
 
-	"github.com/ardanlabs/encore/apis/sales"
+	"github.com/ardanlabs/encore/apis/services/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/app/core/crud/productapp"

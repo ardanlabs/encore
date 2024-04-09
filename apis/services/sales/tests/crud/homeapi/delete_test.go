@@ -1,24 +1,24 @@
-package product_test
+package home_test
 
 import (
 	"context"
 
 	eerrs "encore.dev/beta/errs"
-	"github.com/ardanlabs/encore/apis/sales"
+	"github.com/ardanlabs/encore/apis/services/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
-func productDeleteOk(sd dbtest.SeedData) []apptest.AppTable {
+func homeDeleteOk(sd dbtest.SeedData) []apptest.AppTable {
 	table := []apptest.AppTable{
 		{
 			Name:    "user",
 			Token:   sd.Users[0].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := sales.ProductDelete(ctx, sd.Users[0].Products[1].ID.String()); err != nil {
+				if err := sales.HomeDelete(ctx, sd.Users[0].Homes[1].ID.String()); err != nil {
 					return err
 				}
 
@@ -33,7 +33,7 @@ func productDeleteOk(sd dbtest.SeedData) []apptest.AppTable {
 			Token:   sd.Admins[0].Token,
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := sales.ProductDelete(ctx, sd.Admins[0].Products[1].ID.String()); err != nil {
+				if err := sales.HomeDelete(ctx, sd.Admins[0].Homes[1].ID.String()); err != nil {
 					return err
 				}
 
@@ -48,14 +48,14 @@ func productDeleteOk(sd dbtest.SeedData) []apptest.AppTable {
 	return table
 }
 
-func productDeleteAuth(sd dbtest.SeedData) []apptest.AppTable {
+func homeDeleteAuth(sd dbtest.SeedData) []apptest.AppTable {
 	table := []apptest.AppTable{
 		{
 			Name:    "emptytoken",
 			Token:   "",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
-				err := sales.ProductDelete(ctx, "")
+				err := sales.HomeDelete(ctx, "")
 				if err != nil {
 					return err
 				}
@@ -69,7 +69,7 @@ func productDeleteAuth(sd dbtest.SeedData) []apptest.AppTable {
 			Token:   sd.Users[0].Token + "A",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				err := sales.ProductDelete(ctx, "")
+				err := sales.HomeDelete(ctx, "")
 				if err != nil {
 					return err
 				}
@@ -83,7 +83,7 @@ func productDeleteAuth(sd dbtest.SeedData) []apptest.AppTable {
 			Token:   sd.Users[0].Token,
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
-				err := sales.ProductDelete(ctx, sd.Admins[0].Products[0].ID.String())
+				err := sales.HomeDelete(ctx, sd.Admins[0].Homes[0].ID.String())
 				if err != nil {
 					return err
 				}

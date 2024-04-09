@@ -1,4 +1,4 @@
-package user_test
+package vproduct_test
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/et"
-	authsrv "github.com/ardanlabs/encore/apis/auth"
-	"github.com/ardanlabs/encore/apis/sales"
+	authsrv "github.com/ardanlabs/encore/apis/services/auth"
+	"github.com/ardanlabs/encore/apis/services/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
@@ -20,8 +20,6 @@ import (
 var url string
 
 func TestMain(m *testing.M) {
-	et.EnableServiceInstanceIsolation()
-
 	code, err := run(m)
 	if err != nil {
 		fmt.Println(err)
@@ -31,6 +29,8 @@ func TestMain(m *testing.M) {
 }
 
 func run(m *testing.M) (code int, err error) {
+	et.EnableServiceInstanceIsolation()
+
 	url, err = dbtest.StartDB()
 	if err != nil {
 		return 1, err
@@ -45,10 +45,10 @@ func run(m *testing.M) (code int, err error) {
 
 // =============================================================================
 
-func Test_User(t *testing.T) {
+func Test_VProduct(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_User")
+	dbTest := dbtest.NewTest(t, url, "Test_VProduct")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -84,17 +84,5 @@ func Test_User(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	app.Test(t, userQueryOk(sd), "user-query-ok")
-	app.Test(t, userQueryByIDOk(sd), "user-querybyid-ok")
-
-	app.Test(t, userCreateOk(sd), "user-create-ok")
-	app.Test(t, userCreateAuth(sd), "user-create-auth")
-	app.Test(t, userCreateBad(sd), "user-create-bad")
-
-	app.Test(t, userUpdateOk(sd), "user-update-ok")
-	app.Test(t, userUpdateAuth(sd), "user-update-auth")
-	app.Test(t, userUpdateBad(sd), "user-update-bad")
-
-	app.Test(t, userDeleteOk(sd), "user-delete-ok")
-	app.Test(t, userDeleteAuth(sd), "user-delete-auth")
+	app.Test(t, vproductQueryOk(sd), "vproduct-query-ok")
 }

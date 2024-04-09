@@ -1,4 +1,4 @@
-package home_test
+package product_test
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/et"
-	authsrv "github.com/ardanlabs/encore/apis/auth"
-	"github.com/ardanlabs/encore/apis/sales"
+	authsrv "github.com/ardanlabs/encore/apis/services/auth"
+	"github.com/ardanlabs/encore/apis/services/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
@@ -20,6 +20,8 @@ import (
 var url string
 
 func TestMain(m *testing.M) {
+	et.EnableServiceInstanceIsolation()
+
 	code, err := run(m)
 	if err != nil {
 		fmt.Println(err)
@@ -29,8 +31,6 @@ func TestMain(m *testing.M) {
 }
 
 func run(m *testing.M) (code int, err error) {
-	et.EnableServiceInstanceIsolation()
-
 	url, err = dbtest.StartDB()
 	if err != nil {
 		return 1, err
@@ -45,10 +45,10 @@ func run(m *testing.M) (code int, err error) {
 
 // =============================================================================
 
-func Test_Home(t *testing.T) {
+func Test_Product(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_Home")
+	dbTest := dbtest.NewTest(t, url, "Test_Product")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -84,17 +84,17 @@ func Test_Home(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	app.Test(t, homeQueryOk(sd), "home-query-ok")
-	app.Test(t, homeQueryByIDOk(sd), "home-querybyid-ok")
+	app.Test(t, productQueryOk(sd), "product-query-ok")
+	app.Test(t, productQueryByIDOk(sd), "product-querybyid-ok")
 
-	app.Test(t, homeCreateOk(sd), "home-create-ok")
-	app.Test(t, homeCreateBad(sd), "home-create-bad")
-	app.Test(t, homeCreateAuth(sd), "home-create-auth")
+	app.Test(t, productCreateOk(sd), "product-create-ok")
+	app.Test(t, productCreateBad(sd), "product-create-bad")
+	app.Test(t, productCreateAuth(sd), "product-create-auth")
 
-	app.Test(t, homeUpdateOk(sd), "home-update-ok")
-	app.Test(t, homeUpdateBad(sd), "home-update-bad")
-	app.Test(t, homeUpdateAuth(sd), "home-update-auth")
+	app.Test(t, productUpdateOk(sd), "product-update-ok")
+	app.Test(t, productUpdateBad(sd), "product-update-bad")
+	app.Test(t, productUpdateAuth(sd), "product-update-auth")
 
-	app.Test(t, homeDeleteOk(sd), "home-delete-ok")
-	app.Test(t, homeDeleteAuth(sd), "home-delete-auth")
+	app.Test(t, productDeleteOk(sd), "product-delete-ok")
+	app.Test(t, productDeleteAuth(sd), "product-delete-auth")
 }

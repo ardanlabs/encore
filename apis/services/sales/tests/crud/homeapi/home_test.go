@@ -1,4 +1,4 @@
-package vproduct_test
+package home_test
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/et"
-	authsrv "github.com/ardanlabs/encore/apis/auth"
-	"github.com/ardanlabs/encore/apis/sales"
+	authsrv "github.com/ardanlabs/encore/apis/services/auth"
+	"github.com/ardanlabs/encore/apis/services/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
@@ -45,10 +45,10 @@ func run(m *testing.M) (code int, err error) {
 
 // =============================================================================
 
-func Test_VProduct(t *testing.T) {
+func Test_Home(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_VProduct")
+	dbTest := dbtest.NewTest(t, url, "Test_Home")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -84,5 +84,17 @@ func Test_VProduct(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	app.Test(t, vproductQueryOk(sd), "vproduct-query-ok")
+	app.Test(t, homeQueryOk(sd), "home-query-ok")
+	app.Test(t, homeQueryByIDOk(sd), "home-querybyid-ok")
+
+	app.Test(t, homeCreateOk(sd), "home-create-ok")
+	app.Test(t, homeCreateBad(sd), "home-create-bad")
+	app.Test(t, homeCreateAuth(sd), "home-create-auth")
+
+	app.Test(t, homeUpdateOk(sd), "home-update-ok")
+	app.Test(t, homeUpdateBad(sd), "home-update-bad")
+	app.Test(t, homeUpdateAuth(sd), "home-update-auth")
+
+	app.Test(t, homeDeleteOk(sd), "home-delete-ok")
+	app.Test(t, homeDeleteAuth(sd), "home-delete-auth")
 }

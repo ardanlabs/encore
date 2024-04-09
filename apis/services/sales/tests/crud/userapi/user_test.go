@@ -1,4 +1,4 @@
-package product_test
+package user_test
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/et"
-	authsrv "github.com/ardanlabs/encore/apis/auth"
-	"github.com/ardanlabs/encore/apis/sales"
+	authsrv "github.com/ardanlabs/encore/apis/services/auth"
+	"github.com/ardanlabs/encore/apis/services/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
@@ -45,10 +45,10 @@ func run(m *testing.M) (code int, err error) {
 
 // =============================================================================
 
-func Test_Product(t *testing.T) {
+func Test_User(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_Product")
+	dbTest := dbtest.NewTest(t, url, "Test_User")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -84,17 +84,17 @@ func Test_Product(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	app.Test(t, productQueryOk(sd), "product-query-ok")
-	app.Test(t, productQueryByIDOk(sd), "product-querybyid-ok")
+	app.Test(t, userQueryOk(sd), "user-query-ok")
+	app.Test(t, userQueryByIDOk(sd), "user-querybyid-ok")
 
-	app.Test(t, productCreateOk(sd), "product-create-ok")
-	app.Test(t, productCreateBad(sd), "product-create-bad")
-	app.Test(t, productCreateAuth(sd), "product-create-auth")
+	app.Test(t, userCreateOk(sd), "user-create-ok")
+	app.Test(t, userCreateAuth(sd), "user-create-auth")
+	app.Test(t, userCreateBad(sd), "user-create-bad")
 
-	app.Test(t, productUpdateOk(sd), "product-update-ok")
-	app.Test(t, productUpdateBad(sd), "product-update-bad")
-	app.Test(t, productUpdateAuth(sd), "product-update-auth")
+	app.Test(t, userUpdateOk(sd), "user-update-ok")
+	app.Test(t, userUpdateAuth(sd), "user-update-auth")
+	app.Test(t, userUpdateBad(sd), "user-update-bad")
 
-	app.Test(t, productDeleteOk(sd), "product-delete-ok")
-	app.Test(t, productDeleteAuth(sd), "product-delete-auth")
+	app.Test(t, userDeleteOk(sd), "user-delete-ok")
+	app.Test(t, userDeleteAuth(sd), "user-delete-auth")
 }
