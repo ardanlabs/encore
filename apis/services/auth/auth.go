@@ -37,7 +37,7 @@ type Service struct {
 // NewService is called to create a new encore Service.
 func NewService(log rlog.Ctx, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	delegate := delegate.New(log)
-	userBus := userbus.NewCore(delegate, userdb.NewStore(log, db))
+	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
 
 	s := Service{
 		log:     log,

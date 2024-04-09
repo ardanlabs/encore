@@ -70,7 +70,7 @@ func New(cfg Config) (*Auth, error) {
 	// user enabled check.
 	var userBus *userbus.Core
 	if cfg.DB != nil {
-		userBus = userbus.NewCore(nil, userdb.NewStore(cfg.Log, cfg.DB))
+		userBus = userbus.NewCore(cfg.Log, nil, userdb.NewStore(cfg.Log, cfg.DB))
 	}
 
 	a := Auth{

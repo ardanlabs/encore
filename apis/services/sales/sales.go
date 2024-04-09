@@ -45,6 +45,7 @@ type appView struct {
 }
 
 type busCrud struct {
+	delegate   *delegate.Delegate
 	homeBus    *homebus.Core
 	productBus *productbus.Core
 	userBus    *userbus.Core
@@ -66,7 +67,7 @@ type Service struct {
 // NewService is called to create a new encore Service.
 func NewService(log rlog.Ctx, db *sqlx.DB) (*Service, error) {
 	delegate := delegate.New(log)
-	userBus := userbus.NewCore(delegate, userdb.NewStore(log, db))
+	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
 	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
 	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(log, db))
 	vproductBus := vproductbus.NewCore(vproductdb.NewStore(log, db))
@@ -86,6 +87,7 @@ func NewService(log rlog.Ctx, db *sqlx.DB) (*Service, error) {
 			vproductApp: vproductapp.NewCore(vproductBus),
 		},
 		busCrud: busCrud{
+			delegate:   delegate,
 			userBus:    userBus,
 			productBus: productBus,
 			homeBus:    homeBus,

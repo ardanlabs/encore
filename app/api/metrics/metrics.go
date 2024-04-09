@@ -6,7 +6,7 @@ import (
 	"runtime"
 
 	"encore.dev"
-	emetrics "encore.dev/metrics"
+	"encore.dev/metrics"
 )
 
 var devGoroutines = expvar.NewInt("goroutines")
@@ -16,19 +16,19 @@ var devPanics = expvar.NewInt("panics")
 
 // Config lists the set of metrics that is tracked.
 type Config struct {
-	Goroutines *emetrics.Gauge[uint64]
-	Requests   *emetrics.Counter[uint64]
-	Failures   *emetrics.Counter[uint64]
-	Panics     *emetrics.Counter[uint64]
+	Goroutines *metrics.Gauge[uint64]
+	Requests   *metrics.Counter[uint64]
+	Failures   *metrics.Counter[uint64]
+	Panics     *metrics.Counter[uint64]
 }
 
 // Values provides an api to work with metrics.
 type Values struct {
 	devEnv        bool
-	goroutines    *emetrics.Gauge[uint64]
-	requests      *emetrics.Counter[uint64]
-	failures      *emetrics.Counter[uint64]
-	panics        *emetrics.Counter[uint64]
+	goroutines    *metrics.Gauge[uint64]
+	requests      *metrics.Counter[uint64]
+	failures      *metrics.Counter[uint64]
+	panics        *metrics.Counter[uint64]
 	devGoroutines *expvar.Int
 	devRequests   *expvar.Int
 	devFailures   *expvar.Int

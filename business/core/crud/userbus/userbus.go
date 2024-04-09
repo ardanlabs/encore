@@ -8,9 +8,11 @@ import (
 	"net/mail"
 	"time"
 
+	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/core/crud/delegate"
 	"github.com/ardanlabs/encore/business/data/transaction"
+	"github.com/ardanlabs/encore/business/pubsub"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -38,13 +40,15 @@ type Storer interface {
 
 // Core manages the set of APIs for user access.
 type Core struct {
+	log      rlog.Ctx
 	storer   Storer
 	delegate *delegate.Delegate
 }
 
 // NewCore constructs a user core API for use.
-func NewCore(delegate *delegate.Delegate, storer Storer) *Core {
+func NewCore(log rlog.Ctx, delegate *delegate.Delegate, storer Storer) *Core {
 	return &Core{
+		log:      log,
 		delegate: delegate,
 		storer:   storer,
 	}
@@ -59,6 +63,7 @@ func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error
 	}
 
 	core := Core{
+		log:      c.log,
 		delegate: c.delegate,
 		storer:   trS,
 	}
@@ -131,7 +136,9 @@ func (c *Core) Update(ctx context.Context, usr User, uu UpdateUser) (User, error
 
 	// Other domains may need to know when a user is updated so business
 	// logic can be applied. This represents a delegate call to other domains.
-	if err := c.delegate.Call(ctx, ActionUpdatedData(uu, usr.ID)); err != nil {
+	data := ActionUpdatedData(uu, usr.ID)
+	c.log.Info("user.pubsub.Delegate.Publish", "data", data)
+	if _, err := pubsub.Delegate.Publish(ctx, data); err != nil {
 		return User{}, fmt.Errorf("failed to execute `%s` action: %w", ActionUpdated, err)
 	}
 

@@ -26,7 +26,7 @@ func (c *Core) actionUserUpdated(ctx context.Context, data delegate.Data) error 
 		return fmt.Errorf("expected an encoded %T: %w", params, err)
 	}
 
-	c.log.Info("action-userupdate", "user_id", params.UserID, "enabled", params.Enabled)
+	c.log.Info("product-action-userupdate", "user_id", params.UserID, "enabled", params.Enabled)
 
 	// Now we can see if this user has been disabled. If they have been, we will
 	// want to disable to mark all these products as deleted. Right now we don't

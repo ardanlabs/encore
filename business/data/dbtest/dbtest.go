@@ -75,7 +75,7 @@ type Core struct {
 
 func newCoreAPIs(log rlog.Ctx, db *sqlx.DB) Core {
 	delegate := delegate.New(log)
-	userBus := userbus.NewCore(delegate, userdb.NewStore(log, db))
+	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
 	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
 	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(log, db))
 	vproductBus := vproductbus.NewCore(vproductdb.NewStore(log, db))
