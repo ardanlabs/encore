@@ -6,8 +6,8 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
 	authsrv "github.com/ardanlabs/encore/apis/auth"
-	"github.com/ardanlabs/encore/business/api/errs"
-	"github.com/ardanlabs/encore/business/api/mid"
+	"github.com/ardanlabs/encore/app/api/errs"
+	"github.com/ardanlabs/encore/app/api/mid"
 )
 
 // =============================================================================

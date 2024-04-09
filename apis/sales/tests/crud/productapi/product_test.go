@@ -12,8 +12,8 @@ import (
 	authsrv "github.com/ardanlabs/encore/apis/auth"
 	"github.com/ardanlabs/encore/apis/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
+	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
-	"github.com/ardanlabs/encore/business/api/mid"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 )
 

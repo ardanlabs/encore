@@ -7,9 +7,9 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/app/api/errs"
+	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
-	"github.com/ardanlabs/encore/business/api/errs"
-	"github.com/ardanlabs/encore/business/api/mid"
 )
 
 // AppTable represent fields needed for running an app test.

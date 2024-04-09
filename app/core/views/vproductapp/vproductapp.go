@@ -5,8 +5,8 @@ import (
 	"context"
 
 	eerrs "encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/api/page"
-	"github.com/ardanlabs/encore/business/api/errs"
 	"github.com/ardanlabs/encore/business/core/views/vproductbus"
 )
 
