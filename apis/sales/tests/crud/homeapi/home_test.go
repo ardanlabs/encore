@@ -9,6 +9,7 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/et"
+	authsrv "github.com/ardanlabs/encore/apis/auth"
 	"github.com/ardanlabs/encore/apis/sales"
 	"github.com/ardanlabs/encore/app/api/apptest"
 	"github.com/ardanlabs/encore/business/api/auth"
@@ -63,14 +64,20 @@ func Test_Home(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	service, err := sales.NewService(dbTest.Log, dbTest.DB)
+	authService, err := authsrv.NewService(dbTest.Log, dbTest.DB, dbTest.Auth)
 	if err != nil {
-		t.Fatalf("Service init error: %s", err)
+		t.Fatalf("Auth service init error: %s", err)
 	}
-	et.MockService("sales", service, et.RunMiddleware(true))
+	et.MockService("auth", authService)
+
+	salesService, err := sales.NewService(dbTest.Log, dbTest.DB)
+	if err != nil {
+		t.Fatalf("Sales service init error: %s", err)
+	}
+	et.MockService("sales", salesService, et.RunMiddleware(true))
 
 	authHandler := func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
-		return "", nil, nil
+		return mid.AuthHandler(ctx, dbTest.Auth, dbTest.Core.BusCrud.User, ap)
 	}
 
 	app := apptest.New(authHandler)

@@ -1,6 +1,8 @@
 package sales
 
 import (
+	"fmt"
+
 	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
 	authsrv "github.com/ardanlabs/encore/apis/auth"
@@ -32,12 +34,13 @@ func (s *Service) metrics(req middleware.Request, next middleware.Next) middlewa
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize
 func (s *Service) authorize(req middleware.Request, next middleware.Next) middleware.Response {
-	p, err := mid.Authorize(req, next)
+	p, req, err := mid.Authorize(req, next)
 	if err != nil {
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
 	if err := authsrv.Authorize(req.Context(), p); err != nil {
+		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
@@ -47,12 +50,13 @@ func (s *Service) authorize(req middleware.Request, next middleware.Next) middle
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_user
 func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) middleware.Response {
-	p, err := mid.AuthorizeUser(s.userBus, req, next)
+	p, req, err := mid.AuthorizeUser(s.userBus, req, next)
 	if err != nil {
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
 	if err := authsrv.Authorize(req.Context(), p); err != nil {
+		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
@@ -62,12 +66,13 @@ func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) mi
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_product
 func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next) middleware.Response {
-	p, err := mid.AuthorizeProduct(s.productBus, req, next)
+	p, req, err := mid.AuthorizeProduct(s.productBus, req, next)
 	if err != nil {
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
 	if err := authsrv.Authorize(req.Context(), p); err != nil {
+		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
@@ -77,12 +82,13 @@ func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next)
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize_home
 func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) middleware.Response {
-	p, err := mid.AuthorizeHome(s.homeBus, req, next)
+	p, req, err := mid.AuthorizeHome(s.homeBus, req, next)
 	if err != nil {
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
 	if err := authsrv.Authorize(req.Context(), p); err != nil {
+		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 

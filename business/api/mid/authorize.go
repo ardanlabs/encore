@@ -17,7 +17,7 @@ import (
 var ErrInvalidID = errors.New("ID is not in its proper form")
 
 // Authorize checks the user making the request is an admin or user.
-func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, error) {
+func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
 	claims := eauth.Data().(*auth.Claims)
 
 	rule := auth.RuleAdminOnly
@@ -36,12 +36,12 @@ func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, error) {
 		Rule:   rule,
 	}
 
-	return p, nil
+	return p, req, nil
 }
 
 // AuthorizeUser checks the user making the call has specified a user id on
 // the route that matches the claims.
-func AuthorizeUser(userBus *userbus.Core, req middleware.Request, next middleware.Next) (AuthInfo, error) {
+func AuthorizeUser(userBus *userbus.Core, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -59,17 +59,17 @@ func AuthorizeUser(userBus *userbus.Core, req middleware.Request, next middlewar
 		var err error
 		userID, err = uuid.Parse(id.Value)
 		if err != nil {
-			return AuthInfo{}, ErrInvalidID
+			return AuthInfo{}, req, ErrInvalidID
 		}
 
 		usr, err := userBus.QueryByID(ctx, userID)
 		if err != nil {
 			switch {
 			case errors.Is(err, userbus.ErrNotFound):
-				return AuthInfo{}, err
+				return AuthInfo{}, req, err
 
 			default:
-				return AuthInfo{}, fmt.Errorf("querybyid: userID[%s]: %s", userID, err)
+				return AuthInfo{}, req, fmt.Errorf("querybyid: userID[%s]: %s", userID, err)
 			}
 		}
 
@@ -84,12 +84,12 @@ func AuthorizeUser(userBus *userbus.Core, req middleware.Request, next middlewar
 		Rule:   rule,
 	}
 
-	return p, nil
+	return p, req, nil
 }
 
 // AuthorizeProduct checks the user making the call has specified a product id on
 // the route that matches the claims.
-func AuthorizeProduct(productBus *productbus.Core, req middleware.Request, next middleware.Next) (AuthInfo, error) {
+func AuthorizeProduct(productBus *productbus.Core, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -98,17 +98,17 @@ func AuthorizeProduct(productBus *productbus.Core, req middleware.Request, next 
 
 		productID, err := uuid.Parse(id.Value)
 		if err != nil {
-			return AuthInfo{}, ErrInvalidID
+			return AuthInfo{}, req, ErrInvalidID
 		}
 
 		prd, err := productBus.QueryByID(ctx, productID)
 		if err != nil {
 			switch {
 			case errors.Is(err, productbus.ErrNotFound):
-				return AuthInfo{}, err
+				return AuthInfo{}, req, err
 
 			default:
-				return AuthInfo{}, fmt.Errorf("querybyid: productID[%s]: %s", productID, err)
+				return AuthInfo{}, req, fmt.Errorf("querybyid: productID[%s]: %s", productID, err)
 			}
 		}
 
@@ -124,12 +124,12 @@ func AuthorizeProduct(productBus *productbus.Core, req middleware.Request, next 
 		Rule:   auth.RuleAdminOrSubject,
 	}
 
-	return p, nil
+	return p, req, nil
 }
 
 // AuthorizeHome checks the user making the call has specified a home id on
 // the route that matches the claims.
-func AuthorizeHome(homeBus *homebus.Core, req middleware.Request, next middleware.Next) (AuthInfo, error) {
+func AuthorizeHome(homeBus *homebus.Core, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -138,17 +138,17 @@ func AuthorizeHome(homeBus *homebus.Core, req middleware.Request, next middlewar
 
 		homeID, err := uuid.Parse(id.Value)
 		if err != nil {
-			return AuthInfo{}, ErrInvalidID
+			return AuthInfo{}, req, ErrInvalidID
 		}
 
 		hme, err := homeBus.QueryByID(ctx, homeID)
 		if err != nil {
 			switch {
 			case errors.Is(err, homebus.ErrNotFound):
-				return AuthInfo{}, err
+				return AuthInfo{}, req, err
 
 			default:
-				return AuthInfo{}, fmt.Errorf("querybyid: homeID[%s]: %s", homeID, err)
+				return AuthInfo{}, req, fmt.Errorf("querybyid: homeID[%s]: %s", homeID, err)
 			}
 		}
 
@@ -164,5 +164,5 @@ func AuthorizeHome(homeBus *homebus.Core, req middleware.Request, next middlewar
 		Rule:   auth.RuleAdminOrSubject,
 	}
 
-	return p, nil
+	return p, req, nil
 }

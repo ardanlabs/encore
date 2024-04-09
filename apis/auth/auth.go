@@ -65,7 +65,7 @@ func (s *Service) Shutdown(force context.Context) {
 //
 //lint:ignore U1000 "called by encore"
 func initService() (*Service, error) {
-	log := rlog.With("service", "sales")
+	log := rlog.With("service", "auth")
 
 	db, auth, err := startup(log)
 	if err != nil {

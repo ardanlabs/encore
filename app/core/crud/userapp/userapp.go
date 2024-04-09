@@ -20,14 +20,14 @@ type Core struct {
 	auth    *auth.Auth
 }
 
-// NewCoreWithoutAuth constructs a user core API for use.
+// NewCore constructs a user core API for use.
 func NewCore(userBus *userbus.Core) *Core {
 	return &Core{
 		userBus: userBus,
 	}
 }
 
-// NewCoreWithoutAuth constructs a user core API for use.
+// NewCoreWithAuth constructs a user core API for use with auth support.
 func NewCoreWithAuth(userBus *userbus.Core, auth *auth.Auth) *Core {
 	return &Core{
 		auth:    auth,

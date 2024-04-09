@@ -21,7 +21,7 @@ type AppTable struct {
 	CmpFunc func(got any, exp any) string
 }
 
-// Service defines the method set required to exist for any encore service type.
+// AuthHandler defines a function that can be called to handle authentication.
 type AuthHandler func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error)
 
 // =============================================================================
