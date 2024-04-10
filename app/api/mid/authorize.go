@@ -30,13 +30,13 @@ func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, middlewa
 		}
 	}
 
-	p := AuthInfo{
+	authInfo := AuthInfo{
 		Claims: *claims,
 		UserID: uuid.UUID{},
 		Rule:   rule,
 	}
 
-	return p, req, nil
+	return authInfo, req, nil
 }
 
 // AuthorizeUser checks the user making the call has specified a user id on
@@ -78,13 +78,13 @@ func AuthorizeUser(userBus *userbus.Core, req middleware.Request, next middlewar
 
 	claims := eauth.Data().(*auth.Claims)
 
-	p := AuthInfo{
+	authInfo := AuthInfo{
 		Claims: *claims,
 		UserID: userID,
 		Rule:   rule,
 	}
 
-	return p, req, nil
+	return authInfo, req, nil
 }
 
 // AuthorizeProduct checks the user making the call has specified a product id on
@@ -118,13 +118,13 @@ func AuthorizeProduct(productBus *productbus.Core, req middleware.Request, next 
 
 	claims := eauth.Data().(*auth.Claims)
 
-	p := AuthInfo{
+	authInfo := AuthInfo{
 		Claims: *claims,
 		UserID: userID,
 		Rule:   auth.RuleAdminOrSubject,
 	}
 
-	return p, req, nil
+	return authInfo, req, nil
 }
 
 // AuthorizeHome checks the user making the call has specified a home id on
@@ -158,11 +158,11 @@ func AuthorizeHome(homeBus *homebus.Core, req middleware.Request, next middlewar
 
 	claims := eauth.Data().(*auth.Claims)
 
-	p := AuthInfo{
+	authInfo := AuthInfo{
 		Claims: *claims,
 		UserID: userID,
 		Rule:   auth.RuleAdminOrSubject,
 	}
 
-	return p, req, nil
+	return authInfo, req, nil
 }
