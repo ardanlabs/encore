@@ -30,7 +30,7 @@ type Service struct {
 	log     rlog.Ctx
 	db      *sqlx.DB
 	auth    *auth.Auth
-	userapp *userapp.Core
+	userApp *userapp.Core
 	userBus *userbus.Core
 }
 
@@ -43,7 +43,7 @@ func NewService(log rlog.Ctx, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 		log:     log,
 		db:      db,
 		auth:    ath,
-		userapp: userapp.NewCoreWithAuth(userBus, ath),
+		userApp: userapp.NewCoreWithAuth(userBus, ath),
 		userBus: userBus,
 	}
 
