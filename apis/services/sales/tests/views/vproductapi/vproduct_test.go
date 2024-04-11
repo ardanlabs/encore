@@ -48,7 +48,7 @@ func run(m *testing.M) (code int, err error) {
 func Test_VProduct(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_VProduct")
+	dbTest, appTest := startTest(t, url, "Test_VProduct")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -57,10 +57,20 @@ func Test_VProduct(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
+	// -------------------------------------------------------------------------
+
 	sd, err := insertSeedData(dbTest)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
+
+	// -------------------------------------------------------------------------
+
+	appTest.Run(t, vproductQueryOk(sd), "vproduct-query-ok")
+}
+
+func startTest(t *testing.T, url string, testName string) (*dbtest.Test, *apptest.AppTest) {
+	dbTest := dbtest.NewTest(t, url, testName)
 
 	// -------------------------------------------------------------------------
 
@@ -76,13 +86,13 @@ func Test_VProduct(t *testing.T) {
 	}
 	et.MockService("sales", salesService, et.RunMiddleware(true))
 
+	// -------------------------------------------------------------------------
+
 	authHandler := func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
 		return mid.AuthHandler(ctx, dbTest.Auth, dbTest.Core.BusCrud.User, ap)
 	}
 
-	app := apptest.New(authHandler)
+	appTest := apptest.New(authHandler)
 
-	// -------------------------------------------------------------------------
-
-	app.Test(t, vproductQueryOk(sd), "vproduct-query-ok")
+	return dbTest, appTest
 }

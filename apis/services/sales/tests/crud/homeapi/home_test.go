@@ -48,7 +48,7 @@ func run(m *testing.M) (code int, err error) {
 func Test_Home(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_Home")
+	dbTest, appTest := startTest(t, url, "Test_Home")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -57,10 +57,32 @@ func Test_Home(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
+	// -------------------------------------------------------------------------
+
 	sd, err := insertSeedData(dbTest)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
+
+	// -------------------------------------------------------------------------
+
+	appTest.Run(t, homeQueryOk(sd), "home-query-ok")
+	appTest.Run(t, homeQueryByIDOk(sd), "home-querybyid-ok")
+
+	appTest.Run(t, homeCreateOk(sd), "home-create-ok")
+	appTest.Run(t, homeCreateBad(sd), "home-create-bad")
+	appTest.Run(t, homeCreateAuth(sd), "home-create-auth")
+
+	appTest.Run(t, homeUpdateOk(sd), "home-update-ok")
+	appTest.Run(t, homeUpdateBad(sd), "home-update-bad")
+	appTest.Run(t, homeUpdateAuth(sd), "home-update-auth")
+
+	appTest.Run(t, homeDeleteOk(sd), "home-delete-ok")
+	appTest.Run(t, homeDeleteAuth(sd), "home-delete-auth")
+}
+
+func startTest(t *testing.T, url string, testName string) (*dbtest.Test, *apptest.AppTest) {
+	dbTest := dbtest.NewTest(t, url, testName)
 
 	// -------------------------------------------------------------------------
 
@@ -76,25 +98,13 @@ func Test_Home(t *testing.T) {
 	}
 	et.MockService("sales", salesService, et.RunMiddleware(true))
 
+	// -------------------------------------------------------------------------
+
 	authHandler := func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
 		return mid.AuthHandler(ctx, dbTest.Auth, dbTest.Core.BusCrud.User, ap)
 	}
 
-	app := apptest.New(authHandler)
+	appTest := apptest.New(authHandler)
 
-	// -------------------------------------------------------------------------
-
-	app.Test(t, homeQueryOk(sd), "home-query-ok")
-	app.Test(t, homeQueryByIDOk(sd), "home-querybyid-ok")
-
-	app.Test(t, homeCreateOk(sd), "home-create-ok")
-	app.Test(t, homeCreateBad(sd), "home-create-bad")
-	app.Test(t, homeCreateAuth(sd), "home-create-auth")
-
-	app.Test(t, homeUpdateOk(sd), "home-update-ok")
-	app.Test(t, homeUpdateBad(sd), "home-update-bad")
-	app.Test(t, homeUpdateAuth(sd), "home-update-auth")
-
-	app.Test(t, homeDeleteOk(sd), "home-delete-ok")
-	app.Test(t, homeDeleteAuth(sd), "home-delete-auth")
+	return dbTest, appTest
 }

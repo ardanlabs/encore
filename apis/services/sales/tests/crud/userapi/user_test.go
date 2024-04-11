@@ -48,7 +48,7 @@ func run(m *testing.M) (code int, err error) {
 func Test_User(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_User")
+	dbTest, appTest := startTest(t, url, "Test_User")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
@@ -57,10 +57,32 @@ func Test_User(t *testing.T) {
 		dbTest.Teardown()
 	}()
 
+	// -------------------------------------------------------------------------
+
 	sd, err := insertSeedData(dbTest)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
+
+	// -------------------------------------------------------------------------
+
+	appTest.Run(t, userQueryOk(sd), "user-query-ok")
+	appTest.Run(t, userQueryByIDOk(sd), "user-querybyid-ok")
+
+	appTest.Run(t, userCreateOk(sd), "user-create-ok")
+	appTest.Run(t, userCreateAuth(sd), "user-create-auth")
+	appTest.Run(t, userCreateBad(sd), "user-create-bad")
+
+	appTest.Run(t, userUpdateOk(sd), "user-update-ok")
+	appTest.Run(t, userUpdateAuth(sd), "user-update-auth")
+	appTest.Run(t, userUpdateBad(sd), "user-update-bad")
+
+	appTest.Run(t, userDeleteOk(sd), "user-delete-ok")
+	appTest.Run(t, userDeleteAuth(sd), "user-delete-auth")
+}
+
+func startTest(t *testing.T, url string, testName string) (*dbtest.Test, *apptest.AppTest) {
+	dbTest := dbtest.NewTest(t, url, testName)
 
 	// -------------------------------------------------------------------------
 
@@ -76,25 +98,13 @@ func Test_User(t *testing.T) {
 	}
 	et.MockService("sales", salesService, et.RunMiddleware(true))
 
+	// -------------------------------------------------------------------------
+
 	authHandler := func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
 		return mid.AuthHandler(ctx, dbTest.Auth, dbTest.Core.BusCrud.User, ap)
 	}
 
-	app := apptest.New(authHandler)
+	appTest := apptest.New(authHandler)
 
-	// -------------------------------------------------------------------------
-
-	app.Test(t, userQueryOk(sd), "user-query-ok")
-	app.Test(t, userQueryByIDOk(sd), "user-querybyid-ok")
-
-	app.Test(t, userCreateOk(sd), "user-create-ok")
-	app.Test(t, userCreateAuth(sd), "user-create-auth")
-	app.Test(t, userCreateBad(sd), "user-create-bad")
-
-	app.Test(t, userUpdateOk(sd), "user-update-ok")
-	app.Test(t, userUpdateAuth(sd), "user-update-auth")
-	app.Test(t, userUpdateBad(sd), "user-update-bad")
-
-	app.Test(t, userDeleteOk(sd), "user-delete-ok")
-	app.Test(t, userDeleteAuth(sd), "user-delete-auth")
+	return dbTest, appTest
 }

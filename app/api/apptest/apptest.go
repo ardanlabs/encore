@@ -37,8 +37,8 @@ func New(handler AuthHandler) *AppTest {
 	}
 }
 
-// Test performs the actual test logic based on the table data.
-func (at *AppTest) Test(t *testing.T, table []AppTable, testName string) {
+// Run performs the actual test logic based on the table data.
+func (at *AppTest) Run(t *testing.T, table []AppTable, testName string) {
 	log := func(diff string, got any, exp any) {
 		t.Log("DIFF")
 		t.Logf("%s", diff)
