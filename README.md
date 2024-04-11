@@ -53,7 +53,6 @@ You can read the [service class wiki](https://github.com/ardanlabs/service/wiki)
 * [Teacher](https://github.com/ardanlabs/encore#our-teacher)
 * [More About Go](https://github.com/ardanlabs/encore#more-about-go)
 * [Minimal Qualified Student](https://github.com/ardanlabs/encore#minimal-qualified-student)
-* [Important Reading](https://github.com/ardanlabs/encore#important-reading)
 * [Joining the Go Slack Community](https://github.com/ardanlabs/encore#joining-the-go-slack-community)
 
 ## Installation
@@ -194,10 +193,6 @@ The material has been designed to be taught in a classroom environment. The code
 	* Has worked with a command shell.
 	* Knows how to maneuver around the file system.
 	* Understands what environment variables are.
-
-## Important Reading
-
-Please check out this page of [important reading](.reading/README.md). You will find articles and videos around topics related to this repo.
 
 ## Joining the Go Slack Community
 
