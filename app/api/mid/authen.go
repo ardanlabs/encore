@@ -27,9 +27,6 @@ type AuthParams struct {
 // AuthHandler is used to provide initial auth for JWT's and basic user:password.
 func AuthHandler(ctx context.Context, auth *auth.Auth, userBus *userbus.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
-	if len(parts) != 2 {
-		return "", nil, errs.Newf(eerrs.Unauthenticated, "invalid authorization value")
-	}
 
 	switch parts[0] {
 	case "Bearer":

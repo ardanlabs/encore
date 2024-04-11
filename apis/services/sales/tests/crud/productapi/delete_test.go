@@ -52,7 +52,7 @@ func productDeleteAuth(sd dbtest.SeedData) []apptest.AppTable {
 	table := []apptest.AppTable{
 		{
 			Name:    "emptytoken",
-			Token:   "",
+			Token:   "&nbsp;",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				err := sales.ProductDelete(ctx, "")

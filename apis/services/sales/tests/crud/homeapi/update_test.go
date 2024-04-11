@@ -118,7 +118,7 @@ func homeUpdateAuth(sd dbtest.SeedData) []apptest.AppTable {
 	table := []apptest.AppTable{
 		{
 			Name:    "emptytoken",
-			Token:   "",
+			Token:   "&nbsp;",
 			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeUpdate(ctx, "", homeapp.UpdateHome{})
