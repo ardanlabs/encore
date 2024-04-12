@@ -14,18 +14,18 @@ import (
 
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/auth"
-	"github.com/ardanlabs/encore/business/core/crud/delegate"
-	"github.com/ardanlabs/encore/business/core/crud/homebus"
-	"github.com/ardanlabs/encore/business/core/crud/homebus/stores/homedb"
-	"github.com/ardanlabs/encore/business/core/crud/productbus"
-	"github.com/ardanlabs/encore/business/core/crud/productbus/stores/productdb"
-	"github.com/ardanlabs/encore/business/core/crud/userbus"
-	"github.com/ardanlabs/encore/business/core/crud/userbus/stores/userdb"
-	"github.com/ardanlabs/encore/business/core/views/vproductbus"
-	"github.com/ardanlabs/encore/business/core/views/vproductbus/stores/vproductdb"
+	"github.com/ardanlabs/encore/business/api/delegate"
 	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
+	"github.com/ardanlabs/encore/business/domain/homebus"
+	"github.com/ardanlabs/encore/business/domain/homebus/stores/homedb"
+	"github.com/ardanlabs/encore/business/domain/productbus"
+	"github.com/ardanlabs/encore/business/domain/productbus/stores/productdb"
+	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
+	"github.com/ardanlabs/encore/business/domain/vproductbus"
+	"github.com/ardanlabs/encore/business/domain/vproductbus/stores/vproductdb"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/jmoiron/sqlx"
 )
@@ -54,42 +54,28 @@ func StopDB() error {
 
 // =============================================================================
 
-// BusCrud provides core business crud apis.
-type BusCrud struct {
+// BusDomain represents all the business domain apis needed for testing.
+type BusDomain struct {
 	Delegate *delegate.Delegate
 	Home     *homebus.Core
 	Product  *productbus.Core
 	User     *userbus.Core
+	VProduct *vproductbus.Core
 }
 
-// BusView provides core business view apis.
-type BusView struct {
-	Product *vproductbus.Core
-}
-
-// Core represents all the core api's needed for testing.
-type Core struct {
-	BusCrud BusCrud
-	BusView BusView
-}
-
-func newCoreAPIs(log rlog.Ctx, db *sqlx.DB) Core {
+func newBusDomains(log rlog.Ctx, db *sqlx.DB) BusDomain {
 	delegate := delegate.New(log)
 	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
 	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
 	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(log, db))
 	vproductBus := vproductbus.NewCore(vproductdb.NewStore(log, db))
 
-	return Core{
-		BusCrud: BusCrud{
-			Delegate: delegate,
-			Home:     homeBus,
-			Product:  productBus,
-			User:     userBus,
-		},
-		BusView: BusView{
-			Product: vproductBus,
-		},
+	return BusDomain{
+		Delegate: delegate,
+		Home:     homeBus,
+		Product:  productBus,
+		User:     userBus,
+		VProduct: vproductBus,
 	}
 }
 
@@ -97,12 +83,12 @@ func newCoreAPIs(log rlog.Ctx, db *sqlx.DB) Core {
 
 // Test owns state for running and shutting down tests.
 type Test struct {
-	Log      rlog.Ctx
-	DB       *sqlx.DB
-	Auth     *auth.Auth
-	Core     Core
-	Teardown func()
-	t        *testing.T
+	Log       rlog.Ctx
+	DB        *sqlx.DB
+	Auth      *auth.Auth
+	BusDomain BusDomain
+	Teardown  func()
+	t         *testing.T
 }
 
 // NewTest creates a test database inside a Docker container. It creates the
@@ -182,12 +168,12 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 	}
 
 	tst := Test{
-		Log:      log,
-		DB:       db,
-		Auth:     a,
-		Core:     newCoreAPIs(log, db),
-		Teardown: teardown,
-		t:        t,
+		Log:       log,
+		DB:        db,
+		Auth:      a,
+		BusDomain: newBusDomains(log, db),
+		Teardown:  teardown,
+		t:         t,
 	}
 
 	return &tst

@@ -12,7 +12,7 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/business/api/auth"
-	"github.com/ardanlabs/encore/business/core/crud/userbus"
+	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )

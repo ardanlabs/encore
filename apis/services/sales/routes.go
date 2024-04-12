@@ -6,11 +6,11 @@ import (
 
 	"encore.dev"
 	"github.com/ardanlabs/encore/app/api/page"
-	"github.com/ardanlabs/encore/app/core/crud/homeapp"
-	"github.com/ardanlabs/encore/app/core/crud/productapp"
-	"github.com/ardanlabs/encore/app/core/crud/tranapp"
-	"github.com/ardanlabs/encore/app/core/crud/userapp"
-	"github.com/ardanlabs/encore/app/core/views/vproductapp"
+	"github.com/ardanlabs/encore/app/domain/homeapp"
+	"github.com/ardanlabs/encore/app/domain/productapp"
+	"github.com/ardanlabs/encore/app/domain/tranapp"
+	"github.com/ardanlabs/encore/app/domain/userapp"
+	"github.com/ardanlabs/encore/app/domain/vproductapp"
 )
 
 // Fallback is called for the debug enpoints.

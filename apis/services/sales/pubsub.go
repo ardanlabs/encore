@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"encore.dev/pubsub"
-	"github.com/ardanlabs/encore/business/core/crud/delegate"
+	"github.com/ardanlabs/encore/business/api/delegate"
 	bpubsub "github.com/ardanlabs/encore/business/pubsub"
 )
 

@@ -1,9 +1,9 @@
 package dbtest
 
 import (
-	"github.com/ardanlabs/encore/business/core/crud/homebus"
-	"github.com/ardanlabs/encore/business/core/crud/productbus"
-	"github.com/ardanlabs/encore/business/core/crud/userbus"
+	"github.com/ardanlabs/encore/business/domain/homebus"
+	"github.com/ardanlabs/encore/business/domain/productbus"
+	"github.com/ardanlabs/encore/business/domain/userbus"
 )
 
 // User represents an app user specified for the test.

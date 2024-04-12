@@ -7,7 +7,7 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/api/mid"
-	"github.com/ardanlabs/encore/app/core/crud/userapp"
+	"github.com/ardanlabs/encore/app/domain/userapp"
 	"github.com/ardanlabs/encore/business/api/auth"
 )
 
