@@ -80,8 +80,8 @@ func userDeleteAuth(sd dbtest.SeedData) []apptest.AppTable {
 		},
 		{
 			Name:    "wronguser",
-			Token:   sd.Users[1].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "user not enabled : query user: query: userID["+sd.Users[1].ID.String()+"]: db: user not found"),
+			Token:   sd.Users[2].Token,
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				err := sales.UserDelete(ctx, sd.Users[0].ID.String())
 				if err != nil {
