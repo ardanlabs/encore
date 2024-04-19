@@ -46,15 +46,15 @@ You can read the [service class wiki](https://github.com/ardanlabs/service/wiki)
 
 ## Index
 
-* [Installation](https://github.com/ardanlabs/encore#installation)
-* [Create Your Own Version](https://github.com/ardanlabs/encore#create-your-own-version)
-* [Running The Project](https://github.com/ardanlabs/encore#running-the-project)
-* [Purchase Video](https://github.com/ardanlabs/encore#purchase-video)
-* [Experience](https://github.com/ardanlabs/encore#our-experience)
-* [Teacher](https://github.com/ardanlabs/encore#our-teacher)
-* [More About Go](https://github.com/ardanlabs/encore#more-about-go)
-* [Minimal Qualified Student](https://github.com/ardanlabs/encore#minimal-qualified-student)
-* [Joining the Go Slack Community](https://github.com/ardanlabs/encore#joining-the-go-slack-community)
+* [Installation](https://github.com/ardanlabs/encore?tab=readme-ov-file#installation)
+* [Create Your Own Version](https://github.com/ardanlabs/encore?tab=readme-ov-file#create-your-own-version)
+* [Running The Project](https://github.com/ardanlabs/encore?tab=readme-ov-file#running-the-project)
+* [Purchase Video](https://github.com/ardanlabs/encore?tab=readme-ov-file#purchase-video)
+* [Experience](https://github.com/ardanlabs/encore?tab=readme-ov-file#our-experience)
+* [Teacher](https://github.com/ardanlabs/encore?tab=readme-ov-file#our-teacher)
+* [More About Go](https://github.com/ardanlabs/encore?tab=readme-ov-file#more-about-go)
+* [Minimal Qualified Student](https://github.com/ardanlabs/encore?tab=readme-ov-file#minimal-qualified-student)
+* [Joining the Go Slack Community](https://github.com/ardanlabs/encore?tab=readme-ov-file#joining-the-go-slack-community)
 
 ## Installation
 
