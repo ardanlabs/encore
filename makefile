@@ -247,15 +247,19 @@ token:
 	curl -il \
 	--user "admin@example.com:gophers" http://localhost:4000/v1/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
-token-cloud:
+token-stg:
 	curl -il \
-	--user "admin@example.com:gophers" http://app.encore.dev/sales-7a6i/v1/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	--user "admin@example.com:gophers" http://staging-sales-7a6i.encr.app/v1/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # export TOKEN="COPY TOKEN STRING FROM LAST CALL"
 
 users:
 	curl -il \
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:4000/v1/users?page=1&rows=2"
+
+users-stg:
+	curl -il \
+	-H "Authorization: Bearer ${TOKEN}" "http://staging-sales-7a6i.encr.app/v1/users?page=1&rows=2"
 
 load:
 	hey -m GET -c 100 -n 1000 \
