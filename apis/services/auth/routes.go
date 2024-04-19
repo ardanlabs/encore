@@ -30,7 +30,7 @@ func (s *Service) UserToken(ctx context.Context, kid string) (userapp.Token, err
 }
 
 //lint:ignore U1000 "called by encore"
-//encore:api public method=POST path=/v1/authorize
+//encore:api private method=POST path=/v1/authorize
 func (s *Service) Authorize(ctx context.Context, authInfo mid.AuthInfo) error {
 	if err := s.auth.Authorize(ctx, authInfo.Claims, authInfo.UserID, authInfo.Rule); err != nil {
 		return errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authInfo.Claims.Roles, authInfo.Rule, err)
