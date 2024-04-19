@@ -83,6 +83,14 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 #	$ make down
 
 # ==============================================================================
+# Deploy The Project
+#
+#	$ encore app init
+#	Run the Cloud Dashboard
+#		Github: Connect the repo in the dashboard
+#		Deploy: Manually start a deploy
+
+# ==============================================================================
 # CLASS NOTES
 #
 # RSA Keys
@@ -231,6 +239,10 @@ pgcli:
 token:
 	curl -il \
 	--user "admin@example.com:gophers" http://localhost:4000/v1/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+
+token-cloud:
+	curl -il \
+	--user "admin@example.com:gophers" http://app.encore.dev/sales-7a6i/v1/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # export TOKEN="COPY TOKEN STRING FROM LAST CALL"
 

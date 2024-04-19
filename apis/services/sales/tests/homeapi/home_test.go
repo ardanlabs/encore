@@ -7,6 +7,7 @@ import (
 	"runtime/debug"
 	"testing"
 
+	"encore.dev"
 	eauth "encore.dev/beta/auth"
 	"encore.dev/et"
 	authsrv "github.com/ardanlabs/encore/apis/services/auth"
@@ -20,6 +21,10 @@ import (
 var url string
 
 func TestMain(m *testing.M) {
+	if encore.Meta().Environment.Name == "ci-test" {
+		return
+	}
+
 	code, err := run(m)
 	if err != nil {
 		fmt.Println(err)
@@ -29,8 +34,6 @@ func TestMain(m *testing.M) {
 }
 
 func run(m *testing.M) (code int, err error) {
-	et.EnableServiceInstanceIsolation()
-
 	url, err = dbtest.StartDB()
 	if err != nil {
 		return 1, err

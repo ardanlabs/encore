@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"encore.dev"
 	"github.com/ardanlabs/encore/business/data/dbtest"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/google/go-cmp/cmp"
@@ -19,6 +20,10 @@ import (
 var url string
 
 func TestMain(m *testing.M) {
+	if encore.Meta().Environment.Name == "ci-test" {
+		return
+	}
+
 	code, err := run(m)
 	if err != nil {
 		fmt.Println(err)

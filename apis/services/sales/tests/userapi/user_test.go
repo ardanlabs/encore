@@ -7,6 +7,7 @@ import (
 	"runtime/debug"
 	"testing"
 
+	"encore.dev"
 	eauth "encore.dev/beta/auth"
 	"encore.dev/et"
 	authsrv "github.com/ardanlabs/encore/apis/services/auth"
@@ -20,7 +21,9 @@ import (
 var url string
 
 func TestMain(m *testing.M) {
-	et.EnableServiceInstanceIsolation()
+	if encore.Meta().Environment.Name == "ci-test" {
+		return
+	}
 
 	code, err := run(m)
 	if err != nil {
