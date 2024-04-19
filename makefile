@@ -108,7 +108,6 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # Define dependencies
 
 gotooling:
-	go install github.com/divan/expvarmon@latest
 	go install github.com/rakyll/hey@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest

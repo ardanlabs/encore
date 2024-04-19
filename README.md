@@ -48,6 +48,7 @@ You can read the [service class wiki](https://github.com/ardanlabs/service/wiki)
 
 * [Installation](https://github.com/ardanlabs/encore#installation)
 * [Create Your Own Version](https://github.com/ardanlabs/encore#create-your-own-version)
+* [Running The Project](https://github.com/ardanlabs/encore#running-the-project)
 * [Purchase Video](https://github.com/ardanlabs/encore#purchase-video)
 * [Experience](https://github.com/ardanlabs/encore#our-experience)
 * [Teacher](https://github.com/ardanlabs/encore#our-teacher)
@@ -83,6 +84,28 @@ $ go mod vendor
 ```
 
 Now you have a copy with your own module name. Now all you need to do is initialize the project for git.
+
+## Running The Project
+
+To run the project use the following commands.
+
+```
+# Install Tooling
+$ make gotooling
+$ make brew
+
+# Run Tests
+$ make test
+
+# Run Project
+$ make up
+$ make token
+$ export TOKEN=<COPY TOKEN>
+$ make users
+
+# Shut everything down
+$ make down
+```
 
 ## Purchase Video
 
