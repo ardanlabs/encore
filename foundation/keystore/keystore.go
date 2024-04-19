@@ -9,10 +9,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
-	"io/fs"
-	"path"
-	"strings"
 )
 
 // key represents key information.
@@ -34,57 +30,20 @@ func New() *KeyStore {
 	}
 }
 
-// LoadRSAKeys loads a set of RSA PEM files rooted inside of a directory. The
-// name of each PEM file will be used as the key id.
-// Example: ks.LoadRSAKeys(os.DirFS("/zarf/keys/"))
-// Example: /zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem
-func (ks *KeyStore) LoadRSAKeys(fsys fs.FS) error {
-	fn := func(fileName string, dirEntry fs.DirEntry, err error) error {
-		if err != nil {
-			return fmt.Errorf("walkdir failure: %w", err)
-		}
-
-		if dirEntry.IsDir() {
-			return nil
-		}
-
-		if path.Ext(fileName) != ".pem" {
-			return nil
-		}
-
-		file, err := fsys.Open(fileName)
-		if err != nil {
-			return fmt.Errorf("opening key file: %w", err)
-		}
-		defer file.Close()
-
-		// limit PEM file size to 1 megabyte. This should be reasonable for
-		// almost any PEM file and prevents shenanigans like linking the file
-		// to /dev/random or something like that.
-		pem, err := io.ReadAll(io.LimitReader(file, 1024*1024))
-		if err != nil {
-			return fmt.Errorf("reading auth private key: %w", err)
-		}
-
-		privatePEM := string(pem)
-		publicPEM, err := toPublicPEM(privatePEM)
-		if err != nil {
-			return fmt.Errorf("converting private PEM to public: %w", err)
-		}
-
-		key := key{
-			privatePEM: privatePEM,
-			publicPEM:  publicPEM,
-		}
-
-		ks.store[strings.TrimSuffix(dirEntry.Name(), ".pem")] = key
-
-		return nil
+// LoadKey takes an id and the private PEM string.
+func (ks *KeyStore) LoadKey(id string, pem string) error {
+	privatePEM := string(pem)
+	publicPEM, err := toPublicPEM(privatePEM)
+	if err != nil {
+		return fmt.Errorf("converting private PEM to public: %w", err)
 	}
 
-	if err := fs.WalkDir(fsys, ".", fn); err != nil {
-		return fmt.Errorf("walking directory: %w", err)
+	key := key{
+		privatePEM: privatePEM,
+		publicPEM:  publicPEM,
 	}
+
+	ks.store[id] = key
 
 	return nil
 }

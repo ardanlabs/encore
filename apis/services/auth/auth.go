@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"runtime"
 
 	"encore.dev"
@@ -25,6 +24,12 @@ import (
 // Represents the database this service will use. The name has to be a literal
 // string.
 var appDB = esqldb.Named("app")
+
+// Represents the secrets for this service.
+var secrets struct {
+	KeyID  string
+	KeyPEM string
+}
 
 // =============================================================================
 
@@ -93,9 +98,8 @@ func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
 	cfg := struct {
 		conf.Version
 		Auth struct {
-			KeysFolder string `conf:"default:zarf/"`
-			ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
-			Issuer     string `conf:"default:service project"`
+			ActiveKID string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
+			Issuer    string `conf:"default:service project"`
 		}
 		DB struct {
 			MaxIdleConns int `conf:"default:2"`
@@ -153,7 +157,7 @@ func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
 	// concern.
 
 	ks := keystore.New()
-	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+	if err := ks.LoadKey(secrets.KeyID, secrets.KeyPEM); err != nil {
 		return nil, nil, fmt.Errorf("reading keys: %w", err)
 	}
 

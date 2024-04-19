@@ -87,8 +87,9 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 #
 #	$ encore app init
 #	Run the Cloud Dashboard
-#		Github: Connect the repo in the dashboard
-#		Deploy: Manually start a deploy
+#		Github:  Connect the repo in the dashboard
+#		Deploy:  Manually start a deploy
+#       Secrets: make secrets
 
 # ==============================================================================
 # CLASS NOTES
@@ -136,6 +137,12 @@ reset-encore:
 	rm encore.db-shm; \
 	rm encore.db-wal; \
 	rm onboarding.json;
+
+secrets:
+	cat zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem | encore secret set --type local KeyPEM
+	cat zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem | encore secret set --type dev KeyPEM
+	echo "54bb2165-71e1-41a6-af3e-7da4a0e1e2c1" | encore secret set --type local KeyID
+	echo "54bb2165-71e1-41a6-af3e-7da4a0e1e2c1" | encore secret set --type dev KeyID
 
 metrics:
 	expvarmon -ports="localhost:4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"

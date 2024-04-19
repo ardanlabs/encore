@@ -20,6 +20,7 @@ import (
 	"github.com/ardanlabs/encore/app/domain/userapp"
 	"github.com/ardanlabs/encore/app/domain/vproductapp"
 	"github.com/ardanlabs/encore/business/api/delegate"
+	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/homebus/stores/homedb"
@@ -183,6 +184,10 @@ func startup(log rlog.Ctx) (*sqlx.DB, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("connecting to db: %w", err)
+	}
+
+	if err := migrate.Seed(context.Background(), db); err != nil {
+		return nil, fmt.Errorf("seeding the db: %w", err)
 	}
 
 	return db, nil
