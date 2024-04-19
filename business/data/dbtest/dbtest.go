@@ -15,7 +15,6 @@ import (
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/delegate"
-	"github.com/ardanlabs/encore/business/data/appdb"
 	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/domain/homebus"
@@ -33,7 +32,7 @@ import (
 // StartDB retrieves the database information.
 func StartDB() (string, error) {
 	var out bytes.Buffer
-	cmd := exec.Command("encore", "db", "conn-uri", "--test", appdb.DBName)
+	cmd := exec.Command("encore", "db", "conn-uri", "--test", "app")
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("could not access the database information: %w", err)
@@ -126,7 +125,7 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 
 	// This is changing out the base dbname with the new one on
 	// the connection string.
-	url = strings.Replace(url, appdb.DBName, dbName, 1)
+	url = strings.Replace(url, "app", dbName, 1)
 
 	db, err := sqldb.OpenTest(url)
 	if err != nil {

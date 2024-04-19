@@ -6,11 +6,8 @@ import (
 	edb "encore.dev/storage/sqldb"
 )
 
-// DBName represents the name of the database used by the application.
-const DBName = "app"
-
-// AppDB represents the database for this system. Encore will create and
-// manage this database for us.
-var AppDB = edb.NewDatabase("app", edb.DatabaseConfig{
+// This represents the database for this system. Encore will create and
+// manage this database for us. The name has to be a literal string.
+var _ = edb.NewDatabase("app", edb.DatabaseConfig{
 	Migrations: "./migrate/migrations",
 })

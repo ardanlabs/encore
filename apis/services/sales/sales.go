@@ -10,6 +10,7 @@ import (
 
 	"encore.dev"
 	"encore.dev/rlog"
+	esqldb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/api/debug"
 	"github.com/ardanlabs/encore/app/api/metrics"
@@ -19,8 +20,6 @@ import (
 	"github.com/ardanlabs/encore/app/domain/userapp"
 	"github.com/ardanlabs/encore/app/domain/vproductapp"
 	"github.com/ardanlabs/encore/business/api/delegate"
-	"github.com/ardanlabs/encore/business/data/appdb"
-	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/homebus/stores/homedb"
@@ -32,6 +31,12 @@ import (
 	"github.com/ardanlabs/encore/business/domain/vproductbus/stores/vproductdb"
 	"github.com/jmoiron/sqlx"
 )
+
+// Represents the database this service will use. The name has to be a literal
+// string.
+var appDB = esqldb.Named("app")
+
+// =============================================================================
 
 type appCrud struct {
 	homeApp    *homeapp.Core
@@ -172,18 +177,12 @@ func startup(log rlog.Ctx) (*sqlx.DB, error) {
 	log.Info("initService", "status", "initializing database support")
 
 	db, err := sqldb.Open(sqldb.Config{
-		EDB:          appdb.AppDB,
+		EDB:          appDB,
 		MaxIdleConns: cfg.DB.MaxIdleConns,
 		MaxOpenConns: cfg.DB.MaxOpenConns,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("connecting to db: %w", err)
-	}
-
-	// TODO: I don't like this here because it's more of an ops thing, but
-	// for now I will leave it as I learn more.
-	if err := migrate.Seed(context.Background(), db); err != nil {
-		return nil, fmt.Errorf("seeding db: %w", err)
 	}
 
 	return db, nil

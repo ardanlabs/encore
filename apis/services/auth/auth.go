@@ -10,18 +10,23 @@ import (
 
 	"encore.dev"
 	"encore.dev/rlog"
+	esqldb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/domain/userapp"
 	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/api/delegate"
-	"github.com/ardanlabs/encore/business/data/appdb"
-	"github.com/ardanlabs/encore/business/data/appdb/migrate"
 	"github.com/ardanlabs/encore/business/data/sqldb"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
 	"github.com/ardanlabs/encore/foundation/keystore"
 	"github.com/jmoiron/sqlx"
 )
+
+// Represents the database this service will use. The name has to be a literal
+// string.
+var appDB = esqldb.Named("app")
+
+// =============================================================================
 
 // Service represents the encore service application.
 //
@@ -130,18 +135,12 @@ func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
 	log.Info("initService", "status", "initializing database support")
 
 	db, err := sqldb.Open(sqldb.Config{
-		EDB:          appdb.AppDB,
+		EDB:          appDB,
 		MaxIdleConns: cfg.DB.MaxIdleConns,
 		MaxOpenConns: cfg.DB.MaxOpenConns,
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("connecting to db: %w", err)
-	}
-
-	// TODO: I don't like this here because it's more of an ops thing, but
-	// for now I will leave it as I learn more.
-	if err := migrate.Seed(context.Background(), db); err != nil {
-		return nil, nil, fmt.Errorf("seeding db: %w", err)
 	}
 
 	// -------------------------------------------------------------------------
