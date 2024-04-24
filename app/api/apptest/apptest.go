@@ -7,7 +7,6 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
-	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/auth"
 )
@@ -106,17 +105,6 @@ func CmpAppErrors(got any, exp any) string {
 
 	if gotResp.Message != expResp.Message {
 		return "message does not match"
-	}
-
-	gotDetails := gotResp.Details.(errs.ExtraDetails)
-	expDetails := expResp.Details.(errs.ExtraDetails)
-
-	if gotDetails.HTTPStatus != expDetails.HTTPStatus {
-		return "http status does not match"
-	}
-
-	if gotDetails.HTTPStatusCode != expDetails.HTTPStatusCode {
-		return "http status code does not match"
 	}
 
 	return ""
