@@ -36,6 +36,11 @@ func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, middlewa
 		Rule:   rule,
 	}
 
+	// We should call the Auth Service from here and keep things in the app
+	// layer but Encore won't allow it. The API layer middleware calls
+	// this function first and then calls the Auth Service. This is the same
+	// for the other Authorize middleware functions.
+
 	return authInfo, req, nil
 }
 

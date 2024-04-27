@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 
-	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/auth"
 	"github.com/ardanlabs/encore/app/api/errs"
@@ -36,14 +35,12 @@ func NewCoreWithAuth(userBus *userbus.Core, auth *auth.Auth) *Core {
 }
 
 // Token provides an API token for the authenticated user.
-func (c *Core) Token(ctx context.Context, kid string) (Token, error) {
+func (c *Core) Token(ctx context.Context, claims auth.Claims, kid string) (Token, error) {
 	if c.auth == nil {
 		return Token{}, errs.Newf(eerrs.Internal, "auth not configured")
 	}
 
-	claims := eauth.Data().(*auth.Claims)
-
-	tkn, err := c.auth.GenerateToken(kid, *claims)
+	tkn, err := c.auth.GenerateToken(kid, claims)
 	if err != nil {
 		return Token{}, errs.New(eerrs.Internal, err)
 	}

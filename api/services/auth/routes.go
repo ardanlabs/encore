@@ -26,7 +26,9 @@ func (s *Service) AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UI
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/token/:kid
 func (s *Service) UserToken(ctx context.Context, kid string) (userapp.Token, error) {
-	return s.userApp.Token(ctx, kid)
+	claims := eauth.Data().(*auth.Claims)
+
+	return s.userApp.Token(ctx, *claims, kid)
 }
 
 //lint:ignore U1000 "called by encore"
