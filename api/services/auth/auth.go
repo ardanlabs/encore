@@ -12,7 +12,6 @@ import (
 	esqldb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/api/auth"
-	userapp "github.com/ardanlabs/encore/app/domain/userapp"
 	"github.com/ardanlabs/encore/business/api/delegate"
 	"github.com/ardanlabs/encore/business/api/sqldb"
 	"github.com/ardanlabs/encore/business/domain/userbus"
@@ -40,7 +39,6 @@ type Service struct {
 	log     rlog.Ctx
 	db      *sqlx.DB
 	auth    *auth.Auth
-	userApp *userapp.Core
 	userBus *userbus.Core
 }
 
@@ -53,7 +51,6 @@ func NewService(log rlog.Ctx, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 		log:     log,
 		db:      db,
 		auth:    ath,
-		userApp: userapp.NewCoreWithAuth(userBus, ath),
 		userBus: userBus,
 	}
 

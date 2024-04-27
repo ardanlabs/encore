@@ -8,7 +8,6 @@ import (
 	"github.com/ardanlabs/encore/app/api/auth"
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/api/mid"
-	"github.com/ardanlabs/encore/app/domain/userapp"
 )
 
 // =============================================================================
@@ -23,12 +22,23 @@ func (s *Service) AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UI
 // =============================================================================
 // Auth related APIs
 
+type token struct {
+	Token string `json:"token"`
+}
+
 //lint:ignore U1000 "called by encore"
 //encore:api auth method=GET path=/v1/token/:kid
-func (s *Service) UserToken(ctx context.Context, kid string) (userapp.Token, error) {
+func (s *Service) UserToken(ctx context.Context, kid string) (token, error) {
+
+	// The BearerBasic middleware function generates the claims.
 	claims := eauth.Data().(*auth.Claims)
 
-	return s.userApp.Token(ctx, *claims, kid)
+	tkn, err := s.auth.GenerateToken(kid, *claims)
+	if err != nil {
+		return token{}, errs.New(eerrs.Internal, err)
+	}
+
+	return token{tkn}, nil
 }
 
 //lint:ignore U1000 "called by encore"

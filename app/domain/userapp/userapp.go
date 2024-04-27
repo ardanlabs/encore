@@ -34,20 +34,6 @@ func NewCoreWithAuth(userBus *userbus.Core, auth *auth.Auth) *Core {
 	}
 }
 
-// Token provides an API token for the authenticated user.
-func (c *Core) Token(ctx context.Context, claims auth.Claims, kid string) (Token, error) {
-	if c.auth == nil {
-		return Token{}, errs.Newf(eerrs.Internal, "auth not configured")
-	}
-
-	tkn, err := c.auth.GenerateToken(kid, claims)
-	if err != nil {
-		return Token{}, errs.New(eerrs.Internal, err)
-	}
-
-	return toToken(tkn), nil
-}
-
 // Create adds a new user to the system.
 func (c *Core) Create(ctx context.Context, app NewUser) (User, error) {
 	nc, err := toBusNewUser(app)
