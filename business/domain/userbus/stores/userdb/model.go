@@ -6,7 +6,7 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/ardanlabs/encore/business/data/sqldb/dbarray"
+	"github.com/ardanlabs/encore/business/api/sqldb/dbarray"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/google/uuid"
 )

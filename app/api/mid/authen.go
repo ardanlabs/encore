@@ -10,8 +10,8 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
+	"github.com/ardanlabs/encore/app/api/auth"
 	"github.com/ardanlabs/encore/app/api/errs"
-	"github.com/ardanlabs/encore/business/api/auth"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
@@ -24,8 +24,8 @@ type AuthParams struct {
 
 // =============================================================================
 
-// AuthHandler is used to provide initial auth for JWT's and basic user:password.
-func AuthHandler(ctx context.Context, auth *auth.Auth, userBus *userbus.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
+// BearerBasic processes the actual authentication logic.
+func BearerBasic(ctx context.Context, auth *auth.Auth, userBus *userbus.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
 	parts := strings.Split(ap.Authorization, " ")
 
 	switch parts[0] {

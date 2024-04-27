@@ -3,7 +3,7 @@ package tranapp
 import (
 	"context"
 
-	"github.com/ardanlabs/encore/business/data/transaction"
+	"github.com/ardanlabs/encore/business/api/transaction"
 )
 
 // executeUnderTransaction constructs a new Handlers value with the core apis

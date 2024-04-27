@@ -10,7 +10,7 @@ import (
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/api/delegate"
 	"github.com/ardanlabs/encore/business/api/order"
-	"github.com/ardanlabs/encore/business/data/transaction"
+	"github.com/ardanlabs/encore/business/api/transaction"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/google/uuid"
 )

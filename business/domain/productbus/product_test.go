@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"encore.dev"
-	"github.com/ardanlabs/encore/business/data/dbtest"
+	"github.com/ardanlabs/encore/business/api/dbtest"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/google/go-cmp/cmp"
@@ -89,7 +89,6 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	tu1 := dbtest.User{
 		User:     usrs[0],
-		Token:    dbTest.Token(usrs[0].Email.Address),
 		Products: prds,
 	}
 
@@ -107,7 +106,6 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	tu2 := dbtest.User{
 		User:     usrs[0],
-		Token:    dbTest.Token(usrs[0].Email.Address),
 		Products: prds,
 	}
 

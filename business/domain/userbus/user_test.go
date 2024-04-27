@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"encore.dev"
-	"github.com/ardanlabs/encore/business/data/dbtest"
+	"github.com/ardanlabs/encore/business/api/dbtest"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/crypto/bcrypt"

@@ -7,7 +7,7 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/business/api/auth"
+	"github.com/ardanlabs/encore/app/api/auth"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
@@ -30,6 +30,11 @@ const (
 	homeKey
 )
 
+func setUser(req middleware.Request, usr userbus.User) middleware.Request {
+	ctx := context.WithValue(req.Context(), userKey, usr)
+	return req.WithContext(ctx)
+}
+
 // GetUserID extracts the user id from the context.
 func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	userID, found := eauth.UserID()
@@ -43,11 +48,6 @@ func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	}
 
 	return v, nil
-}
-
-func setUser(req middleware.Request, usr userbus.User) middleware.Request {
-	ctx := context.WithValue(req.Context(), userKey, usr)
-	return req.WithContext(ctx)
 }
 
 // GetUser extracts the user from the context.
