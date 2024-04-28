@@ -54,10 +54,10 @@ type AppTest struct {
 }
 
 // New constructs an app test for use.
-func New(dbTest *dbtest.Test, auth *auth.Auth, handler AuthHandler) *AppTest {
+func New(dbTest *dbtest.Test, ath *auth.Auth, handler AuthHandler) *AppTest {
 	return &AppTest{
 		DBTest:  dbTest,
-		Auth:    auth,
+		Auth:    ath,
 		handler: handler,
 	}
 }

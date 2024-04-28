@@ -10,7 +10,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/userbus"
 )
 
-func insertSeedData(dbTest *dbtest.Test, auth *auth.Auth) (apitest.SeedData, error) {
+func insertSeedData(dbTest *dbtest.Test, ath *auth.Auth) (apitest.SeedData, error) {
 	ctx := context.Background()
 	busDomain := dbTest.BusDomain
 
@@ -23,14 +23,14 @@ func insertSeedData(dbTest *dbtest.Test, auth *auth.Auth) (apitest.SeedData, err
 		User: dbtest.User{
 			User: usrs[0],
 		},
-		Token: apitest.Token(dbTest, auth, usrs[0].Email.Address),
+		Token: apitest.Token(dbTest, ath, usrs[0].Email.Address),
 	}
 
 	tu2 := apitest.User{
 		User: dbtest.User{
 			User: usrs[1],
 		},
-		Token: apitest.Token(dbTest, auth, usrs[1].Email.Address),
+		Token: apitest.Token(dbTest, ath, usrs[1].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
@@ -44,21 +44,21 @@ func insertSeedData(dbTest *dbtest.Test, auth *auth.Auth) (apitest.SeedData, err
 		User: dbtest.User{
 			User: usrs[0],
 		},
-		Token: apitest.Token(dbTest, auth, usrs[0].Email.Address),
+		Token: apitest.Token(dbTest, ath, usrs[0].Email.Address),
 	}
 
 	tu4 := apitest.User{
 		User: dbtest.User{
 			User: usrs[1],
 		},
-		Token: apitest.Token(dbTest, auth, usrs[1].Email.Address),
+		Token: apitest.Token(dbTest, ath, usrs[1].Email.Address),
 	}
 
 	tu5 := apitest.User{
 		User: dbtest.User{
 			User: usrs[2],
 		},
-		Token: apitest.Token(dbTest, auth, usrs[2].Email.Address),
+		Token: apitest.Token(dbTest, ath, usrs[2].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
