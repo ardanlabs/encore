@@ -120,7 +120,7 @@ func startup(log rlog.Ctx) (*sqlx.DB, error) {
 	cfg := struct {
 		conf.Version
 		DB struct {
-			MaxIdleConns int `conf:"default:2"`
+			MaxIdleConns int `conf:"default:0"`
 			MaxOpenConns int `conf:"default:0"`
 		}
 	}{

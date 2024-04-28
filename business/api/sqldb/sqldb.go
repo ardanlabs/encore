@@ -52,8 +52,8 @@ func OpenTest(url string) (*sqlx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.SetMaxIdleConns(2)
-	db.SetMaxOpenConns(2)
+	db.SetMaxIdleConns(0)
+	db.SetMaxOpenConns(0)
 
 	return db, nil
 }

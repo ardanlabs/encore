@@ -99,7 +99,7 @@ func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
 			Issuer    string `conf:"default:service project"`
 		}
 		DB struct {
-			MaxIdleConns int `conf:"default:2"`
+			MaxIdleConns int `conf:"default:0"`
 			MaxOpenConns int `conf:"default:0"`
 		}
 	}{
