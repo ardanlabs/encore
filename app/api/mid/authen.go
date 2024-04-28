@@ -17,32 +17,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// AuthParams is used to unmarshal the authorization string from the request.
-type AuthParams struct {
-	Authorization string `header:"Authorization"`
-}
-
-// =============================================================================
-
-// BearerBasic processes the actual authentication logic.
-func BearerBasic(ctx context.Context, auth *auth.Auth, userBus *userbus.Core, ap *AuthParams) (eauth.UID, *auth.Claims, error) {
-	parts := strings.Split(ap.Authorization, " ")
-
-	switch parts[0] {
-	case "Bearer":
-		return processJWT(ctx, auth, ap.Authorization)
-
-	case "Basic":
-		return processBasic(ctx, userBus, ap.Authorization)
-	}
-
-	return "", nil, errs.Newf(eerrs.Unauthenticated, eerrs.Unauthenticated.String())
-}
-
-// =============================================================================
-
-func processJWT(ctx context.Context, auth *auth.Auth, token string) (eauth.UID, *auth.Claims, error) {
-	claims, err := auth.Authenticate(ctx, token)
+// Bearer processes JWT authentication logic.
+func Bearer(ctx context.Context, ath *auth.Auth, authorization string) (eauth.UID, *auth.Claims, error) {
+	claims, err := ath.Authenticate(ctx, authorization)
 	if err != nil {
 		return "", nil, errs.New(eerrs.Unauthenticated, err)
 	}
@@ -59,8 +36,9 @@ func processJWT(ctx context.Context, auth *auth.Auth, token string) (eauth.UID, 
 	return eauth.UID(subjectID.String()), &claims, nil
 }
 
-func processBasic(ctx context.Context, userBus *userbus.Core, basic string) (eauth.UID, *auth.Claims, error) {
-	email, pass, ok := parseBasicAuth(basic)
+// Basic processes basic authentication logic.
+func Basic(ctx context.Context, ath *auth.Auth, userBus *userbus.Core, authorization string) (eauth.UID, *auth.Claims, error) {
+	email, pass, ok := parseBasicAuth(authorization)
 	if !ok {
 		return "", nil, errs.Newf(eerrs.Unauthenticated, "invalid Basic auth")
 	}
@@ -78,7 +56,7 @@ func processBasic(ctx context.Context, userBus *userbus.Core, basic string) (eau
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   usr.ID.String(),
-			Issuer:    "service project",
+			Issuer:    ath.Issuer(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(8760 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},

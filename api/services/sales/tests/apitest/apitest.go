@@ -10,7 +10,6 @@ import (
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/auth"
-	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/api/dbtest"
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
 	"github.com/golang-jwt/jwt/v4"
@@ -37,8 +36,13 @@ type Table struct {
 	CmpFunc func(got any, exp any) string
 }
 
+// AuthParams rerpesents the parameters provided to the auth handler.
+type AuthParams struct {
+	Authorization string `header:"Authorization"`
+}
+
 // AuthHandler defines a function that can be called to handle authentication.
-type AuthHandler func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error)
+type AuthHandler func(ctx context.Context, ap *AuthParams) (eauth.UID, *auth.Claims, error)
 
 // =============================================================================
 
@@ -98,7 +102,7 @@ func (at *AppTest) Run(t *testing.T, table []Table, testName string) {
 }
 
 func (at *AppTest) authHandler(ctx context.Context, token string) (context.Context, error) {
-	uid, claims, err := at.handler(ctx, &mid.AuthParams{
+	uid, claims, err := at.handler(ctx, &AuthParams{
 		Authorization: "Bearer " + token,
 	})
 

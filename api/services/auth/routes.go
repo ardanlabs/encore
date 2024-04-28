@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"strings"
 
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
@@ -13,10 +14,24 @@ import (
 // =============================================================================
 // JWT or Basic Athentication handling
 
+type authParams struct {
+	Authorization string `header:"Authorization"`
+}
+
 //lint:ignore U1000 "called by encore"
 //encore:authhandler
-func (s *Service) AuthHandler(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
-	return mid.BearerBasic(ctx, s.auth, s.userBus, ap)
+func (s *Service) AuthHandler(ctx context.Context, ap *authParams) (eauth.UID, *auth.Claims, error) {
+	parts := strings.Split(ap.Authorization, " ")
+
+	switch parts[0] {
+	case "Bearer":
+		return mid.Bearer(ctx, s.auth, ap.Authorization)
+
+	case "Basic":
+		return mid.Basic(ctx, s.auth, s.userBus, ap.Authorization)
+	}
+
+	return "", nil, errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action")
 }
 
 // =============================================================================

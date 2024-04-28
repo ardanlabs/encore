@@ -114,8 +114,8 @@ func startTest(t *testing.T, url string, testName string) *apitest.AppTest {
 
 	// -------------------------------------------------------------------------
 
-	authHandler := func(ctx context.Context, ap *mid.AuthParams) (eauth.UID, *auth.Claims, error) {
-		return mid.BearerBasic(ctx, ath, dbTest.BusDomain.User, ap)
+	authHandler := func(ctx context.Context, ap *apitest.AuthParams) (eauth.UID, *auth.Claims, error) {
+		return mid.Bearer(ctx, ath, ap.Authorization)
 	}
 
 	appTest := apitest.New(dbTest, ath, authHandler)
