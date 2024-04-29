@@ -46,7 +46,7 @@ func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, middlewa
 
 // AuthorizeUser checks the user making the call has specified a user id on
 // the route that matches the claims.
-func AuthorizeUser(userBus *userbus.Core, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
+func AuthorizeUser(userBus *userbus.Business, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -94,7 +94,7 @@ func AuthorizeUser(userBus *userbus.Core, req middleware.Request, next middlewar
 
 // AuthorizeProduct checks the user making the call has specified a product id on
 // the route that matches the claims.
-func AuthorizeProduct(productBus *productbus.Core, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
+func AuthorizeProduct(productBus *productbus.Business, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -134,7 +134,7 @@ func AuthorizeProduct(productBus *productbus.Core, req middleware.Request, next 
 
 // AuthorizeHome checks the user making the call has specified a home id on
 // the route that matches the claims.
-func AuthorizeHome(homeBus *homebus.Core, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
+func AuthorizeHome(homeBus *homebus.Business, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 

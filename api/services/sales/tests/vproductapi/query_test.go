@@ -31,8 +31,8 @@ func vproductQueryOk(sd apitest.SeedData) []apitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				qp := vproductapp.QueryParams{
-					Page:    1,
-					Rows:    10,
+					Page:    "1",
+					Rows:    "10",
 					OrderBy: "product_id,ASC",
 					Name:    "Name",
 				}

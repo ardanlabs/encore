@@ -33,8 +33,8 @@ func homeQueryOk(sd apitest.SeedData) []apitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				qp := homeapp.QueryParams{
-					Page:    1,
-					Rows:    10,
+					Page:    "1",
+					Rows:    "10",
 					OrderBy: "home_id,ASC",
 				}
 

@@ -8,8 +8,8 @@ import (
 
 // QueryParams represents the set of possible query strings.
 type QueryParams struct {
-	Page     int    `query:"page"`
-	Rows     int    `query:"rows"`
+	Page     string `query:"page"`
+	Rows     string `query:"rows"`
 	OrderBy  string `query:"orderBy"`
 	ID       string `query:"product_id"`
 	Name     string `query:"name"`

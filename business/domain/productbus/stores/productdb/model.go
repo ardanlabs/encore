@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type dbProduct struct {
+type product struct {
 	ID          uuid.UUID `db:"product_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Name        string    `db:"name"`
@@ -17,40 +17,40 @@ type dbProduct struct {
 	DateUpdated time.Time `db:"date_updated"`
 }
 
-func toDBProduct(prd productbus.Product) dbProduct {
-	prdDB := dbProduct{
-		ID:          prd.ID,
-		UserID:      prd.UserID,
-		Name:        prd.Name,
-		Cost:        prd.Cost,
-		Quantity:    prd.Quantity,
-		DateCreated: prd.DateCreated.UTC(),
-		DateUpdated: prd.DateUpdated.UTC(),
+func toDBProduct(bus productbus.Product) product {
+	db := product{
+		ID:          bus.ID,
+		UserID:      bus.UserID,
+		Name:        bus.Name,
+		Cost:        bus.Cost,
+		Quantity:    bus.Quantity,
+		DateCreated: bus.DateCreated.UTC(),
+		DateUpdated: bus.DateUpdated.UTC(),
 	}
 
-	return prdDB
+	return db
 }
 
-func toCoreProduct(dbPrd dbProduct) productbus.Product {
-	prd := productbus.Product{
-		ID:          dbPrd.ID,
-		UserID:      dbPrd.UserID,
-		Name:        dbPrd.Name,
-		Cost:        dbPrd.Cost,
-		Quantity:    dbPrd.Quantity,
-		DateCreated: dbPrd.DateCreated.In(time.Local),
-		DateUpdated: dbPrd.DateUpdated.In(time.Local),
+func toBusProduct(db product) productbus.Product {
+	bus := productbus.Product{
+		ID:          db.ID,
+		UserID:      db.UserID,
+		Name:        db.Name,
+		Cost:        db.Cost,
+		Quantity:    db.Quantity,
+		DateCreated: db.DateCreated.In(time.Local),
+		DateUpdated: db.DateUpdated.In(time.Local),
 	}
 
-	return prd
+	return bus
 }
 
-func toCoreProducts(dbPrds []dbProduct) []productbus.Product {
-	prds := make([]productbus.Product, len(dbPrds))
+func toBusProducts(dbs []product) []productbus.Product {
+	bus := make([]productbus.Product, len(dbs))
 
-	for i, dbPrd := range dbPrds {
-		prds[i] = toCoreProduct(dbPrd)
+	for i, db := range dbs {
+		bus[i] = toBusProduct(db)
 	}
 
-	return prds
+	return bus
 }

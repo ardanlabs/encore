@@ -13,16 +13,16 @@ import (
 )
 
 type appDomain struct {
-	homeApp     *homeapp.Core
-	productApp  *productapp.Core
-	tranApp     *tranapp.Core
-	userApp     *userapp.Core
-	vproductApp *vproductapp.Core
+	homeApp     *homeapp.App
+	productApp  *productapp.App
+	tranApp     *tranapp.App
+	userApp     *userapp.App
+	vproductApp *vproductapp.App
 }
 
 type busDomain struct {
 	delegate   *delegate.Delegate
-	homeBus    *homebus.Core
-	productBus *productbus.Core
-	userBus    *userbus.Core
+	homeBus    *homebus.Business
+	productBus *productbus.Business
+	userBus    *userbus.Business
 }

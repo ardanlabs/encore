@@ -127,12 +127,12 @@ func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderB
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbPrds []dbProduct
+	var dbPrds []product
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toCoreProducts(dbPrds), nil
+	return toBusProducts(dbPrds), nil
 }
 
 // Count returns the total number of users in the DB.
@@ -176,7 +176,7 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 	WHERE
 		product_id = :product_id`
 
-	var dbPrd dbProduct
+	var dbPrd product
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbPrd); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return productbus.Product{}, fmt.Errorf("db: %w", productbus.ErrNotFound)
@@ -184,7 +184,7 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 		return productbus.Product{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toCoreProduct(dbPrd), nil
+	return toBusProduct(dbPrd), nil
 }
 
 // QueryByUserID finds the product identified by a given User ID.
@@ -203,10 +203,10 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productb
 	WHERE
 		user_id = :user_id`
 
-	var dbPrds []dbProduct
+	var dbPrds []product
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
-	return toCoreProducts(dbPrds), nil
+	return toBusProducts(dbPrds), nil
 }

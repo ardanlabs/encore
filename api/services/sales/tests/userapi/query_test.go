@@ -39,8 +39,8 @@ func userQueryOk(sd apitest.SeedData) []apitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				qp := userapp.QueryParams{
-					Page:    1,
-					Rows:    10,
+					Page:    "1",
+					Rows:    "10",
 					OrderBy: "user_id,ASC",
 					Name:    "Name",
 				}

@@ -7,24 +7,26 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/api/page"
+	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
 )
 
-// Core manages the set of app layer api functions for the view product domain.
-type Core struct {
-	vproductBus *vproductbus.Core
+// App manages the set of app layer api functions for the view product domain.
+type App struct {
+	vproductBus *vproductbus.Business
 }
 
-// NewCore constructs a view product core API for use.
-func NewCore(vproductBus *vproductbus.Core) *Core {
-	return &Core{
+// NewApp constructs a view product app API for use.
+func NewApp(vproductBus *vproductbus.Business) *App {
+	return &App{
 		vproductBus: vproductBus,
 	}
 }
 
 // Query returns a list of products with paging.
-func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Product], error) {
-	if err := validatePaging(qp); err != nil {
+func (a *App) Query(ctx context.Context, qp QueryParams) (page.Document[Product], error) {
+	pg, err := page.Parse(qp.Page, qp.Rows)
+	if err != nil {
 		return page.Document[Product]{}, err
 	}
 
@@ -33,20 +35,20 @@ func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Product
 		return page.Document[Product]{}, err
 	}
 
-	orderBy, err := parseOrder(qp)
+	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
 		return page.Document[Product]{}, err
 	}
 
-	prds, err := c.vproductBus.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	prds, err := a.vproductBus.Query(ctx, filter, orderBy, pg.Number, pg.RowsPerPage)
 	if err != nil {
 		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
-	total, err := c.vproductBus.Count(ctx, filter)
+	total, err := a.vproductBus.Count(ctx, filter)
 	if err != nil {
 		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
 
-	return page.NewDocument(toAppProducts(prds), total, qp.Page, qp.Rows), nil
+	return page.NewDocument(toAppProducts(prds), total, pg.Number, pg.RowsPerPage), nil
 }

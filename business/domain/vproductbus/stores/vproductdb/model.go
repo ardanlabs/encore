@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type dbProduct struct {
+type product struct {
 	ID          uuid.UUID `db:"product_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Name        string    `db:"name"`
@@ -18,26 +18,26 @@ type dbProduct struct {
 	UserName    string    `db:"user_name"`
 }
 
-func toCoreProduct(dbPrd dbProduct) vproductbus.Product {
+func toBusProduct(db product) vproductbus.Product {
 	prd := vproductbus.Product{
-		ID:          dbPrd.ID,
-		UserID:      dbPrd.UserID,
-		Name:        dbPrd.Name,
-		Cost:        dbPrd.Cost,
-		Quantity:    dbPrd.Quantity,
-		DateCreated: dbPrd.DateCreated.In(time.Local),
-		DateUpdated: dbPrd.DateUpdated.In(time.Local),
-		UserName:    dbPrd.UserName,
+		ID:          db.ID,
+		UserID:      db.UserID,
+		Name:        db.Name,
+		Cost:        db.Cost,
+		Quantity:    db.Quantity,
+		DateCreated: db.DateCreated.In(time.Local),
+		DateUpdated: db.DateUpdated.In(time.Local),
+		UserName:    db.UserName,
 	}
 
 	return prd
 }
 
-func toCoreProducts(dbPrds []dbProduct) []vproductbus.Product {
-	prds := make([]vproductbus.Product, len(dbPrds))
+func toBusProducts(dbs []product) []vproductbus.Product {
+	prds := make([]vproductbus.Product, len(dbs))
 
-	for i, dbPrd := range dbPrds {
-		prds[i] = toCoreProduct(dbPrd)
+	for i, db := range dbs {
+		prds[i] = toBusProduct(db)
 	}
 
 	return prds

@@ -105,11 +105,7 @@ func NamedExecContext(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, que
 
 	defer func() {
 		if err != nil {
-			if _, ok := data.(struct{}); ok {
-				log.Info("database.NamedExecContext", "query", q, "ERROR", err)
-			} else {
-				log.Info("database.NamedExecContext", "query", q, "ERROR", err)
-			}
+			log.Info("database.NamedExecContext", "query", q, "ERROR", err)
 		}
 	}()
 

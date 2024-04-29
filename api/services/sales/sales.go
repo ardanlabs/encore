@@ -54,10 +54,10 @@ type Service struct {
 // NewService is called to create a new encore Service.
 func NewService(log rlog.Ctx, db *sqlx.DB) (*Service, error) {
 	delegate := delegate.New(log)
-	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
-	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
-	homeBus := homebus.NewCore(userBus, delegate, homedb.NewStore(log, db))
-	vproductBus := vproductbus.NewCore(vproductdb.NewStore(log, db))
+	userBus := userbus.NewBusiness(log, delegate, userdb.NewStore(log, db))
+	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
+	homeBus := homebus.NewBusiness(userBus, delegate, homedb.NewStore(log, db))
+	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))
 
 	s := Service{
 		log:   log,
@@ -65,11 +65,11 @@ func NewService(log rlog.Ctx, db *sqlx.DB) (*Service, error) {
 		db:    db,
 		debug: debug.Mux(),
 		appDomain: appDomain{
-			userApp:     userapp.NewCore(userBus),
-			productApp:  productapp.NewCore(productBus),
-			homeApp:     homeapp.NewCore(homeBus),
-			tranApp:     tranapp.NewCore(userBus, productBus),
-			vproductApp: vproductapp.NewCore(vproductBus),
+			userApp:     userapp.NewApp(userBus),
+			productApp:  productapp.NewApp(productBus),
+			homeApp:     homeapp.NewApp(homeBus),
+			tranApp:     tranapp.NewApp(userBus, productBus),
+			vproductApp: vproductapp.NewApp(vproductBus),
 		},
 		busDomain: busDomain{
 			delegate:   delegate,

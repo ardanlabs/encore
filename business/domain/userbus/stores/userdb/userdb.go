@@ -136,12 +136,12 @@ func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy o
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbUsrs []dbUser
+	var dbUsrs []user
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbUsrs); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toCoreUserSlice(dbUsrs)
+	return toBusUsers(dbUsrs)
 }
 
 // Count returns the total number of users in the DB.
@@ -183,7 +183,7 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, 
 	WHERE 
 		user_id = :user_id`
 
-	var dbUsr dbUser
+	var dbUsr user
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return userbus.User{}, fmt.Errorf("db: %w", userbus.ErrNotFound)
@@ -215,7 +215,7 @@ func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]userbus.
 	WHERE
 		user_id = ANY(:user_id)`
 
-	var dbUsrs []dbUser
+	var dbUsrs []user
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbUsrs); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return nil, userbus.ErrNotFound
@@ -223,7 +223,7 @@ func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]userbus.
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
-	return toCoreUserSlice(dbUsrs)
+	return toBusUsers(dbUsrs)
 }
 
 // QueryByEmail gets the specified user from the database by email.
@@ -242,7 +242,7 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.U
 	WHERE
 		email = :email`
 
-	var dbUsr dbUser
+	var dbUsr user
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return userbus.User{}, fmt.Errorf("db: %w", userbus.ErrNotFound)

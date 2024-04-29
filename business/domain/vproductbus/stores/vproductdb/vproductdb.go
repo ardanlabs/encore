@@ -58,12 +58,12 @@ func (s *Store) Query(ctx context.Context, filter vproductbus.QueryFilter, order
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dnPrd []dbProduct
+	var dnPrd []product
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dnPrd); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toCoreProducts(dnPrd), nil
+	return toBusProducts(dnPrd), nil
 }
 
 // Count returns the total number of products in the DB.

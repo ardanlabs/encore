@@ -35,44 +35,44 @@ type Storer interface {
 	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Product, error)
 }
 
-// Core manages the set of APIs for product access.
-type Core struct {
+// Business manages the set of APIs for product access.
+type Business struct {
 	log      rlog.Ctx
-	userBus  *userbus.Core
+	userBus  *userbus.Business
 	delegate *delegate.Delegate
 	storer   Storer
 }
 
-// NewCore constructs a product core API for use.
-func NewCore(log rlog.Ctx, userBus *userbus.Core, delegate *delegate.Delegate, storer Storer) *Core {
-	c := Core{
+// NewBusiness constructs a product business API for use.
+func NewBusiness(log rlog.Ctx, userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
+	b := Business{
 		log:      log,
 		userBus:  userBus,
 		delegate: delegate,
 		storer:   storer,
 	}
 
-	c.registerDelegateFunctions()
+	b.registerDelegateFunctions()
 
-	return &c
+	return &b
 }
 
 // ExecuteUnderTransaction constructs a new Core value that will use the
 // specified transaction in any store related calls.
-func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error) {
-	storer, err := c.storer.ExecuteUnderTransaction(tx)
+func (b *Business) ExecuteUnderTransaction(tx transaction.Transaction) (*Business, error) {
+	storer, err := b.storer.ExecuteUnderTransaction(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	userBus, err := c.userBus.ExecuteUnderTransaction(tx)
+	userBus, err := b.userBus.ExecuteUnderTransaction(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	core := Core{
+	core := Business{
 		userBus:  userBus,
-		delegate: c.delegate,
+		delegate: b.delegate,
 		storer:   storer,
 	}
 
@@ -80,8 +80,8 @@ func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error
 }
 
 // Create adds a new product to the system.
-func (c *Core) Create(ctx context.Context, np NewProduct) (Product, error) {
-	usr, err := c.userBus.QueryByID(ctx, np.UserID)
+func (b *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
+	usr, err := b.userBus.QueryByID(ctx, np.UserID)
 	if err != nil {
 		return Product{}, fmt.Errorf("user.querybyid: %s: %w", np.UserID, err)
 	}
@@ -106,7 +106,7 @@ func (c *Core) Create(ctx context.Context, np NewProduct) (Product, error) {
 		DateUpdated: now,
 	}
 
-	if err := c.storer.Create(ctx, prd); err != nil {
+	if err := b.storer.Create(ctx, prd); err != nil {
 		return Product{}, fmt.Errorf("create: %w", err)
 	}
 
@@ -114,7 +114,7 @@ func (c *Core) Create(ctx context.Context, np NewProduct) (Product, error) {
 }
 
 // Update modifies information about a product.
-func (c *Core) Update(ctx context.Context, prd Product, up UpdateProduct) (Product, error) {
+func (b *Business) Update(ctx context.Context, prd Product, up UpdateProduct) (Product, error) {
 	if up.Name != nil {
 		prd.Name = *up.Name
 	}
@@ -129,7 +129,7 @@ func (c *Core) Update(ctx context.Context, prd Product, up UpdateProduct) (Produ
 
 	prd.DateUpdated = time.Now()
 
-	if err := c.storer.Update(ctx, prd); err != nil {
+	if err := b.storer.Update(ctx, prd); err != nil {
 		return Product{}, fmt.Errorf("update: %w", err)
 	}
 
@@ -137,8 +137,8 @@ func (c *Core) Update(ctx context.Context, prd Product, up UpdateProduct) (Produ
 }
 
 // Delete removes the specified product.
-func (c *Core) Delete(ctx context.Context, prd Product) error {
-	if err := c.storer.Delete(ctx, prd); err != nil {
+func (b *Business) Delete(ctx context.Context, prd Product) error {
+	if err := b.storer.Delete(ctx, prd); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 
@@ -146,12 +146,12 @@ func (c *Core) Delete(ctx context.Context, prd Product) error {
 }
 
 // Query retrieves a list of existing products.
-func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Product, error) {
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Product, error) {
 	if err := filter.Validate(); err != nil {
 		return nil, err
 	}
 
-	prds, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+	prds, err := b.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -160,17 +160,17 @@ func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, 
 }
 
 // Count returns the total number of products.
-func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
+func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	if err := filter.Validate(); err != nil {
 		return 0, err
 	}
 
-	return c.storer.Count(ctx, filter)
+	return b.storer.Count(ctx, filter)
 }
 
 // QueryByID finds the product by the specified ID.
-func (c *Core) QueryByID(ctx context.Context, productID uuid.UUID) (Product, error) {
-	prd, err := c.storer.QueryByID(ctx, productID)
+func (b *Business) QueryByID(ctx context.Context, productID uuid.UUID) (Product, error) {
+	prd, err := b.storer.QueryByID(ctx, productID)
 	if err != nil {
 		return Product{}, fmt.Errorf("query: productID[%s]: %w", productID, err)
 	}
@@ -179,8 +179,8 @@ func (c *Core) QueryByID(ctx context.Context, productID uuid.UUID) (Product, err
 }
 
 // QueryByUserID finds the products by a specified User ID.
-func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Product, error) {
-	prds, err := c.storer.QueryByUserID(ctx, userID)
+func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Product, error) {
+	prds, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}

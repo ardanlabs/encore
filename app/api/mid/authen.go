@@ -37,7 +37,7 @@ func Bearer(ctx context.Context, ath *auth.Auth, authorization string) (eauth.UI
 }
 
 // Basic processes basic authentication logic.
-func Basic(ctx context.Context, ath *auth.Auth, userBus *userbus.Core, authorization string) (eauth.UID, *auth.Claims, error) {
+func Basic(ctx context.Context, ath *auth.Auth, userBus *userbus.Business, authorization string) (eauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(authorization)
 	if !ok {
 		return "", nil, errs.Newf(eerrs.Unauthenticated, "invalid Basic auth")

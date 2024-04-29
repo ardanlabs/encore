@@ -33,16 +33,16 @@ type Storer interface {
 	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Home, error)
 }
 
-// Core manages the set of APIs for home api access.
-type Core struct {
-	userBus  *userbus.Core
+// Business manages the set of APIs for home api access.
+type Business struct {
+	userBus  *userbus.Business
 	delegate *delegate.Delegate
 	storer   Storer
 }
 
-// NewCore constructs a home core API for use.
-func NewCore(userBus *userbus.Core, delegate *delegate.Delegate, storer Storer) *Core {
-	return &Core{
+// NewBusiness constructs a home business API for use.
+func NewBusiness(userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
+	return &Business{
 		userBus:  userBus,
 		delegate: delegate,
 		storer:   storer,
@@ -51,29 +51,29 @@ func NewCore(userBus *userbus.Core, delegate *delegate.Delegate, storer Storer) 
 
 // ExecuteUnderTransaction constructs a new Core value that will use the
 // specified transaction in any store related calls.
-func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error) {
-	storer, err := c.storer.ExecuteUnderTransaction(tx)
+func (b *Business) ExecuteUnderTransaction(tx transaction.Transaction) (*Business, error) {
+	storer, err := b.storer.ExecuteUnderTransaction(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	userBus, err := c.userBus.ExecuteUnderTransaction(tx)
+	userBus, err := b.userBus.ExecuteUnderTransaction(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	core := Core{
+	bus := Business{
 		userBus:  userBus,
-		delegate: c.delegate,
+		delegate: b.delegate,
 		storer:   storer,
 	}
 
-	return &core, nil
+	return &bus, nil
 }
 
 // Create adds a new home to the system.
-func (c *Core) Create(ctx context.Context, nh NewHome) (Home, error) {
-	usr, err := c.userBus.QueryByID(ctx, nh.UserID)
+func (b *Business) Create(ctx context.Context, nh NewHome) (Home, error) {
+	usr, err := b.userBus.QueryByID(ctx, nh.UserID)
 	if err != nil {
 		return Home{}, fmt.Errorf("user.querybyid: %s: %w", nh.UserID, err)
 	}
@@ -100,7 +100,7 @@ func (c *Core) Create(ctx context.Context, nh NewHome) (Home, error) {
 		DateUpdated: now,
 	}
 
-	if err := c.storer.Create(ctx, hme); err != nil {
+	if err := b.storer.Create(ctx, hme); err != nil {
 		return Home{}, fmt.Errorf("create: %w", err)
 	}
 
@@ -108,7 +108,7 @@ func (c *Core) Create(ctx context.Context, nh NewHome) (Home, error) {
 }
 
 // Update modifies information about a home.
-func (c *Core) Update(ctx context.Context, hme Home, uh UpdateHome) (Home, error) {
+func (b *Business) Update(ctx context.Context, hme Home, uh UpdateHome) (Home, error) {
 	if uh.Type != nil {
 		hme.Type = *uh.Type
 	}
@@ -141,7 +141,7 @@ func (c *Core) Update(ctx context.Context, hme Home, uh UpdateHome) (Home, error
 
 	hme.DateUpdated = time.Now()
 
-	if err := c.storer.Update(ctx, hme); err != nil {
+	if err := b.storer.Update(ctx, hme); err != nil {
 		return Home{}, fmt.Errorf("update: %w", err)
 	}
 
@@ -149,8 +149,8 @@ func (c *Core) Update(ctx context.Context, hme Home, uh UpdateHome) (Home, error
 }
 
 // Delete removes the specified home.
-func (c *Core) Delete(ctx context.Context, hme Home) error {
-	if err := c.storer.Delete(ctx, hme); err != nil {
+func (b *Business) Delete(ctx context.Context, hme Home) error {
+	if err := b.storer.Delete(ctx, hme); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 
@@ -158,12 +158,12 @@ func (c *Core) Delete(ctx context.Context, hme Home) error {
 }
 
 // Query retrieves a list of existing homes.
-func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Home, error) {
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Home, error) {
 	if err := filter.Validate(); err != nil {
 		return nil, err
 	}
 
-	hmes, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+	hmes, err := b.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -172,17 +172,17 @@ func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, 
 }
 
 // Count returns the total number of homes.
-func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
+func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	if err := filter.Validate(); err != nil {
 		return 0, err
 	}
 
-	return c.storer.Count(ctx, filter)
+	return b.storer.Count(ctx, filter)
 }
 
 // QueryByID finds the home by the specified ID.
-func (c *Core) QueryByID(ctx context.Context, homeID uuid.UUID) (Home, error) {
-	hme, err := c.storer.QueryByID(ctx, homeID)
+func (b *Business) QueryByID(ctx context.Context, homeID uuid.UUID) (Home, error) {
+	hme, err := b.storer.QueryByID(ctx, homeID)
 	if err != nil {
 		return Home{}, fmt.Errorf("query: homeID[%s]: %w", homeID, err)
 	}
@@ -191,8 +191,8 @@ func (c *Core) QueryByID(ctx context.Context, homeID uuid.UUID) (Home, error) {
 }
 
 // QueryByUserID finds the homes by a specified User ID.
-func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Home, error) {
-	hmes, err := c.storer.QueryByUserID(ctx, userID)
+func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Home, error) {
+	hmes, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}

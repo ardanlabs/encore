@@ -1,42 +1,17 @@
 package vproductapp
 
 import (
-	"errors"
-
 	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
-	"github.com/ardanlabs/encore/foundation/validate"
 )
 
-func parseOrder(qp QueryParams) (order.By, error) {
-	const (
-		orderByProductID = "product_id"
-		orderByUserID    = "user_id"
-		orderByName      = "name"
-		orderByCost      = "cost"
-		orderByQuantity  = "quantity"
-		orderByUserName  = "user_name"
-	)
+var defaultOrderBy = order.NewBy("product_id", order.ASC)
 
-	var orderByFields = map[string]string{
-		orderByProductID: vproductbus.OrderByProductID,
-		orderByUserID:    vproductbus.OrderByUserID,
-		orderByName:      vproductbus.OrderByName,
-		orderByCost:      vproductbus.OrderByCost,
-		orderByQuantity:  vproductbus.OrderByQuantity,
-		orderByUserName:  vproductbus.OrderByUserName,
-	}
-
-	orderBy, err := order.Parse(qp.OrderBy, order.NewBy(orderByProductID, order.ASC))
-	if err != nil {
-		return order.By{}, err
-	}
-
-	if _, exists := orderByFields[orderBy.Field]; !exists {
-		return order.By{}, validate.NewFieldsError(orderBy.Field, errors.New("order field does not exist"))
-	}
-
-	orderBy.Field = orderByFields[orderBy.Field]
-
-	return orderBy, nil
+var orderByFields = map[string]string{
+	"product_id": vproductbus.OrderByProductID,
+	"user_id":    vproductbus.OrderByUserID,
+	"name":       vproductbus.OrderByName,
+	"cost":       vproductbus.OrderByCost,
+	"quantity":   vproductbus.OrderByQuantity,
+	"user_name":  vproductbus.OrderByUserName,
 }

@@ -8,29 +8,30 @@ import (
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/app/api/page"
+	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 )
 
-// Core manages the set of app layer api functions for the product domain.
-type Core struct {
-	productBus *productbus.Core
+// App manages the set of app layer api functions for the product domain.
+type App struct {
+	productBus *productbus.Business
 }
 
-// NewCore constructs a product core API for use.
-func NewCore(productBus *productbus.Core) *Core {
-	return &Core{
+// NewApp constructs a product app API for use.
+func NewApp(productBus *productbus.Business) *App {
+	return &App{
 		productBus: productBus,
 	}
 }
 
 // Create adds a new product to the system.
-func (c *Core) Create(ctx context.Context, app NewProduct) (Product, error) {
+func (a *App) Create(ctx context.Context, app NewProduct) (Product, error) {
 	np, err := toBusNewProduct(ctx, app)
 	if err != nil {
 		return Product{}, errs.New(eerrs.FailedPrecondition, err)
 	}
 
-	prd, err := c.productBus.Create(ctx, np)
+	prd, err := a.productBus.Create(ctx, np)
 	if err != nil {
 		return Product{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
@@ -39,13 +40,13 @@ func (c *Core) Create(ctx context.Context, app NewProduct) (Product, error) {
 }
 
 // Update updates an existing product.
-func (c *Core) Update(ctx context.Context, productID string, app UpdateProduct) (Product, error) {
+func (a *App) Update(ctx context.Context, productID string, app UpdateProduct) (Product, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return Product{}, errs.Newf(eerrs.Internal, "product missing in context: %s", err)
 	}
 
-	updPrd, err := c.productBus.Update(ctx, prd, toBusUpdateProduct(app))
+	updPrd, err := a.productBus.Update(ctx, prd, toBusUpdateProduct(app))
 	if err != nil {
 		return Product{}, errs.Newf(eerrs.Internal, "update: productID[%s] up[%+v]: %s", prd.ID, app, err)
 	}
@@ -54,13 +55,13 @@ func (c *Core) Update(ctx context.Context, productID string, app UpdateProduct) 
 }
 
 // Delete removes a product from the system.
-func (c *Core) Delete(ctx context.Context, productID string) error {
+func (a *App) Delete(ctx context.Context, productID string) error {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return errs.Newf(eerrs.Internal, "productID[%s] missing in context: %s", productID, err)
 	}
 
-	if err := c.productBus.Delete(ctx, prd); err != nil {
+	if err := a.productBus.Delete(ctx, prd); err != nil {
 		return errs.Newf(eerrs.Internal, "delete: productID[%s]: %s", prd.ID, err)
 	}
 
@@ -68,8 +69,9 @@ func (c *Core) Delete(ctx context.Context, productID string) error {
 }
 
 // Query returns a list of products with paging.
-func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Product], error) {
-	if err := validatePaging(qp); err != nil {
+func (a *App) Query(ctx context.Context, qp QueryParams) (page.Document[Product], error) {
+	pg, err := page.Parse(qp.Page, qp.Rows)
+	if err != nil {
 		return page.Document[Product]{}, err
 	}
 
@@ -78,26 +80,26 @@ func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Product
 		return page.Document[Product]{}, err
 	}
 
-	orderBy, err := parseOrder(qp)
+	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
 		return page.Document[Product]{}, err
 	}
 
-	prds, err := c.productBus.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	prds, err := a.productBus.Query(ctx, filter, orderBy, pg.Number, pg.RowsPerPage)
 	if err != nil {
 		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
-	total, err := c.productBus.Count(ctx, filter)
+	total, err := a.productBus.Count(ctx, filter)
 	if err != nil {
 		return page.Document[Product]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
 
-	return page.NewDocument(toAppProducts(prds), total, qp.Page, qp.Rows), nil
+	return page.NewDocument(toAppProducts(prds), total, pg.Number, pg.RowsPerPage), nil
 }
 
 // QueryByID returns a product by its ID.
-func (c *Core) QueryByID(ctx context.Context, productID string) (Product, error) {
+func (a *App) QueryByID(ctx context.Context, productID string) (Product, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return Product{}, errs.Newf(eerrs.Internal, "querybyid: productID[%s]: %s", productID, err)
