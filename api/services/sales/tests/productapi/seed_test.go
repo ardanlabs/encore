@@ -11,9 +11,9 @@ import (
 	"github.com/ardanlabs/encore/business/domain/userbus"
 )
 
-func insertSeedData(dbTest *dbtest.Test, ath *auth.Auth) (apitest.SeedData, error) {
+func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, error) {
 	ctx := context.Background()
-	busDomain := dbTest.BusDomain
+	busDomain := db.BusDomain
 
 	usrs, err := userbus.TestGenerateSeedUsers(ctx, 1, userbus.RoleUser, busDomain.User)
 	if err != nil {
@@ -26,11 +26,9 @@ func insertSeedData(dbTest *dbtest.Test, ath *auth.Auth) (apitest.SeedData, erro
 	}
 
 	tu1 := apitest.User{
-		User: dbtest.User{
-			User:     usrs[0],
-			Products: prds,
-		},
-		Token: apitest.Token(dbTest, ath, usrs[0].Email.Address),
+		User:     usrs[0],
+		Products: prds,
+		Token:    apitest.Token(db, ath, usrs[0].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
@@ -46,11 +44,9 @@ func insertSeedData(dbTest *dbtest.Test, ath *auth.Auth) (apitest.SeedData, erro
 	}
 
 	tu2 := apitest.User{
-		User: dbtest.User{
-			User:     usrs[0],
-			Products: prds,
-		},
-		Token: apitest.Token(dbTest, ath, usrs[0].Email.Address),
+		User:     usrs[0],
+		Products: prds,
+		Token:    apitest.Token(db, ath, usrs[0].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------

@@ -15,7 +15,7 @@ import (
 )
 
 func startTest(t *testing.T, url string, testName string) *apitest.Test {
-	dbTest := dbtest.NewTest(t, url, testName)
+	dbTest := dbtest.NewDatabase(t, url, testName)
 
 	// -------------------------------------------------------------------------
 

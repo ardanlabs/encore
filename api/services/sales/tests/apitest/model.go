@@ -5,13 +5,17 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"github.com/ardanlabs/encore/app/api/auth"
-	"github.com/ardanlabs/encore/business/api/dbtest"
+	"github.com/ardanlabs/encore/business/domain/homebus"
+	"github.com/ardanlabs/encore/business/domain/productbus"
+	"github.com/ardanlabs/encore/business/domain/userbus"
 )
 
 // User extends the dbtest user for app test support.
 type User struct {
-	dbtest.User
-	Token string
+	userbus.User
+	Products []productbus.Product
+	Homes    []homebus.Home
+	Token    string
 }
 
 // SeedData represents users for app tests.

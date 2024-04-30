@@ -126,7 +126,7 @@ func startup(log rlog.Ctx) (*sqlx.DB, error) {
 	}{
 		Version: conf.Version{
 			Build: encore.Meta().Environment.Name,
-			Desc:  "Service Project",
+			Desc:  "Sales",
 		},
 	}
 

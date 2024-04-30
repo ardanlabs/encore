@@ -15,13 +15,13 @@ import (
 )
 
 func startTest(t *testing.T, url string, testName string) *apitest.Test {
-	dbTest := dbtest.NewTest(t, url, testName)
+	db := dbtest.NewDatabase(t, url, testName)
 
 	// -------------------------------------------------------------------------
 
 	ath, err := auth.New(auth.Config{
-		Log:       dbTest.Log,
-		DB:        dbTest.DB,
+		Log:       db.Log,
+		DB:        db.DB,
 		KeyLookup: &apitest.KeyStore{},
 	})
 	if err != nil {
@@ -30,13 +30,13 @@ func startTest(t *testing.T, url string, testName string) *apitest.Test {
 
 	// -------------------------------------------------------------------------
 
-	authService, err := authsrv.NewService(dbTest.Log, dbTest.DB, ath)
+	authService, err := authsrv.NewService(db.Log, db.DB, ath)
 	if err != nil {
 		t.Fatalf("Auth service init error: %s", err)
 	}
 	et.MockService("auth", authService)
 
-	salesService, err := salesrv.NewService(dbTest.Log, dbTest.DB)
+	salesService, err := salesrv.NewService(db.Log, db.DB)
 	if err != nil {
 		t.Fatalf("Sales service init error: %s", err)
 	}
@@ -48,5 +48,5 @@ func startTest(t *testing.T, url string, testName string) *apitest.Test {
 		return mid.Bearer(ctx, ath, ap.Authorization)
 	}
 
-	return apitest.New(dbTest, ath, authHandler)
+	return apitest.New(db, ath, authHandler)
 }

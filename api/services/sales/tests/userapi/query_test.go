@@ -16,11 +16,11 @@ func userQueryOk(sd apitest.SeedData) []apitest.Table {
 	usrs := make([]userbus.User, 0, len(sd.Admins)+len(sd.Users))
 
 	for _, adm := range sd.Admins {
-		usrs = append(usrs, adm.User.User)
+		usrs = append(usrs, adm.User)
 	}
 
 	for _, usr := range sd.Users {
-		usrs = append(usrs, usr.User.User)
+		usrs = append(usrs, usr.User)
 	}
 
 	sort.Slice(usrs, func(i, j int) bool {
@@ -66,7 +66,7 @@ func userQueryByIDOk(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "byid",
 			Token:   sd.Users[0].Token,
-			ExpResp: toAppUser(sd.Users[0].User.User),
+			ExpResp: toAppUser(sd.Users[0].User),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserQueryByID(ctx, sd.Users[0].ID.String())
 				if err != nil {

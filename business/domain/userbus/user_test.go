@@ -12,6 +12,7 @@ import (
 
 	"encore.dev"
 	"github.com/ardanlabs/encore/business/api/dbtest"
+	"github.com/ardanlabs/encore/business/api/unitest"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/crypto/bcrypt"
@@ -50,44 +51,43 @@ func run(m *testing.M) (code int, err error) {
 func Test_User(t *testing.T) {
 	t.Parallel()
 
-	dbTest := dbtest.NewTest(t, url, "Test_User")
+	db := dbtest.NewDatabase(t, url, "Test_User")
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)
 			t.Error(string(debug.Stack()))
 		}
-		dbTest.Teardown()
+		db.Teardown()
 	}()
 
-	sd, err := insertSeedData(dbTest)
+	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
 	// -------------------------------------------------------------------------
 
-	dbtest.UnitTest(t, query(dbTest, sd), "query")
-	dbtest.UnitTest(t, create(dbTest), "create")
-	dbtest.UnitTest(t, update(dbTest, sd), "update")
-	dbtest.UnitTest(t, delete(dbTest, sd), "delete")
+	unitest.Run(t, query(db.BusDomain, sd), "query")
+	unitest.Run(t, create(db.BusDomain), "create")
+	unitest.Run(t, update(db.BusDomain, sd), "update")
+	unitest.Run(t, delete(db.BusDomain, sd), "delete")
 }
 
 // =============================================================================
 
-func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
+func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	ctx := context.Background()
-	busDomain := dbTest.BusDomain
 
 	usrs, err := userbus.TestGenerateSeedUsers(ctx, 2, userbus.RoleAdmin, busDomain.User)
 	if err != nil {
-		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
+		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	tu1 := dbtest.User{
+	tu1 := unitest.User{
 		User: usrs[0],
 	}
 
-	tu2 := dbtest.User{
+	tu2 := unitest.User{
 		User: usrs[1],
 	}
 
@@ -95,22 +95,22 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 	usrs, err = userbus.TestGenerateSeedUsers(ctx, 2, userbus.RoleUser, busDomain.User)
 	if err != nil {
-		return dbtest.SeedData{}, fmt.Errorf("seeding users : %w", err)
+		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	tu3 := dbtest.User{
+	tu3 := unitest.User{
 		User: usrs[0],
 	}
 
-	tu4 := dbtest.User{
+	tu4 := unitest.User{
 		User: usrs[1],
 	}
 
 	// -------------------------------------------------------------------------
 
-	sd := dbtest.SeedData{
-		Users:  []dbtest.User{tu3, tu4},
-		Admins: []dbtest.User{tu1, tu2},
+	sd := unitest.SeedData{
+		Users:  []unitest.User{tu3, tu4},
+		Admins: []unitest.User{tu1, tu2},
 	}
 
 	return sd, nil
@@ -118,7 +118,7 @@ func insertSeedData(dbTest *dbtest.Test) (dbtest.SeedData, error) {
 
 // =============================================================================
 
-func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
+func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	usrs := make([]userbus.User, 0, len(sd.Admins)+len(sd.Users))
 
 	for _, adm := range sd.Admins {
@@ -133,7 +133,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 		return usrs[i].ID.String() <= usrs[j].ID.String()
 	})
 
-	table := []dbtest.UnitTable{
+	table := []unitest.Table{
 		{
 			Name:    "all",
 			ExpResp: usrs,
@@ -142,7 +142,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					Name: dbtest.StringPointer("Name"),
 				}
 
-				resp, err := dbt.BusDomain.User.Query(ctx, filter, userbus.DefaultOrderBy, 1, 10)
+				resp, err := busDomain.User.Query(ctx, filter, userbus.DefaultOrderBy, 1, 10)
 				if err != nil {
 					return err
 				}
@@ -174,7 +174,7 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "byid",
 			ExpResp: sd.Users[0].User,
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := dbt.BusDomain.User.QueryByID(ctx, sd.Users[0].ID)
+				resp, err := busDomain.User.QueryByID(ctx, sd.Users[0].ID)
 				if err != nil {
 					return err
 				}
@@ -205,10 +205,10 @@ func query(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 	return table
 }
 
-func create(dbt *dbtest.Test) []dbtest.UnitTable {
+func create(busDomain dbtest.BusDomain) []unitest.Table {
 	email, _ := mail.ParseAddress("bill@ardanlabs.com")
 
-	table := []dbtest.UnitTable{
+	table := []unitest.Table{
 		{
 			Name: "basic",
 			ExpResp: userbus.User{
@@ -228,7 +228,7 @@ func create(dbt *dbtest.Test) []dbtest.UnitTable {
 					PasswordConfirm: "123",
 				}
 
-				resp, err := dbt.BusDomain.User.Create(ctx, nu)
+				resp, err := busDomain.User.Create(ctx, nu)
 				if err != nil {
 					return err
 				}
@@ -260,10 +260,10 @@ func create(dbt *dbtest.Test) []dbtest.UnitTable {
 	return table
 }
 
-func update(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
+func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	email, _ := mail.ParseAddress("jack@ardanlabs.com")
 
-	table := []dbtest.UnitTable{
+	table := []unitest.Table{
 		{
 			Name: "basic",
 			ExpResp: userbus.User{
@@ -285,7 +285,7 @@ func update(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 					PasswordConfirm: dbtest.StringPointer("1234"),
 				}
 
-				resp, err := dbt.BusDomain.User.Update(ctx, sd.Users[0].User, uu)
+				resp, err := busDomain.User.Update(ctx, sd.Users[0].User, uu)
 				if err != nil {
 					return err
 				}
@@ -315,13 +315,13 @@ func update(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 	return table
 }
 
-func delete(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
-	table := []dbtest.UnitTable{
+func delete(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+	table := []unitest.Table{
 		{
 			Name:    "user",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := dbt.BusDomain.User.Delete(ctx, sd.Users[1].User); err != nil {
+				if err := busDomain.User.Delete(ctx, sd.Users[1].User); err != nil {
 					return err
 				}
 
@@ -335,7 +335,7 @@ func delete(dbt *dbtest.Test, sd dbtest.SeedData) []dbtest.UnitTable {
 			Name:    "admin",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := dbt.BusDomain.User.Delete(ctx, sd.Admins[1].User); err != nil {
+				if err := busDomain.User.Delete(ctx, sd.Admins[1].User); err != nil {
 					return err
 				}
 

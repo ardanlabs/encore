@@ -17,15 +17,15 @@ import (
 
 // Test contains functions for executing an api test.
 type Test struct {
-	DBTest  *dbtest.Test
+	DB      *dbtest.Database
 	Auth    *auth.Auth
 	handler AuthHandler
 }
 
 // New constructs a Test value for running api tests.
-func New(dbTest *dbtest.Test, ath *auth.Auth, handler AuthHandler) *Test {
+func New(db *dbtest.Database, ath *auth.Auth, handler AuthHandler) *Test {
 	return &Test{
-		DBTest:  dbTest,
+		DB:      db,
 		Auth:    ath,
 		handler: handler,
 	}
@@ -106,10 +106,10 @@ func CmpAppErrors(got any, exp any) string {
 }
 
 // Token generates an authenticated token for a user.
-func Token(dbTest *dbtest.Test, ath *auth.Auth, email string) string {
+func Token(db *dbtest.Database, ath *auth.Auth, email string) string {
 	addr, _ := mail.ParseAddress(email)
 
-	store := userdb.NewStore(dbTest.Log, dbTest.DB)
+	store := userdb.NewStore(db.Log, db.DB)
 	dbUsr, err := store.QueryByEmail(context.Background(), *addr)
 	if err != nil {
 		return ""
@@ -118,7 +118,7 @@ func Token(dbTest *dbtest.Test, ath *auth.Auth, email string) string {
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   dbUsr.ID.String(),
-			Issuer:    "service project",
+			Issuer:    ath.Issuer(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},

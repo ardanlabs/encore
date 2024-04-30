@@ -49,12 +49,12 @@ func Test_Product(t *testing.T) {
 			t.Log(r)
 			t.Error(string(debug.Stack()))
 		}
-		test.DBTest.Teardown()
+		test.DB.Teardown()
 	}()
 
 	// -------------------------------------------------------------------------
 
-	sd, err := insertSeedData(test.DBTest, test.Auth)
+	sd, err := insertSeedData(test.DB, test.Auth)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}

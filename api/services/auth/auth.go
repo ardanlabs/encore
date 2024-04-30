@@ -105,11 +105,11 @@ func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
 	}{
 		Version: conf.Version{
 			Build: encore.Meta().Environment.Name,
-			Desc:  "Service Project",
+			Desc:  "Auth",
 		},
 	}
 
-	const prefix = "SALES"
+	const prefix = "AUTH"
 	help, err := conf.Parse(prefix, &cfg)
 	if err != nil {
 		if errors.Is(err, conf.ErrHelpWanted) {

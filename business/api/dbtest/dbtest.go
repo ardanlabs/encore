@@ -77,19 +77,18 @@ func newBusDomains(log rlog.Ctx, db *sqlx.DB) BusDomain {
 
 // =============================================================================
 
-// Test owns state for running and shutting down tests.
-type Test struct {
+// Database owns state for running and shutting down tests.
+type Database struct {
 	Log       rlog.Ctx
 	DB        *sqlx.DB
 	BusDomain BusDomain
 	Teardown  func()
-	t         *testing.T
 }
 
-// NewTest creates a test database inside a Docker container. It creates the
-// required table structure but the database is otherwise empty. It returns
-// the database to use as well as a function to call at the end of the test.
-func NewTest(t *testing.T, url string, testName string) *Test {
+// NewDatabase creates a new test database inside the database that was started
+// to handle testing. The database is migrated to the current version and
+// a connection pool is provided with business domain packages.
+func NewDatabase(t *testing.T, url string, testName string) *Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -151,15 +150,12 @@ func NewTest(t *testing.T, url string, testName string) *Test {
 		}
 	}
 
-	tst := Test{
+	return &Database{
 		Log:       log,
 		DB:        db,
 		BusDomain: newBusDomains(log, db),
 		Teardown:  teardown,
-		t:         t,
 	}
-
-	return &tst
 }
 
 // =============================================================================
