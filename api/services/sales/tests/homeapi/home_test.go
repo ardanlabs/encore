@@ -61,17 +61,17 @@ func Test_Home(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	test.Run(t, homeQueryOk(sd), "home-query-ok")
-	test.Run(t, homeQueryByIDOk(sd), "home-querybyid-ok")
+	test.Run(t, queryOk(sd), "query-ok")
+	test.Run(t, queryByIDOk(sd), "querybyid-ok")
 
-	test.Run(t, homeCreateOk(sd), "home-create-ok")
-	test.Run(t, homeCreateBad(sd), "home-create-bad")
-	test.Run(t, homeCreateAuth(sd), "home-create-auth")
+	test.Run(t, createOk(sd), "create-ok")
+	test.Run(t, createBad(sd), "create-bad")
+	test.Run(t, createAuth(sd), "create-auth")
 
-	test.Run(t, homeUpdateOk(sd), "home-update-ok")
-	test.Run(t, homeUpdateBad(sd), "home-update-bad")
-	test.Run(t, homeUpdateAuth(sd), "home-update-auth")
+	test.Run(t, updateOk(sd), "update-ok")
+	test.Run(t, updateBad(sd), "update-bad")
+	test.Run(t, updateAuth(sd), "update-auth")
 
-	test.Run(t, homeDeleteOk(sd), "home-delete-ok")
-	test.Run(t, homeDeleteAuth(sd), "home-delete-auth")
+	test.Run(t, deleteOk(sd), "delete-ok")
+	test.Run(t, deleteAuth(sd), "delete-auth")
 }

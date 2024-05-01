@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func userUpdateOk(sd apitest.SeedData) []apitest.Table {
+func updateOk(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:  "basic",
@@ -55,7 +55,7 @@ func userUpdateOk(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func userUpdateBad(sd apitest.SeedData) []apitest.Table {
+func updateBad(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "input",
@@ -99,7 +99,7 @@ func userUpdateBad(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func userUpdateAuth(sd apitest.SeedData) []apitest.Table {
+func updateAuth(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "emptytoken",

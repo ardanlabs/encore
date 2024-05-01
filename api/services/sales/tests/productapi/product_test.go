@@ -61,17 +61,17 @@ func Test_Product(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	test.Run(t, productQueryOk(sd), "product-query-ok")
-	test.Run(t, productQueryByIDOk(sd), "product-querybyid-ok")
+	test.Run(t, queryOk(sd), "query-ok")
+	test.Run(t, queryByIDOk(sd), "querybyid-ok")
 
-	test.Run(t, productCreateOk(sd), "product-create-ok")
-	test.Run(t, productCreateBad(sd), "product-create-bad")
-	test.Run(t, productCreateAuth(sd), "product-create-auth")
+	test.Run(t, createOk(sd), "create-ok")
+	test.Run(t, createBad(sd), "create-bad")
+	test.Run(t, createAuth(sd), "create-auth")
 
-	test.Run(t, productUpdateOk(sd), "product-update-ok")
-	test.Run(t, productUpdateBad(sd), "product-update-bad")
-	test.Run(t, productUpdateAuth(sd), "product-update-auth")
+	test.Run(t, updateOk(sd), "update-ok")
+	test.Run(t, updateBad(sd), "update-bad")
+	test.Run(t, updateAuth(sd), "update-auth")
 
-	test.Run(t, productDeleteOk(sd), "product-delete-ok")
-	test.Run(t, productDeleteAuth(sd), "product-delete-auth")
+	test.Run(t, deleteOk(sd), "delete-ok")
+	test.Run(t, deleteAuth(sd), "delete-auth")
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func homeQueryOk(sd apitest.SeedData) []apitest.Table {
+func queryOk(sd apitest.SeedData) []apitest.Table {
 	hmes := make([]homebus.Home, 0, len(sd.Admins[0].Homes)+len(sd.Users[0].Homes))
 	hmes = append(hmes, sd.Admins[0].Homes...)
 	hmes = append(hmes, sd.Users[0].Homes...)
@@ -54,7 +54,7 @@ func homeQueryOk(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func homeQueryByIDOk(sd apitest.SeedData) []apitest.Table {
+func queryByIDOk(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "byid",

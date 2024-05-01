@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func productQueryOk(sd apitest.SeedData) []apitest.Table {
+func queryOk(sd apitest.SeedData) []apitest.Table {
 	prds := make([]productbus.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
 	prds = append(prds, sd.Admins[0].Products...)
 	prds = append(prds, sd.Users[0].Products...)
@@ -55,7 +55,7 @@ func productQueryOk(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func productQueryByIDOk(sd apitest.SeedData) []apitest.Table {
+func queryByIDOk(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "byid",

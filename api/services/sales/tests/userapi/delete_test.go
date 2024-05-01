@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func userDeleteOk(sd apitest.SeedData) []apitest.Table {
+func deleteOk(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "user",
@@ -47,7 +47,7 @@ func userDeleteOk(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func userDeleteAuth(sd apitest.SeedData) []apitest.Table {
+func deleteAuth(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "emptytoken",

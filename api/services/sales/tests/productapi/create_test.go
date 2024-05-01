@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func productCreateOk(sd apitest.SeedData) []apitest.Table {
+func createOk(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:  "basic",
@@ -56,7 +56,7 @@ func productCreateOk(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func productCreateBad(sd apitest.SeedData) []apitest.Table {
+func createBad(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "missing",
@@ -77,7 +77,7 @@ func productCreateBad(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func productCreateAuth(sd apitest.SeedData) []apitest.Table {
+func createAuth(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:    "emptytoken",

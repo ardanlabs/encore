@@ -61,5 +61,5 @@ func Test_VProduct(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	test.Run(t, vproductQueryOk(sd), "vproduct-query-ok")
+	test.Run(t, queryOk(sd), "query-ok")
 }

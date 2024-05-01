@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func vproductQueryOk(sd apitest.SeedData) []apitest.Table {
+func queryOk(sd apitest.SeedData) []apitest.Table {
 	prds := toAppVProducts(sd.Admins[0].User, sd.Admins[0].Products)
 	prds = append(prds, toAppVProducts(sd.Users[0].User, sd.Users[0].Products)...)
 
