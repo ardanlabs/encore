@@ -45,9 +45,11 @@ func (at *Test) Run(t *testing.T, table []Table, testName string) {
 
 	for _, tt := range table {
 		f := func(t *testing.T) {
+			t.Logf("\n***** Running Test: %s *****\n", testName+"-"+tt.Name)
+			defer t.Logf("\n***** Finished Test: %s *****\n", testName+"-"+tt.Name)
+
 			ctx := context.Background()
 
-			t.Log("Calling authHandler")
 			ctx, err := at.authHandler(ctx, tt.Token)
 			if err != nil {
 				diff := tt.CmpFunc(err, tt.ExpResp)
@@ -57,7 +59,6 @@ func (at *Test) Run(t *testing.T, table []Table, testName string) {
 				return
 			}
 
-			t.Log("Calling excFunc")
 			got := tt.ExcFunc(ctx)
 
 			diff := tt.CmpFunc(got, tt.ExpResp)

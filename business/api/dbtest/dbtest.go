@@ -38,8 +38,6 @@ func StartDB() (string, error) {
 	url := out.String()
 	url = strings.Trim(url, "\n")
 
-	fmt.Println("=== DB   ", url)
-
 	return url, nil
 }
 
@@ -92,6 +90,8 @@ func NewDatabase(t *testing.T, url string, testName string) *Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	t.Logf("DB: %s\n", url)
+
 	log := rlog.With("service", "sales-test")
 
 	dbM, err := sqldb.OpenTest(url)
@@ -110,8 +110,7 @@ func NewDatabase(t *testing.T, url string, testName string) *Database {
 	}
 	dbName := string(b)
 
-	t.Logf("Creating database: %s", dbName)
-
+	t.Logf("Creating Database: %s", dbName)
 	if _, err := dbM.ExecContext(context.Background(), "CREATE DATABASE "+dbName); err != nil {
 		t.Fatalf("creating database %s: %v", dbName, err)
 	}
@@ -127,8 +126,7 @@ func NewDatabase(t *testing.T, url string, testName string) *Database {
 		t.Fatalf("Opening database connection: %v", err)
 	}
 
-	t.Logf("Migrating database: %s", dbName)
-
+	t.Logf("Migrating Database: %s", dbName)
 	if err := migrate.Migrate(ctx, db); err != nil {
 		t.Fatalf("Migrating error: %s", err)
 	}
@@ -143,8 +141,7 @@ func NewDatabase(t *testing.T, url string, testName string) *Database {
 		db.Close()
 		defer dbM.Close()
 
-		t.Logf("Dropping database: %s", dbName)
-
+		t.Logf("Dropping Database: %s", dbName)
 		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
 			fmt.Printf("dropping database %s: %v", dbName, err)
 		}
