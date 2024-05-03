@@ -17,7 +17,7 @@ import (
 var ErrInvalidID = errors.New("ID is not in its proper form")
 
 // Authorize checks the user making the request is an admin or user.
-func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
+func Authorize(req middleware.Request) (AuthInfo, middleware.Request, error) {
 	claims := eauth.Data().(*auth.Claims)
 
 	rule := auth.RuleAdminOnly
@@ -46,7 +46,7 @@ func Authorize(req middleware.Request, next middleware.Next) (AuthInfo, middlewa
 
 // AuthorizeUser checks the user making the call has specified a user id on
 // the route that matches the claims.
-func AuthorizeUser(userBus *userbus.Business, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
+func AuthorizeUser(userBus *userbus.Business, req middleware.Request) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -94,7 +94,7 @@ func AuthorizeUser(userBus *userbus.Business, req middleware.Request, next middl
 
 // AuthorizeProduct checks the user making the call has specified a product id on
 // the route that matches the claims.
-func AuthorizeProduct(productBus *productbus.Business, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
+func AuthorizeProduct(productBus *productbus.Business, req middleware.Request) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
@@ -134,7 +134,7 @@ func AuthorizeProduct(productBus *productbus.Business, req middleware.Request, n
 
 // AuthorizeHome checks the user making the call has specified a home id on
 // the route that matches the claims.
-func AuthorizeHome(homeBus *homebus.Business, req middleware.Request, next middleware.Next) (AuthInfo, middleware.Request, error) {
+func AuthorizeHome(homeBus *homebus.Business, req middleware.Request) (AuthInfo, middleware.Request, error) {
 	ctx := req.Context()
 	var userID uuid.UUID
 
