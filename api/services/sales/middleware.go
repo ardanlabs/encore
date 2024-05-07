@@ -1,7 +1,9 @@
 package sales
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
@@ -46,7 +48,10 @@ func (s *Service) authorize(req middleware.Request, next middleware.Next) middle
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
-	if err := authsrv.Authorize(req.Context(), p); err != nil {
+	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
+	defer cancel()
+
+	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
@@ -62,7 +67,10 @@ func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) mi
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
-	if err := authsrv.Authorize(req.Context(), p); err != nil {
+	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
+	defer cancel()
+
+	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
@@ -78,7 +86,10 @@ func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next)
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
-	if err := authsrv.Authorize(req.Context(), p); err != nil {
+	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
+	defer cancel()
+
+	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
@@ -94,7 +105,10 @@ func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) mi
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
 
-	if err := authsrv.Authorize(req.Context(), p); err != nil {
+	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
+	defer cancel()
+
+	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
 		return errs.NewResponse(eerrs.Unauthenticated, err)
 	}
