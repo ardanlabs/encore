@@ -13,9 +13,12 @@ import (
 	"github.com/ardanlabs/encore/business/api/sqldb"
 )
 
+// NOTE: The order matters so be careful when injecting new middleware. Global
+//       middleware will always come first. We want the Auth middleware to
+//       happen before any non-global middlware.
+
 // =============================================================================
 // Global middleware functions
-// The order matters so be careful when injecting new middleware.
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=all
@@ -23,22 +26,8 @@ func (s *Service) panics(req middleware.Request, next middleware.Next) middlewar
 	return mid.Panics(s.mtrcs, req, next)
 }
 
-//lint:ignore U1000 "called by encore"
-//encore:middleware target=tag:metrics
-func (s *Service) metrics(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.Metrics(s.mtrcs, req, next)
-}
-
-//lint:ignore U1000 "called by encore"
-//encore:middleware target=tag:transaction
-func (s *Service) beginCommitRollback(req middleware.Request, next middleware.Next) middleware.Response {
-	return mid.BeginCommitRollback(s.log, sqldb.NewBeginner(s.db), req, next)
-}
-
 // =============================================================================
 // Authorization related middleware
-// These middleware functions must come after the global middleware functions
-// above. These are targeted so the order doesn't matter.
 
 //lint:ignore U1000 "called by encore"
 //encore:middleware target=tag:authorize
@@ -114,4 +103,19 @@ func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) mi
 	}
 
 	return next(req)
+}
+
+// =============================================================================
+// Specific middleware functions
+
+//lint:ignore U1000 "called by encore"
+//encore:middleware target=tag:transaction
+func (s *Service) beginCommitRollback(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.BeginCommitRollback(s.log, sqldb.NewBeginner(s.db), req, next)
+}
+
+//lint:ignore U1000 "called by encore"
+//encore:middleware target=tag:metrics
+func (s *Service) metrics(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.Metrics(s.mtrcs, req, next)
 }
