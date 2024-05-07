@@ -96,7 +96,7 @@ func (s *Service) ProductQueryByID(ctx context.Context, productID string) (produ
 // =============================================================================
 
 //lint:ignore U1000 "called by encore"
-//encore:api auth method=POST path=/v1/tran tag:metrics tag:authorize tag:as_user_role
+//encore:api auth method=POST path=/v1/tran tag:metrics tag:transaction tag:authorize tag:as_admin_role
 func (s *Service) TranCreate(ctx context.Context, app tranapp.NewTran) (tranapp.Product, error) {
 	return s.tranApp.Create(ctx, app)
 }

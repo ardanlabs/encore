@@ -7,6 +7,7 @@ import (
 
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/api/errs"
+	"github.com/ardanlabs/encore/app/api/mid"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 )
@@ -25,9 +26,35 @@ func NewApp(userBus *userbus.Business, productBus *productbus.Business) *App {
 	}
 }
 
+// newWithTx constructs a new Handlers value with the core apis
+// using a store transaction that was created via middleware.
+func (a *App) newWithTx(ctx context.Context) (*App, error) {
+	tx, err := mid.GetTran(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	userBus, err := a.userBus.NewWithTx(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	productBus, err := a.productBus.NewWithTx(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	app := App{
+		userBus:    userBus,
+		productBus: productBus,
+	}
+
+	return &app, nil
+}
+
 // Create adds a new user and product at the same time under a single transaction.
 func (a *App) Create(ctx context.Context, app NewTran) (Product, error) {
-	h, err := a.executeUnderTransaction(ctx)
+	h, err := a.newWithTx(ctx)
 	if err != nil {
 		return Product{}, errs.New(eerrs.Internal, err)
 	}

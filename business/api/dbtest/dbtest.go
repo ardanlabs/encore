@@ -20,6 +20,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/productbus/stores/productdb"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/domain/userbus/stores/usercache"
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
 	"github.com/ardanlabs/encore/business/domain/vproductbus/stores/vproductdb"
@@ -59,7 +60,7 @@ type BusDomain struct {
 
 func newBusDomains(log rlog.Ctx, db *sqlx.DB) BusDomain {
 	delegate := delegate.New(log)
-	userBus := userbus.NewBusiness(log, delegate, userdb.NewStore(log, db))
+	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
 	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
 	homeBus := homebus.NewBusiness(userBus, delegate, homedb.NewStore(log, db))
 	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))

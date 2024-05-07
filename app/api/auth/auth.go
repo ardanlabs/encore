@@ -8,9 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/domain/userbus/stores/usercache"
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
@@ -70,7 +72,7 @@ func New(cfg Config) (*Auth, error) {
 	// user enabled check.
 	var userBus *userbus.Business
 	if cfg.DB != nil {
-		userBus = userbus.NewBusiness(cfg.Log, nil, userdb.NewStore(cfg.Log, cfg.DB))
+		userBus = userbus.NewBusiness(cfg.Log, nil, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB), 10*time.Minute))
 	}
 
 	a := Auth{

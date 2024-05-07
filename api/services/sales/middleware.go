@@ -8,6 +8,7 @@ import (
 	authsrv "github.com/ardanlabs/encore/api/services/auth"
 	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/api/mid"
+	"github.com/ardanlabs/encore/business/api/sqldb"
 )
 
 // =============================================================================
@@ -24,6 +25,12 @@ func (s *Service) panics(req middleware.Request, next middleware.Next) middlewar
 //encore:middleware target=tag:metrics
 func (s *Service) metrics(req middleware.Request, next middleware.Next) middleware.Response {
 	return mid.Metrics(s.mtrcs, req, next)
+}
+
+//lint:ignore U1000 "called by encore"
+//encore:middleware target=tag:transaction
+func (s *Service) beginCommitRollback(req middleware.Request, next middleware.Next) middleware.Response {
+	return mid.BeginCommitRollback(s.log, sqldb.NewBeginner(s.db), req, next)
 }
 
 // =============================================================================

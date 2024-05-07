@@ -8,6 +8,7 @@ import (
 	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/api/auth"
+	"github.com/ardanlabs/encore/business/api/transaction"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
@@ -21,6 +22,8 @@ type AuthInfo struct {
 	Rule   string
 }
 
+// =============================================================================
+
 type ctxKey int
 
 const (
@@ -28,6 +31,7 @@ const (
 	userKey
 	productKey
 	homeKey
+	trKey
 )
 
 func setUser(req middleware.Request, usr userbus.User) middleware.Request {
@@ -85,6 +89,21 @@ func GetHome(ctx context.Context) (homebus.Home, error) {
 	v, ok := ctx.Value(homeKey).(homebus.Home)
 	if !ok {
 		return homebus.Home{}, errors.New("home not found in context")
+	}
+
+	return v, nil
+}
+
+func setTran(req middleware.Request, tx transaction.CommitRollbacker) middleware.Request {
+	ctx := context.WithValue(req.Context(), trKey, tx)
+	return req.WithContext(ctx)
+}
+
+// GetTran retrieves the value that can manage a transaction.
+func GetTran(ctx context.Context) (transaction.CommitRollbacker, error) {
+	v, ok := ctx.Value(trKey).(transaction.CommitRollbacker)
+	if !ok {
+		return nil, errors.New("transaction not found in context")
 	}
 
 	return v, nil
