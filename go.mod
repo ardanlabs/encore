@@ -2,13 +2,11 @@ module github.com/ardanlabs/encore
 
 go 1.22.1
 
-toolchain go1.22.3
-
 require (
 	encore.dev v1.34.3
 	github.com/ardanlabs/conf/v3 v3.1.7
 	github.com/arl/statsviz v0.6.0
-	github.com/creativecreature/sturdyc v0.3.4
+	github.com/creativecreature/sturdyc v0.3.5
 	github.com/go-json-experiment/json v0.0.0-20240418180308-af2d5061e6c2
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
@@ -39,7 +37,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/prometheus/client_golang v1.19.0 // indirect
+	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.53.0 // indirect
 	github.com/prometheus/procfs v0.14.0 // indirect
