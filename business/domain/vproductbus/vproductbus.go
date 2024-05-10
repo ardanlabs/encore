@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ardanlabs/encore/business/api/order"
+	"github.com/ardanlabs/encore/business/sdk/order"
 )
 
 // Storer interface declares the behavior this package needs to perists and

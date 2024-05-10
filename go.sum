@@ -1,5 +1,5 @@
-encore.dev v1.34.3 h1:jO+8jBqq5/MShiRHSRGPBuTq003YR6KnnspgD+fkMBg=
-encore.dev v1.34.3/go.mod h1:XdWK6bKKAVzutmOKpC5qzalDQJLNfRCF/YCgA7OUZ3E=
+encore.dev v1.37.0 h1:of8TTr+SEPHb9riB6feibBa/6mjbaElVd519pOK026w=
+encore.dev v1.37.0/go.mod h1:XdWK6bKKAVzutmOKpC5qzalDQJLNfRCF/YCgA7OUZ3E=
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=

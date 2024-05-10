@@ -1,8 +1,8 @@
 package homeapp
 
 import (
-	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/domain/homebus"
+	"github.com/ardanlabs/encore/business/sdk/order"
 )
 
 var defaultOrderBy = order.NewBy("home_id", order.ASC)

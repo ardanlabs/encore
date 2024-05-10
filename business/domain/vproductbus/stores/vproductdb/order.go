@@ -3,8 +3,8 @@ package vproductdb
 import (
 	"fmt"
 
-	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
+	"github.com/ardanlabs/encore/business/sdk/order"
 )
 
 var orderByFields = map[string]string{

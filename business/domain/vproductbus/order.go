@@ -1,6 +1,6 @@
 package vproductbus
 
-import "github.com/ardanlabs/encore/business/api/order"
+import "github.com/ardanlabs/encore/business/sdk/order"
 
 // DefaultOrderBy represents the default way we sort.
 var DefaultOrderBy = order.NewBy(OrderByProductID, order.ASC)

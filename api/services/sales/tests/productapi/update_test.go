@@ -7,9 +7,9 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
-	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/domain/productapp"
-	"github.com/ardanlabs/encore/business/api/dbtest"
+	"github.com/ardanlabs/encore/app/sdk/errs"
+	"github.com/ardanlabs/encore/business/sdk/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 

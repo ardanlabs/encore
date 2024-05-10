@@ -2,19 +2,12 @@
 package dbtest
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"math/rand"
-	"os/exec"
-	"strings"
 	"testing"
 	"time"
 
 	"encore.dev/rlog"
-	"github.com/ardanlabs/encore/business/api/appdb/migrate"
-	"github.com/ardanlabs/encore/business/api/delegate"
-	"github.com/ardanlabs/encore/business/api/sqldb"
+	esqldb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/homebus/stores/homedb"
 	"github.com/ardanlabs/encore/business/domain/productbus"
@@ -24,30 +17,10 @@ import (
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
 	"github.com/ardanlabs/encore/business/domain/vproductbus/stores/vproductdb"
+	"github.com/ardanlabs/encore/business/sdk/delegate"
+	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/jmoiron/sqlx"
 )
-
-// StartDB retrieves the database information.
-func StartDB() (string, error) {
-	var out bytes.Buffer
-	cmd := exec.Command("encore", "db", "conn-uri", "--test", "app")
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("could not access the database information: %w", err)
-	}
-
-	url := out.String()
-	url = strings.Trim(url, "\n")
-
-	return url, nil
-}
-
-// StopDB stops a running database instance.
-func StopDB() error {
-	return nil
-}
-
-// =============================================================================
 
 // BusDomain represents all the business domain apis needed for testing.
 type BusDomain struct {
@@ -84,52 +57,24 @@ type Database struct {
 	Teardown  func()
 }
 
-// NewDatabase creates a new test database inside the database that was started
-// to handle testing. The database is migrated to the current version and
-// a connection pool is provided with business domain packages.
-func NewDatabase(t *testing.T, url string, testName string) *Database {
+// NewDatabase uses the specified database to perform testing. This database
+// should be created using the `et.NewTestDatabase` call. A connection pool
+// is provided with business domain packages.
+func NewDatabase(t *testing.T, edb *esqldb.Database) *Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	t.Logf("DB: %s\n", url)
-
-	log := rlog.With("service", "sales-test")
-
-	dbM, err := sqldb.OpenTest(url)
+	db, err := sqldb.Open(sqldb.Config{
+		EDB:          edb,
+		MaxIdleConns: 0,
+		MaxOpenConns: 0,
+	})
 	if err != nil {
-		t.Fatalf("Opening database connection: %v", err)
+		t.Fatalf("open database: %v", err)
 	}
 
-	if err := sqldb.StatusCheck(ctx, dbM); err != nil {
+	if err := sqldb.StatusCheck(ctx, db); err != nil {
 		t.Fatalf("status check database: %v", err)
-	}
-
-	const letterBytes = "abcdefghijklmnopqrstuvwxyz"
-	b := make([]byte, 4)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	dbName := string(b)
-
-	t.Logf("Creating Database: %s", dbName)
-	if _, err := dbM.ExecContext(context.Background(), "CREATE DATABASE "+dbName); err != nil {
-		t.Fatalf("creating database %s: %v", dbName, err)
-	}
-
-	// -------------------------------------------------------------------------
-
-	// This is changing out the base dbname with the new one on
-	// the connection string.
-	url = strings.Replace(url, "app", dbName, 1)
-
-	db, err := sqldb.OpenTest(url)
-	if err != nil {
-		t.Fatalf("Opening database connection: %v", err)
-	}
-
-	t.Logf("Migrating Database: %s", dbName)
-	if err := migrate.Migrate(ctx, db); err != nil {
-		t.Fatalf("Migrating error: %s", err)
 	}
 
 	// -------------------------------------------------------------------------
@@ -138,15 +83,10 @@ func NewDatabase(t *testing.T, url string, testName string) *Database {
 	// with the database.
 	teardown := func() {
 		t.Helper()
-
 		db.Close()
-		defer dbM.Close()
-
-		t.Logf("Dropping Database: %s", dbName)
-		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
-			fmt.Printf("dropping database %s: %v", dbName, err)
-		}
 	}
+
+	log := rlog.With("service", "test")
 
 	return &Database{
 		Log:       log,

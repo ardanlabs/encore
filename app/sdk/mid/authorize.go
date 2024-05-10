@@ -6,7 +6,7 @@ import (
 
 	eauth "encore.dev/beta/auth"
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/app/api/auth"
+	"github.com/ardanlabs/encore/app/sdk/auth"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"

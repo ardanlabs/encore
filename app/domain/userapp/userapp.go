@@ -6,12 +6,12 @@ import (
 	"errors"
 
 	eerrs "encore.dev/beta/errs"
-	"github.com/ardanlabs/encore/app/api/auth"
-	"github.com/ardanlabs/encore/app/api/errs"
-	"github.com/ardanlabs/encore/app/api/mid"
-	"github.com/ardanlabs/encore/app/api/page"
-	"github.com/ardanlabs/encore/business/api/order"
+	"github.com/ardanlabs/encore/app/sdk/auth"
+	"github.com/ardanlabs/encore/app/sdk/errs"
+	"github.com/ardanlabs/encore/app/sdk/mid"
+	"github.com/ardanlabs/encore/app/sdk/page"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/sdk/order"
 )
 
 // App manages the set of app layer api functions for the user domain.

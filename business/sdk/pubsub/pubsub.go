@@ -3,7 +3,7 @@ package pubsub
 
 import (
 	"encore.dev/pubsub"
-	"github.com/ardanlabs/encore/business/api/delegate"
+	"github.com/ardanlabs/encore/business/sdk/delegate"
 )
 
 // Delegate represents a topic for handling delegate calls.

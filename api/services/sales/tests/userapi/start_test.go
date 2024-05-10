@@ -9,19 +9,24 @@ import (
 	authsrv "github.com/ardanlabs/encore/api/services/auth"
 	salesrv "github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
-	"github.com/ardanlabs/encore/app/api/auth"
-	"github.com/ardanlabs/encore/app/api/mid"
-	"github.com/ardanlabs/encore/business/api/dbtest"
+	"github.com/ardanlabs/encore/app/sdk/auth"
+	"github.com/ardanlabs/encore/app/sdk/mid"
+	"github.com/ardanlabs/encore/business/sdk/dbtest"
 )
 
-func startTest(t *testing.T, url string, testName string) *apitest.Test {
-	dbTest := dbtest.NewDatabase(t, url, testName)
+func startTest(t *testing.T) *apitest.Test {
+	edb, err := et.NewTestDatabase(context.Background(), "app")
+	if err != nil {
+		t.Fatalf("Creating new database: %s", err)
+	}
+
+	db := dbtest.NewDatabase(t, edb)
 
 	// -------------------------------------------------------------------------
 
 	ath, err := auth.New(auth.Config{
-		Log:       dbTest.Log,
-		DB:        dbTest.DB,
+		Log:       db.Log,
+		DB:        db.DB,
 		KeyLookup: &apitest.KeyStore{},
 	})
 	if err != nil {
@@ -30,13 +35,13 @@ func startTest(t *testing.T, url string, testName string) *apitest.Test {
 
 	// -------------------------------------------------------------------------
 
-	authService, err := authsrv.NewService(dbTest.Log, dbTest.DB, ath)
+	authService, err := authsrv.NewService(db.Log, db.DB, ath)
 	if err != nil {
 		t.Fatalf("Auth service init error: %s", err)
 	}
 	et.MockService("auth", authService)
 
-	salesService, err := salesrv.NewService(dbTest.Log, dbTest.DB)
+	salesService, err := salesrv.NewService(db.Log, db.DB)
 	if err != nil {
 		t.Fatalf("Sales service init error: %s", err)
 	}
@@ -48,5 +53,5 @@ func startTest(t *testing.T, url string, testName string) *apitest.Test {
 		return mid.Bearer(ctx, ath, ap.Authorization)
 	}
 
-	return apitest.New(dbTest, ath, authHandler)
+	return apitest.New(db, ath, authHandler)
 }

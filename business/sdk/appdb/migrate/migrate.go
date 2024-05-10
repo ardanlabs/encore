@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/ardanlabs/encore/business/api/sqldb"
+	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/jmoiron/sqlx"
 )
 

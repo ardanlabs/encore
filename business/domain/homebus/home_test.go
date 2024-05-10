@@ -3,54 +3,28 @@ package homebus_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"runtime/debug"
 	"sort"
 	"testing"
 	"time"
 
-	"encore.dev"
-	"github.com/ardanlabs/encore/business/api/dbtest"
-	"github.com/ardanlabs/encore/business/api/unitest"
+	"encore.dev/et"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/sdk/dbtest"
+	"github.com/ardanlabs/encore/business/sdk/unitest"
 	"github.com/google/go-cmp/cmp"
 )
-
-var url string
-
-func TestMain(m *testing.M) {
-	if encore.Meta().Environment.Name == "ci-test" {
-		return
-	}
-
-	code, err := run(m)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	os.Exit(code)
-}
-
-func run(m *testing.M) (code int, err error) {
-	url, err = dbtest.StartDB()
-	if err != nil {
-		return 1, err
-	}
-
-	defer func() {
-		err = dbtest.StopDB()
-	}()
-
-	return m.Run(), nil
-}
-
-// =============================================================================
 
 func Test_Home(t *testing.T) {
 	t.Parallel()
 
-	db := dbtest.NewDatabase(t, url, "Test_Home")
+	edb, err := et.NewTestDatabase(context.Background(), "app")
+	if err != nil {
+		t.Fatalf("Creating new database: %s", err)
+	}
+
+	db := dbtest.NewDatabase(t, edb)
 	defer func() {
 		if r := recover(); r != nil {
 			t.Log(r)

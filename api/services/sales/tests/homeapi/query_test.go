@@ -6,8 +6,8 @@ import (
 
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
-	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/app/domain/homeapp"
+	"github.com/ardanlabs/encore/app/sdk/page"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/google/go-cmp/cmp"
 )

@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
-	"github.com/ardanlabs/encore/app/api/auth"
-	"github.com/ardanlabs/encore/business/api/dbtest"
+	"github.com/ardanlabs/encore/app/sdk/auth"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/sdk/dbtest"
 )
 
 func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, error) {

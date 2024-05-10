@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ardanlabs/encore/business/api/delegate"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/go-json-experiment/json"
 )
 

@@ -2,7 +2,7 @@ package mid
 
 import (
 	"encore.dev/middleware"
-	"github.com/ardanlabs/encore/app/api/metrics"
+	"github.com/ardanlabs/encore/app/sdk/metrics"
 )
 
 // Metrics sets the basic counters and guages.

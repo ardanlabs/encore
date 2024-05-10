@@ -1,8 +1,8 @@
 package vproductapp
 
 import (
-	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
+	"github.com/ardanlabs/encore/business/sdk/order"
 )
 
 var defaultOrderBy = order.NewBy("product_id", order.ASC)

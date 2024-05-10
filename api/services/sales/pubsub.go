@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"encore.dev/pubsub"
-	"github.com/ardanlabs/encore/business/api/delegate"
-	bpubsub "github.com/ardanlabs/encore/business/api/pubsub"
+	"github.com/ardanlabs/encore/business/sdk/delegate"
+	bpubsub "github.com/ardanlabs/encore/business/sdk/pubsub"
 )
 
 // We need a single subscription which will route a message to the

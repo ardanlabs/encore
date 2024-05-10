@@ -8,9 +8,9 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
 	authsrv "github.com/ardanlabs/encore/api/services/auth"
-	"github.com/ardanlabs/encore/app/api/errs"
-	"github.com/ardanlabs/encore/app/api/mid"
-	"github.com/ardanlabs/encore/business/api/sqldb"
+	"github.com/ardanlabs/encore/app/sdk/errs"
+	"github.com/ardanlabs/encore/app/sdk/mid"
+	"github.com/ardanlabs/encore/business/sdk/sqldb"
 )
 
 // NOTE: The order matters so be careful when injecting new middleware. Global

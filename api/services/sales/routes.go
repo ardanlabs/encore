@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"encore.dev"
-	"github.com/ardanlabs/encore/app/api/page"
 	"github.com/ardanlabs/encore/app/domain/homeapp"
 	"github.com/ardanlabs/encore/app/domain/productapp"
 	"github.com/ardanlabs/encore/app/domain/tranapp"
 	"github.com/ardanlabs/encore/app/domain/userapp"
 	"github.com/ardanlabs/encore/app/domain/vproductapp"
+	"github.com/ardanlabs/encore/app/sdk/page"
 )
 
 // Fallback is called for the debug enpoints.

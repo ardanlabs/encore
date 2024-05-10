@@ -6,10 +6,10 @@ import (
 	tranapp "github.com/ardanlabs/encore/app/domain/tranapp"
 	userapp "github.com/ardanlabs/encore/app/domain/userapp"
 	vproductapp "github.com/ardanlabs/encore/app/domain/vproductapp"
-	"github.com/ardanlabs/encore/business/api/delegate"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/business/sdk/delegate"
 )
 
 type appDomain struct {

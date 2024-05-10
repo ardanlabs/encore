@@ -6,7 +6,7 @@ import (
 	"time"
 
 	eerrs "encore.dev/beta/errs"
-	"github.com/ardanlabs/encore/app/api/errs"
+	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/foundation/validate"
 )

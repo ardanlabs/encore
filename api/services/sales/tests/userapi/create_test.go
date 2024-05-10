@@ -6,8 +6,8 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
-	"github.com/ardanlabs/encore/app/api/errs"
 	"github.com/ardanlabs/encore/app/domain/userapp"
+	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/google/go-cmp/cmp"
 )
 

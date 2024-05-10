@@ -3,8 +3,8 @@ package homedb
 import (
 	"fmt"
 
-	"github.com/ardanlabs/encore/business/api/order"
 	"github.com/ardanlabs/encore/business/domain/homebus"
+	"github.com/ardanlabs/encore/business/sdk/order"
 )
 
 var orderByFields = map[string]string{
