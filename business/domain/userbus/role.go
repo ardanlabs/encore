@@ -2,14 +2,42 @@ package userbus
 
 import "fmt"
 
+type roleSet struct {
+	Admin Role
+	User  Role
+}
+
+// Roles represents the set of roles that can be used.
+var Roles = roleSet{
+	Admin: newRole("ADMIN"),
+	User:  newRole("USER"),
+}
+
+// Parse parses the string value and returns a role if one exists.
+func (r roleSet) Parse(value string) (Role, error) {
+	role, exists := roles[value]
+	if !exists {
+		return Role{}, fmt.Errorf("invalid role %q", value)
+	}
+
+	return role, nil
+}
+
+// MustParse parses the string value and returns a role if one exists. If
+// an error occurs the function panics.
+func (r roleSet) MustParse(value string) Role {
+	role, err := Roles.Parse(value)
+	if err != nil {
+		panic(err)
+	}
+
+	return role
+}
+
+// =============================================================================
+
 // Set of known roles.
 var roles = make(map[string]Role)
-
-// Set of possible roles for a user.
-var (
-	RoleAdmin = newRole("ADMIN")
-	RoleUser  = newRole("USER")
-)
 
 // Role represents a role in the system.
 type Role struct {
@@ -22,27 +50,6 @@ func newRole(role string) Role {
 	return r
 }
 
-// ParseRole parses the string value and returns a role if one exists.
-func ParseRole(value string) (Role, error) {
-	role, exists := roles[value]
-	if !exists {
-		return Role{}, fmt.Errorf("invalid role %q", value)
-	}
-
-	return role, nil
-}
-
-// MustParseRole parses the string value and returns a role if one exists. If
-// an error occurs the function panics.
-func MustParseRole(value string) Role {
-	role, err := ParseRole(value)
-	if err != nil {
-		panic(err)
-	}
-
-	return role
-}
-
 // Name returns the name of the role.
 func (r Role) Name() string {
 	return r.name
@@ -50,7 +57,7 @@ func (r Role) Name() string {
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
 func (r *Role) UnmarshalText(data []byte) error {
-	role, err := ParseRole(string(data))
+	role, err := Roles.Parse(string(data))
 	if err != nil {
 		return err
 	}

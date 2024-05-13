@@ -93,7 +93,7 @@ func toBusNewHome(ctx context.Context, app NewHome) (homebus.NewHome, error) {
 		return homebus.NewHome{}, fmt.Errorf("getuserid: %w", err)
 	}
 
-	typ, err := homebus.ParseType(app.Type)
+	typ, err := homebus.Types.Parse(app.Type)
 	if err != nil {
 		return homebus.NewHome{}, fmt.Errorf("parse: %w", err)
 	}
@@ -152,7 +152,7 @@ func toBusUpdateHome(app UpdateHome) (homebus.UpdateHome, error) {
 	var typ homebus.Type
 	if app.Type != nil {
 		var err error
-		typ, err = homebus.ParseType(*app.Type)
+		typ, err = homebus.Types.Parse(*app.Type)
 		if err != nil {
 			return homebus.UpdateHome{}, fmt.Errorf("parse: %w", err)
 		}

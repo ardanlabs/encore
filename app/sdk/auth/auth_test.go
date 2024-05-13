@@ -53,7 +53,7 @@ func test1(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.RoleAdmin},
+			Roles: []userbus.Role{userbus.Roles.Admin},
 		}
 
 		token, err := ath.GenerateToken(kid, claims)
@@ -96,7 +96,7 @@ func test2(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.RoleUser},
+			Roles: []userbus.Role{userbus.Roles.User},
 		}
 
 		token, err := ath.GenerateToken(kid, claims)
@@ -144,7 +144,7 @@ func test3(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.RoleUser},
+			Roles: []userbus.Role{userbus.Roles.User},
 		}
 
 		token, err := ath.GenerateToken(kid, claims)
@@ -177,7 +177,7 @@ func test4(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.RoleUser, userbus.RoleAdmin},
+			Roles: []userbus.Role{userbus.Roles.User, userbus.Roles.Admin},
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
@@ -209,7 +209,7 @@ func test5(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.RoleUser},
+			Roles: []userbus.Role{userbus.Roles.User},
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
@@ -241,7 +241,7 @@ func test6(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.RoleAdmin},
+			Roles: []userbus.Role{userbus.Roles.Admin},
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 

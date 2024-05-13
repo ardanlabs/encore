@@ -52,7 +52,7 @@ func Test_User(t *testing.T) {
 func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	ctx := context.Background()
 
-	usrs, err := userbus.TestGenerateSeedUsers(ctx, 2, userbus.RoleAdmin, busDomain.User)
+	usrs, err := userbus.TestGenerateSeedUsers(ctx, 2, userbus.Roles.Admin, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -67,7 +67,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestGenerateSeedUsers(ctx, 2, userbus.RoleUser, busDomain.User)
+	usrs, err = userbus.TestGenerateSeedUsers(ctx, 2, userbus.Roles.User, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -188,7 +188,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 			ExpResp: userbus.User{
 				Name:       "Bill Kennedy",
 				Email:      *email,
-				Roles:      []userbus.Role{userbus.RoleAdmin},
+				Roles:      []userbus.Role{userbus.Roles.Admin},
 				Department: "IT",
 				Enabled:    true,
 			},
@@ -196,7 +196,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 				nu := userbus.NewUser{
 					Name:            "Bill Kennedy",
 					Email:           *email,
-					Roles:           []userbus.Role{userbus.RoleAdmin},
+					Roles:           []userbus.Role{userbus.Roles.Admin},
 					Department:      "IT",
 					Password:        "123",
 					PasswordConfirm: "123",
@@ -244,7 +244,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				ID:          sd.Users[0].ID,
 				Name:        "Jack Kennedy",
 				Email:       *email,
-				Roles:       []userbus.Role{userbus.RoleAdmin},
+				Roles:       []userbus.Role{userbus.Roles.Admin},
 				Department:  "IT",
 				Enabled:     true,
 				DateCreated: sd.Users[0].DateCreated,
@@ -253,7 +253,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				uu := userbus.UpdateUser{
 					Name:            dbtest.StringPointer("Jack Kennedy"),
 					Email:           email,
-					Roles:           []userbus.Role{userbus.RoleAdmin},
+					Roles:           []userbus.Role{userbus.Roles.Admin},
 					Department:      dbtest.StringPointer("IT"),
 					Password:        dbtest.StringPointer("1234"),
 					PasswordConfirm: dbtest.StringPointer("1234"),
