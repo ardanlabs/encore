@@ -9,6 +9,7 @@ import (
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/jmoiron/sqlx"
 )
@@ -28,10 +29,10 @@ func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
 }
 
 // Query retrieves a list of existing products from the database.
-func (s *Store) Query(ctx context.Context, filter vproductbus.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]vproductbus.Product, error) {
-	data := map[string]interface{}{
-		"offset":        (pageNumber - 1) * rowsPerPage,
-		"rows_per_page": rowsPerPage,
+func (s *Store) Query(ctx context.Context, filter vproductbus.QueryFilter, orderBy order.By, page page.Page) ([]vproductbus.Product, error) {
+	data := map[string]any{
+		"offset":        (page.Number() - 1) * page.RowsPerPage(),
+		"rows_per_page": page.RowsPerPage(),
 	}
 
 	const q = `
@@ -63,7 +64,12 @@ func (s *Store) Query(ctx context.Context, filter vproductbus.QueryFilter, order
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toBusProducts(dnPrd), nil
+	prd, err := toBusProducts(dnPrd)
+	if err != nil {
+		return nil, err
+	}
+
+	return prd, nil
 }
 
 // Count returns the total number of products in the DB.

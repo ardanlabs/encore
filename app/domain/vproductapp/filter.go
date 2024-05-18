@@ -3,6 +3,8 @@ package vproductapp
 import (
 	"strconv"
 
+	"github.com/ardanlabs/encore/business/domain/productbus"
+	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
 	"github.com/ardanlabs/encore/foundation/validate"
 	"github.com/google/uuid"
@@ -16,11 +18,15 @@ func parseFilter(qp QueryParams) (vproductbus.QueryFilter, error) {
 		if err != nil {
 			return vproductbus.QueryFilter{}, validate.NewFieldsError("product_id", err)
 		}
-		filter.WithID(id)
+		filter.ID = &id
 	}
 
 	if qp.Name != "" {
-		filter.WithName(qp.Name)
+		name, err := productbus.Names.Parse(qp.Name)
+		if err != nil {
+			return vproductbus.QueryFilter{}, validate.NewFieldsError("name", err)
+		}
+		filter.Name = &name
 	}
 
 	if qp.Cost != "" {
@@ -28,7 +34,7 @@ func parseFilter(qp QueryParams) (vproductbus.QueryFilter, error) {
 		if err != nil {
 			return vproductbus.QueryFilter{}, validate.NewFieldsError("cost", err)
 		}
-		filter.WithCost(cst)
+		filter.Cost = &cst
 	}
 
 	if qp.Quantity != "" {
@@ -36,11 +42,16 @@ func parseFilter(qp QueryParams) (vproductbus.QueryFilter, error) {
 		if err != nil {
 			return vproductbus.QueryFilter{}, validate.NewFieldsError("quantity", err)
 		}
-		filter.WithQuantity(int(qua))
+		i := int(qua)
+		filter.Quantity = &i
 	}
 
-	if qp.UserName != "" {
-		filter.WithUserName(qp.UserName)
+	if qp.Name != "" {
+		name, err := userbus.Names.Parse(qp.Name)
+		if err != nil {
+			return vproductbus.QueryFilter{}, validate.NewFieldsError("name", err)
+		}
+		filter.UserName = &name
 	}
 
 	return filter, nil

@@ -125,3 +125,19 @@ func FloatPointer(f float64) *float64 {
 func BoolPointer(b bool) *bool {
 	return &b
 }
+
+// UserNamePointer is a helper to get a *Name from a string. It's in the tests
+// package because we normally don't want to deal with pointers to basic types
+// but it's useful in some tests.
+func UserNamePointer(value string) *userbus.Name {
+	name := userbus.Names.MustParse(value)
+	return &name
+}
+
+// ProductNamePointer is a helper to get a *Name from a string. It's in the tests
+// package because we normally don't want to deal with pointers to basic types
+// but it's useful in some tests.
+func ProductNamePointer(value string) *productbus.Name {
+	name := productbus.Names.MustParse(value)
+	return &name
+}

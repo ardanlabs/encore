@@ -1,8 +1,11 @@
 package vproductdb
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/ardanlabs/encore/business/domain/productbus"
+	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
 	"github.com/google/uuid"
 )
@@ -18,27 +21,41 @@ type product struct {
 	UserName    string    `db:"user_name"`
 }
 
-func toBusProduct(db product) vproductbus.Product {
-	prd := vproductbus.Product{
+func toBusProduct(db product) (vproductbus.Product, error) {
+	userName, err := userbus.Names.Parse(db.UserName)
+	if err != nil {
+		return vproductbus.Product{}, fmt.Errorf("parse user name: %w", err)
+	}
+
+	name, err := productbus.Names.Parse(db.Name)
+	if err != nil {
+		return vproductbus.Product{}, fmt.Errorf("parse name: %w", err)
+	}
+
+	bus := vproductbus.Product{
 		ID:          db.ID,
 		UserID:      db.UserID,
-		Name:        db.Name,
+		Name:        name,
 		Cost:        db.Cost,
 		Quantity:    db.Quantity,
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
-		UserName:    db.UserName,
+		UserName:    userName,
 	}
 
-	return prd
+	return bus, nil
 }
 
-func toBusProducts(dbs []product) []vproductbus.Product {
-	prds := make([]vproductbus.Product, len(dbs))
+func toBusProducts(dbPrds []product) ([]vproductbus.Product, error) {
+	bus := make([]vproductbus.Product, len(dbPrds))
 
-	for i, db := range dbs {
-		prds[i] = toBusProduct(db)
+	for i, dbPrd := range dbPrds {
+		var err error
+		bus[i], err = toBusProduct(dbPrd)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return prds
+	return bus, nil
 }

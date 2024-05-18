@@ -9,9 +9,10 @@ import (
 	"github.com/ardanlabs/encore/app/sdk/auth"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
-	"github.com/ardanlabs/encore/app/sdk/page"
+	"github.com/ardanlabs/encore/app/sdk/query"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 )
 
 // App manages the set of app layer api functions for the user domain.
@@ -54,7 +55,7 @@ func (a *App) Create(ctx context.Context, app NewUser) (User, error) {
 }
 
 // Update updates an existing user.
-func (a *App) Update(ctx context.Context, userID string, app UpdateUser) (User, error) {
+func (a *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 	uu, err := toBusUpdateUser(app)
 	if err != nil {
 		return User{}, errs.New(eerrs.FailedPrecondition, err)
@@ -74,7 +75,7 @@ func (a *App) Update(ctx context.Context, userID string, app UpdateUser) (User, 
 }
 
 // UpdateRole updates an existing user's role.
-func (a *App) UpdateRole(ctx context.Context, userID string, app UpdateUserRole) (User, error) {
+func (a *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
 	uu, err := toBusUpdateUserRole(app)
 	if err != nil {
 		return User{}, errs.New(eerrs.FailedPrecondition, err)
@@ -94,10 +95,10 @@ func (a *App) UpdateRole(ctx context.Context, userID string, app UpdateUserRole)
 }
 
 // Delete removes a user from the system.
-func (a *App) Delete(ctx context.Context, userID string) error {
+func (a *App) Delete(ctx context.Context) error {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return errs.Newf(eerrs.Internal, "userID[%s] missing in context: %s", userID, err)
+		return errs.Newf(eerrs.Internal, "userID missing in context: %s", err)
 	}
 
 	if err := a.userBus.Delete(ctx, usr); err != nil {
@@ -108,40 +109,40 @@ func (a *App) Delete(ctx context.Context, userID string) error {
 }
 
 // Query returns a list of users with paging.
-func (a *App) Query(ctx context.Context, qp QueryParams) (page.Document[User], error) {
-	pg, err := page.Parse(qp.Page, qp.Rows)
+func (a *App) Query(ctx context.Context, qp QueryParams) (query.Result[User], error) {
+	page, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		return page.Document[User]{}, err
+		return query.Result[User]{}, err
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return page.Document[User]{}, err
+		return query.Result[User]{}, err
 	}
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return page.Document[User]{}, err
+		return query.Result[User]{}, err
 	}
 
-	usrs, err := a.userBus.Query(ctx, filter, orderBy, pg.Number, pg.RowsPerPage)
+	usrs, err := a.userBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
-		return page.Document[User]{}, errs.Newf(eerrs.Internal, "query: %s", err)
+		return query.Result[User]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
 	total, err := a.userBus.Count(ctx, filter)
 	if err != nil {
-		return page.Document[User]{}, errs.Newf(eerrs.Internal, "count: %s", err)
+		return query.Result[User]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
 
-	return page.NewDocument(toAppUsers(usrs), total, pg.Number, pg.RowsPerPage), nil
+	return query.NewResult(toAppUsers(usrs), total, page), nil
 }
 
 // QueryByID returns a user by its ID.
-func (a *App) QueryByID(ctx context.Context, userID string) (User, error) {
+func (a *App) QueryByID(ctx context.Context) (User, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return User{}, errs.Newf(eerrs.Internal, "querybyid: userID[%s]: %s", userID, err)
+		return User{}, errs.Newf(eerrs.Internal, "querybyid: %s", err)
 	}
 
 	return toAppUser(usr), nil

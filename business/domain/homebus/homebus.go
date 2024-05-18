@@ -10,6 +10,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
 	"github.com/google/uuid"
 )
@@ -27,7 +28,7 @@ type Storer interface {
 	Create(ctx context.Context, hme Home) error
 	Update(ctx context.Context, hme Home) error
 	Delete(ctx context.Context, hme Home) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Home, error)
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Home, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, homeID uuid.UUID) (Home, error)
 	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Home, error)
@@ -158,12 +159,8 @@ func (b *Business) Delete(ctx context.Context, hme Home) error {
 }
 
 // Query retrieves a list of existing homes.
-func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Home, error) {
-	if err := filter.Validate(); err != nil {
-		return nil, err
-	}
-
-	hmes, err := b.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Home, error) {
+	hmes, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -173,10 +170,6 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 
 // Count returns the total number of homes.
 func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
-	if err := filter.Validate(); err != nil {
-		return 0, err
-	}
-
 	return b.storer.Count(ctx, filter)
 }
 

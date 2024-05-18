@@ -7,9 +7,10 @@ import (
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
-	"github.com/ardanlabs/encore/app/sdk/page"
+	"github.com/ardanlabs/encore/app/sdk/query"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 )
 
 // App manages the set of app layer api functions for the home domain.
@@ -40,7 +41,7 @@ func (a *App) Create(ctx context.Context, app NewHome) (Home, error) {
 }
 
 // Update updates an existing home.
-func (a *App) Update(ctx context.Context, userID string, app UpdateHome) (Home, error) {
+func (a *App) Update(ctx context.Context, app UpdateHome) (Home, error) {
 	uh, err := toBusUpdateHome(app)
 	if err != nil {
 		return Home{}, errs.New(eerrs.FailedPrecondition, err)
@@ -60,10 +61,10 @@ func (a *App) Update(ctx context.Context, userID string, app UpdateHome) (Home, 
 }
 
 // Delete removes a home from the system.
-func (a *App) Delete(ctx context.Context, homeID string) error {
+func (a *App) Delete(ctx context.Context) error {
 	hme, err := mid.GetHome(ctx)
 	if err != nil {
-		return errs.Newf(eerrs.Internal, "homeID[%s] missing in context: %s", homeID, err)
+		return errs.Newf(eerrs.Internal, "homeID missing in context: %s", err)
 	}
 
 	if err := a.homeBus.Delete(ctx, hme); err != nil {
@@ -74,40 +75,40 @@ func (a *App) Delete(ctx context.Context, homeID string) error {
 }
 
 // Query returns a list of homes with paging.
-func (a *App) Query(ctx context.Context, qp QueryParams) (page.Document[Home], error) {
-	pg, err := page.Parse(qp.Page, qp.Rows)
+func (a *App) Query(ctx context.Context, qp QueryParams) (query.Result[Home], error) {
+	page, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		return page.Document[Home]{}, err
+		return query.Result[Home]{}, err
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return page.Document[Home]{}, err
+		return query.Result[Home]{}, err
 	}
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return page.Document[Home]{}, err
+		return query.Result[Home]{}, err
 	}
 
-	hmes, err := a.homeBus.Query(ctx, filter, orderBy, pg.Number, pg.RowsPerPage)
+	hmes, err := a.homeBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
-		return page.Document[Home]{}, errs.Newf(eerrs.Internal, "query: %s", err)
+		return query.Result[Home]{}, errs.Newf(eerrs.Internal, "query: %s", err)
 	}
 
 	total, err := a.homeBus.Count(ctx, filter)
 	if err != nil {
-		return page.Document[Home]{}, errs.Newf(eerrs.Internal, "count: %s", err)
+		return query.Result[Home]{}, errs.Newf(eerrs.Internal, "count: %s", err)
 	}
 
-	return page.NewDocument(toAppHomes(hmes), total, pg.Number, pg.RowsPerPage), nil
+	return query.NewResult(toAppHomes(hmes), total, page), nil
 }
 
 // QueryByID returns a home by its ID.
-func (a *App) QueryByID(ctx context.Context, homeID string) (Home, error) {
+func (a *App) QueryByID(ctx context.Context) (Home, error) {
 	hme, err := mid.GetHome(ctx)
 	if err != nil {
-		return Home{}, errs.Newf(eerrs.Internal, "querybyid: homeID[%s]: %s", homeID, err)
+		return Home{}, errs.Newf(eerrs.Internal, "querybyid: %s", err)
 	}
 
 	return toAppHome(hme), nil

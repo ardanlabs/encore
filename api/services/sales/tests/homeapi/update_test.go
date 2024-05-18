@@ -161,7 +161,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.UpdateHome{
 					Type: dbtest.StringPointer("SINGLE FAMILY"),

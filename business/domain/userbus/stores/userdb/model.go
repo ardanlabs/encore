@@ -26,12 +26,12 @@ type user struct {
 func toDBUser(bus userbus.User) user {
 	roles := make([]string, len(bus.Roles))
 	for i, role := range bus.Roles {
-		roles[i] = role.Name()
+		roles[i] = role.String()
 	}
 
 	return user{
 		ID:           bus.ID,
-		Name:         bus.Name,
+		Name:         bus.Name.String(),
 		Email:        bus.Email.Address,
 		Roles:        roles,
 		PasswordHash: bus.PasswordHash,
@@ -59,9 +59,14 @@ func toCoreUser(db user) (userbus.User, error) {
 		}
 	}
 
+	name, err := userbus.Names.Parse(db.Name)
+	if err != nil {
+		return userbus.User{}, fmt.Errorf("parse name: %w", err)
+	}
+
 	usr := userbus.User{
 		ID:           db.ID,
-		Name:         db.Name,
+		Name:         name,
 		Email:        addr,
 		Roles:        roles,
 		PasswordHash: db.PasswordHash,

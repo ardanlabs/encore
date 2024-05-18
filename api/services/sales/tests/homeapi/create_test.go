@@ -159,7 +159,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "wronguser",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{ADMIN}]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.NewHome{
 					Type: "SINGLE FAMILY",

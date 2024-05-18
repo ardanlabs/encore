@@ -38,7 +38,7 @@ func toAppProduct(prd productbus.Product) Product {
 	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
-		Name:        prd.Name,
+		Name:        prd.Name.String(),
 		Cost:        prd.Cost,
 		Quantity:    prd.Quantity,
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
@@ -68,9 +68,14 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
 	}
 
+	name, err := productbus.Names.Parse(app.Name)
+	if err != nil {
+		return productbus.NewProduct{}, fmt.Errorf("parse name: %w", err)
+	}
+
 	prd := productbus.NewProduct{
 		UserID:   userID,
-		Name:     app.Name,
+		Name:     name,
 		Cost:     app.Cost,
 		Quantity: app.Quantity,
 	}
@@ -94,14 +99,23 @@ type UpdateProduct struct {
 	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
 }
 
-func toBusUpdateProduct(app UpdateProduct) productbus.UpdateProduct {
-	core := productbus.UpdateProduct{
-		Name:     app.Name,
+func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
+	var name *productbus.Name
+	if app.Name != nil {
+		nm, err := productbus.Names.Parse(*app.Name)
+		if err != nil {
+			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+		}
+		name = &nm
+	}
+
+	bus := productbus.UpdateProduct{
+		Name:     name,
 		Cost:     app.Cost,
 		Quantity: app.Quantity,
 	}
 
-	return core
+	return bus, nil
 }
 
 // Validate checks the data in the model is considered clean.

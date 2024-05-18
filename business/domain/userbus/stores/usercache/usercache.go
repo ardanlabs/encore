@@ -10,6 +10,7 @@ import (
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
 	"github.com/creativecreature/sturdyc"
 	"github.com/google/uuid"
@@ -76,8 +77,8 @@ func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
 }
 
 // Query retrieves a list of existing users from the database.
-func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]userbus.User, error) {
-	return s.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, page page.Page) ([]userbus.User, error) {
+	return s.storer.Query(ctx, filter, orderBy, page)
 }
 
 // Count returns the total number of cards in the DB.

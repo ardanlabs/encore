@@ -13,6 +13,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
 	"github.com/ardanlabs/encore/business/sdk/dbtest"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/unitest"
 	"github.com/google/go-cmp/cmp"
 )
@@ -131,10 +132,10 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			ExpResp: prds,
 			ExcFunc: func(ctx context.Context) any {
 				filter := vproductbus.QueryFilter{
-					Name: dbtest.StringPointer("Name"),
+					Name: dbtest.ProductNamePointer("Name"),
 				}
 
-				resp, err := busDomain.VProduct.Query(ctx, filter, vproductbus.DefaultOrderBy, 1, 10)
+				resp, err := busDomain.VProduct.Query(ctx, filter, vproductbus.DefaultOrderBy, page.MustParse("1", "10"))
 				if err != nil {
 					return err
 				}

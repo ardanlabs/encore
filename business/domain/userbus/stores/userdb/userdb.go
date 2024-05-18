@@ -11,6 +11,7 @@ import (
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/ardanlabs/encore/business/sdk/sqldb/dbarray"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
@@ -114,10 +115,10 @@ func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
 }
 
 // Query retrieves a list of existing users from the database.
-func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]userbus.User, error) {
+func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, page page.Page) ([]userbus.User, error) {
 	data := map[string]interface{}{
-		"offset":        (pageNumber - 1) * rowsPerPage,
-		"rows_per_page": rowsPerPage,
+		"offset":        (page.Number() - 1) * page.RowsPerPage(),
+		"rows_per_page": page.RowsPerPage(),
 	}
 
 	const q = `

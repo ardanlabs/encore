@@ -25,7 +25,7 @@ func toAppProduct(prd productbus.Product) Product {
 	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
-		Name:        prd.Name,
+		Name:        prd.Name.String(),
 		Cost:        prd.Cost,
 		Quantity:    prd.Quantity,
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
@@ -55,26 +55,30 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 	for i, roleStr := range app.Roles {
 		role, err := userbus.Roles.Parse(roleStr)
 		if err != nil {
-			return userbus.NewUser{}, fmt.Errorf("parsing role: %w", err)
+			return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 		}
 		roles[i] = role
 	}
 
 	addr, err := mail.ParseAddress(app.Email)
 	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parsing email: %w", err)
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	usr := userbus.NewUser{
-		Name:            app.Name,
-		Email:           *addr,
-		Roles:           roles,
-		Department:      app.Department,
-		Password:        app.Password,
-		PasswordConfirm: app.PasswordConfirm,
+	name, err := userbus.Names.Parse(app.Name)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	return usr, nil
+	bus := userbus.NewUser{
+		Name:       name,
+		Email:      *addr,
+		Roles:      roles,
+		Department: app.Department,
+		Password:   app.Password,
+	}
+
+	return bus, nil
 }
 
 // Validate checks the data in the model is considered clean.
@@ -94,13 +98,18 @@ type NewProduct struct {
 }
 
 func toBusNewProduct(app NewProduct) (productbus.NewProduct, error) {
-	prd := productbus.NewProduct{
-		Name:     app.Name,
+	name, err := productbus.Names.Parse(app.Name)
+	if err != nil {
+		return productbus.NewProduct{}, fmt.Errorf("parse: %w", err)
+	}
+
+	bus := productbus.NewProduct{
+		Name:     name,
 		Cost:     app.Cost,
 		Quantity: app.Quantity,
 	}
 
-	return prd, nil
+	return bus, nil
 }
 
 // Validate checks the data in the model is considered clean.

@@ -146,7 +146,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUser{
 					Name:            dbtest.StringPointer("Jack Kennedy"),
@@ -168,7 +168,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "roleadminonly",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[{USER}]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUserRole{
 					Roles: []string{"ADMIN"},

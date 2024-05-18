@@ -12,6 +12,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/dbtest"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/unitest"
 	"github.com/google/go-cmp/cmp"
 )
@@ -110,10 +111,10 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			ExpResp: prds,
 			ExcFunc: func(ctx context.Context) any {
 				filter := productbus.QueryFilter{
-					Name: dbtest.StringPointer("Name"),
+					Name: dbtest.ProductNamePointer("Name"),
 				}
 
-				resp, err := busDomain.Product.Query(ctx, filter, productbus.DefaultOrderBy, 1, 10)
+				resp, err := busDomain.Product.Query(ctx, filter, productbus.DefaultOrderBy, page.MustParse("1", "10"))
 				if err != nil {
 					return err
 				}
@@ -182,14 +183,14 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name: "basic",
 			ExpResp: productbus.Product{
 				UserID:   sd.Users[0].ID,
-				Name:     "Guitar",
+				Name:     productbus.Names.MustParse("Guitar"),
 				Cost:     10.34,
 				Quantity: 10,
 			},
 			ExcFunc: func(ctx context.Context) any {
 				np := productbus.NewProduct{
 					UserID:   sd.Users[0].ID,
-					Name:     "Guitar",
+					Name:     productbus.Names.MustParse("Guitar"),
 					Cost:     10.34,
 					Quantity: 10,
 				}
@@ -228,7 +229,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			ExpResp: productbus.Product{
 				ID:          sd.Users[0].Products[0].ID,
 				UserID:      sd.Users[0].ID,
-				Name:        "Guitar",
+				Name:        productbus.Names.MustParse("Guitar"),
 				Cost:        10.34,
 				Quantity:    10,
 				DateCreated: sd.Users[0].Products[0].DateCreated,
@@ -236,7 +237,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				up := productbus.UpdateProduct{
-					Name:     dbtest.StringPointer("Guitar"),
+					Name:     dbtest.ProductNamePointer("Guitar"),
 					Cost:     dbtest.FloatPointer(10.34),
 					Quantity: dbtest.IntPointer(10),
 				}

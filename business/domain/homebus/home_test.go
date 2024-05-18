@@ -12,6 +12,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/dbtest"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/unitest"
 	"github.com/google/go-cmp/cmp"
 )
@@ -131,7 +132,7 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name:    "all",
 			ExpResp: hmes,
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := busDomain.Home.Query(ctx, homebus.QueryFilter{}, homebus.DefaultOrderBy, 1, 10)
+				resp, err := busDomain.Home.Query(ctx, homebus.QueryFilter{}, homebus.DefaultOrderBy, page.MustParse("1", "10"))
 				if err != nil {
 					return err
 				}

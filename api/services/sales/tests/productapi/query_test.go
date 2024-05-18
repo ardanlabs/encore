@@ -7,7 +7,7 @@ import (
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
 	"github.com/ardanlabs/encore/app/domain/productapp"
-	"github.com/ardanlabs/encore/app/sdk/page"
+	"github.com/ardanlabs/encore/app/sdk/query"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/google/go-cmp/cmp"
 )
@@ -25,7 +25,7 @@ func queryOk(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:  "all",
 			Token: sd.Admins[0].Token,
-			ExpResp: page.Document[productapp.Product]{
+			ExpResp: query.Result[productapp.Product]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(prds),

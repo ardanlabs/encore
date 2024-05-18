@@ -10,6 +10,7 @@ import (
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
 	"github.com/google/uuid"
@@ -104,10 +105,10 @@ func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
 }
 
 // Query gets all Products from the database.
-func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]productbus.Product, error) {
-	data := map[string]interface{}{
-		"offset":        (pageNumber - 1) * rowsPerPage,
-		"rows_per_page": rowsPerPage,
+func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderBy order.By, page page.Page) ([]productbus.Product, error) {
+	data := map[string]any{
+		"offset":        (page.Number() - 1) * page.RowsPerPage(),
+		"rows_per_page": page.RowsPerPage(),
 	}
 
 	const q = `
@@ -132,7 +133,7 @@ func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderB
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toBusProducts(dbPrds), nil
+	return toBusProducts(dbPrds)
 }
 
 // Count returns the total number of users in the DB.
@@ -184,7 +185,7 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 		return productbus.Product{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toBusProduct(dbPrd), nil
+	return toBusProduct(dbPrd)
 }
 
 // QueryByUserID finds the product identified by a given User ID.
@@ -208,5 +209,5 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productb
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
-	return toBusProducts(dbPrds), nil
+	return toBusProducts(dbPrds)
 }

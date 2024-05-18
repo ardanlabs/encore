@@ -11,6 +11,7 @@ import (
 	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/ardanlabs/encore/business/sdk/order"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/pubsub"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
 	"github.com/google/uuid"
@@ -31,7 +32,7 @@ type Storer interface {
 	Create(ctx context.Context, usr User) error
 	Update(ctx context.Context, usr User) error
 	Delete(ctx context.Context, usr User) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error)
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]User, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
 	QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]User, error)
@@ -155,12 +156,8 @@ func (b *Business) Delete(ctx context.Context, usr User) error {
 }
 
 // Query retrieves a list of existing users.
-func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error) {
-	if err := filter.Validate(); err != nil {
-		return nil, err
-	}
-
-	users, err := b.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]User, error) {
+	users, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -170,10 +167,6 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 
 // Count returns the total number of users.
 func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
-	if err := filter.Validate(); err != nil {
-		return 0, err
-	}
-
 	return b.storer.Count(ctx, filter)
 }
 

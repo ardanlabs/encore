@@ -36,22 +36,22 @@ type User struct {
 	DateUpdated  string   `json:"dateUpdated"`
 }
 
-func toAppUser(usr userbus.User) User {
-	roles := make([]string, len(usr.Roles))
-	for i, role := range usr.Roles {
-		roles[i] = role.Name()
+func toAppUser(bus userbus.User) User {
+	roles := make([]string, len(bus.Roles))
+	for i, role := range bus.Roles {
+		roles[i] = role.String()
 	}
 
 	return User{
-		ID:           usr.ID.String(),
-		Name:         usr.Name,
-		Email:        usr.Email.Address,
+		ID:           bus.ID.String(),
+		Name:         bus.Name.String(),
+		Email:        bus.Email.Address,
 		Roles:        roles,
-		PasswordHash: usr.PasswordHash,
-		Department:   usr.Department,
-		Enabled:      usr.Enabled,
-		DateCreated:  usr.DateCreated.Format(time.RFC3339),
-		DateUpdated:  usr.DateUpdated.Format(time.RFC3339),
+		PasswordHash: bus.PasswordHash,
+		Department:   bus.Department,
+		Enabled:      bus.Enabled,
+		DateCreated:  bus.DateCreated.Format(time.RFC3339),
+		DateUpdated:  bus.DateUpdated.Format(time.RFC3339),
 	}
 }
 
@@ -89,16 +89,20 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	usr := userbus.NewUser{
-		Name:            app.Name,
-		Email:           *addr,
-		Roles:           roles,
-		Department:      app.Department,
-		Password:        app.Password,
-		PasswordConfirm: app.PasswordConfirm,
+	name, err := userbus.Names.Parse(app.Name)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	return usr, nil
+	bus := userbus.NewUser{
+		Name:       name,
+		Email:      *addr,
+		Roles:      roles,
+		Department: app.Department,
+		Password:   app.Password,
+	}
+
+	return bus, nil
 }
 
 // Validate checks the data in the model is considered clean.
@@ -155,16 +159,24 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 		}
 	}
 
-	nu := userbus.UpdateUser{
-		Name:            app.Name,
-		Email:           addr,
-		Department:      app.Department,
-		Password:        app.Password,
-		PasswordConfirm: app.PasswordConfirm,
-		Enabled:         app.Enabled,
+	var name *userbus.Name
+	if app.Name != nil {
+		nm, err := userbus.Names.Parse(*app.Name)
+		if err != nil {
+			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+		}
+		name = &nm
 	}
 
-	return nu, nil
+	bus := userbus.UpdateUser{
+		Name:       name,
+		Email:      addr,
+		Department: app.Department,
+		Password:   app.Password,
+		Enabled:    app.Enabled,
+	}
+
+	return bus, nil
 }
 
 // Validate checks the data in the model is considered clean.

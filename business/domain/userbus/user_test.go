@@ -12,6 +12,7 @@ import (
 	"encore.dev/et"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/dbtest"
+	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/unitest"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/crypto/bcrypt"
@@ -113,10 +114,10 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			ExpResp: usrs,
 			ExcFunc: func(ctx context.Context) any {
 				filter := userbus.QueryFilter{
-					Name: dbtest.StringPointer("Name"),
+					Name: dbtest.UserNamePointer("Name"),
 				}
 
-				resp, err := busDomain.User.Query(ctx, filter, userbus.DefaultOrderBy, 1, 10)
+				resp, err := busDomain.User.Query(ctx, filter, userbus.DefaultOrderBy, page.MustParse("1", "10"))
 				if err != nil {
 					return err
 				}
@@ -186,7 +187,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 		{
 			Name: "basic",
 			ExpResp: userbus.User{
-				Name:       "Bill Kennedy",
+				Name:       userbus.Names.MustParse("Bill Kennedy"),
 				Email:      *email,
 				Roles:      []userbus.Role{userbus.Roles.Admin},
 				Department: "IT",
@@ -194,7 +195,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				nu := userbus.NewUser{
-					Name:            "Bill Kennedy",
+					Name:            userbus.Names.MustParse("Bill Kennedy"),
 					Email:           *email,
 					Roles:           []userbus.Role{userbus.Roles.Admin},
 					Department:      "IT",
@@ -242,7 +243,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name: "basic",
 			ExpResp: userbus.User{
 				ID:          sd.Users[0].ID,
-				Name:        "Jack Kennedy",
+				Name:        userbus.Names.MustParse("Jack Kennedy"),
 				Email:       *email,
 				Roles:       []userbus.Role{userbus.Roles.Admin},
 				Department:  "IT",
@@ -251,7 +252,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				uu := userbus.UpdateUser{
-					Name:            dbtest.StringPointer("Jack Kennedy"),
+					Name:            dbtest.UserNamePointer("Jack Kennedy"),
 					Email:           email,
 					Roles:           []userbus.Role{userbus.Roles.Admin},
 					Department:      dbtest.StringPointer("IT"),
