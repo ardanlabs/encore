@@ -16,7 +16,7 @@ const (
 )
 
 // EventFn is a function to be executed when configured against a log level.
-type EventFn func(ctx context.Context, msg string)
+type EventFn func(ctx context.Context, msg string, args ...any)
 
 // Events contains an assignment of an event function to a log level.
 type Events struct {

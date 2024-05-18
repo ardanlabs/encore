@@ -63,16 +63,33 @@ func (log *Logger) Errorc(ctx context.Context, caller int, msg string, args ...a
 	log.write(ctx, LevelError, caller, msg, args...)
 }
 
+// The caller parameter is being used for backwards compatibility support with
+// the service project. At this time in encore we can't use it. :(
 func (log *Logger) write(ctx context.Context, level Level, caller int, msg string, args ...any) {
 	switch level {
 	case LevelDebug:
 		log.handler.Debug(msg, args...)
+		if log.events.Debug != nil {
+			log.events.Debug(ctx, msg, args...)
+		}
+
 	case LevelInfo:
 		log.handler.Info(msg, args...)
+		if log.events.Info != nil {
+			log.events.Info(ctx, msg, args...)
+		}
+
 	case LevelWarn:
 		log.handler.Warn(msg, args...)
+		if log.events.Warn != nil {
+			log.events.Warn(ctx, msg, args...)
+		}
+
 	case LevelError:
 		log.handler.Error(msg, args...)
+		if log.events.Error != nil {
+			log.events.Error(ctx, msg, args...)
+		}
 	}
 }
 
