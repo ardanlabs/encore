@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
 	authsrv "github.com/ardanlabs/encore/api/services/auth"
 	"github.com/ardanlabs/encore/app/sdk/errs"
@@ -34,7 +33,7 @@ func (s *Service) panics(req middleware.Request, next middleware.Next) middlewar
 func (s *Service) authorize(req middleware.Request, next middleware.Next) middleware.Response {
 	p, req, err := mid.Authorize(req)
 	if err != nil {
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
@@ -42,7 +41,7 @@ func (s *Service) authorize(req middleware.Request, next middleware.Next) middle
 
 	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	return next(req)
@@ -53,7 +52,7 @@ func (s *Service) authorize(req middleware.Request, next middleware.Next) middle
 func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) middleware.Response {
 	p, req, err := mid.AuthorizeUser(s.userBus, req)
 	if err != nil {
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
@@ -61,7 +60,7 @@ func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) mi
 
 	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	return next(req)
@@ -72,7 +71,7 @@ func (s *Service) authorizeUser(req middleware.Request, next middleware.Next) mi
 func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next) middleware.Response {
 	p, req, err := mid.AuthorizeProduct(s.productBus, req)
 	if err != nil {
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
@@ -80,7 +79,7 @@ func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next)
 
 	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	return next(req)
@@ -91,7 +90,7 @@ func (s *Service) authorizeProduct(req middleware.Request, next middleware.Next)
 func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) middleware.Response {
 	p, req, err := mid.AuthorizeHome(s.homeBus, req)
 	if err != nil {
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
@@ -99,7 +98,7 @@ func (s *Service) authorizeHome(req middleware.Request, next middleware.Next) mi
 
 	if err := authsrv.Authorize(ctx, p); err != nil {
 		err = fmt.Errorf("%s", err.Error()[17:]) // Remove "unauthenticated:" from the error string.
-		return errs.NewResponse(eerrs.Unauthenticated, err)
+		return errs.NewResponse(errs.Unauthenticated, err)
 	}
 
 	return next(req)

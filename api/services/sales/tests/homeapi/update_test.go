@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
 	"github.com/ardanlabs/encore/app/domain/homeapp"
@@ -69,7 +68,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "input",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"address1\",\"error\":\"address1 must be at least 1 character in length\"},{\"field\":\"zipCode\",\"error\":\"zipCode must be a valid numeric value\"},{\"field\":\"state\",\"error\":\"state must be at least 1 character in length\"},{\"field\":\"country\",\"error\":\"Key: 'UpdateHome.address.country' Error:Field validation for 'country' failed on the 'iso3166_1_alpha2' tag\"}]"),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"address1\",\"error\":\"address1 must be at least 1 character in length\"},{\"field\":\"zipCode\",\"error\":\"zipCode must be a valid numeric value\"},{\"field\":\"state\",\"error\":\"state must be at least 1 character in length\"},{\"field\":\"country\",\"error\":\"Key: 'UpdateHome.address.country' Error:Field validation for 'country' failed on the 'iso3166_1_alpha2' tag\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.UpdateHome{
 					Address: &homeapp.UpdateAddress{
@@ -94,7 +93,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "type",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "parse: invalid type \"BAD TYPE\""),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid type \"BAD TYPE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.UpdateHome{
 					Type: dbtest.StringPointer("BAD TYPE"),
@@ -119,7 +118,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "emptytoken",
 			Token:   "&nbsp;",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeUpdate(ctx, "", homeapp.UpdateHome{})
 				if err != nil {
@@ -133,7 +132,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeUpdate(ctx, "", homeapp.UpdateHome{})
 				if err != nil {
@@ -147,7 +146,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeUpdate(ctx, "", homeapp.UpdateHome{})
 				if err != nil {
@@ -161,7 +160,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.UpdateHome{
 					Type: dbtest.StringPointer("SINGLE FAMILY"),

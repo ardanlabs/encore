@@ -2,10 +2,10 @@ package homeapp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
 	"github.com/ardanlabs/encore/business/domain/homebus"
@@ -14,15 +14,17 @@ import (
 
 // QueryParams represents the set of possible query strings.
 type QueryParams struct {
-	Page             string `query:"page"`
-	Rows             string `query:"rows"`
-	OrderBy          string `query:"orderBy"`
-	ID               string `query:"home_id"`
-	UserID           string `query:"user_id"`
-	Type             string `query:"type"`
-	StartCreatedDate string `query:"start_created_date"`
-	EndCreatedDate   string `query:"end_created_date"`
+	Page             string
+	Rows             string
+	OrderBy          string
+	ID               string
+	UserID           string
+	Type             string
+	StartCreatedDate string
+	EndCreatedDate   string
 }
+
+// =============================================================================
 
 // Address represents information about an individual address.
 type Address struct {
@@ -44,6 +46,12 @@ type Home struct {
 	DateUpdated string  `json:"dateUpdated"`
 }
 
+// Encode implments the encoder interface.
+func (app Home) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(app)
+	return data, "application/json", err
+}
+
 func toAppHome(hme homebus.Home) Home {
 	return Home{
 		ID:     hme.ID.String(),
@@ -63,13 +71,15 @@ func toAppHome(hme homebus.Home) Home {
 }
 
 func toAppHomes(homes []homebus.Home) []Home {
-	items := make([]Home, len(homes))
+	app := make([]Home, len(homes))
 	for i, hme := range homes {
-		items[i] = toAppHome(hme)
+		app[i] = toAppHome(hme)
 	}
 
-	return items
+	return app
 }
+
+// =============================================================================
 
 // NewAddress defines the data needed to add a new address.
 type NewAddress struct {
@@ -87,6 +97,20 @@ type NewHome struct {
 	Address NewAddress `json:"address"`
 }
 
+// Decode implments the decoder interface.
+func (app *NewHome) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks if the data in the model is considered clean.
+func (app NewHome) Validate() error {
+	if err := validate.Check(app); err != nil {
+		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
+	}
+
+	return nil
+}
+
 func toBusNewHome(ctx context.Context, app NewHome) (homebus.NewHome, error) {
 	userID, err := mid.GetUserID(ctx)
 	if err != nil {
@@ -98,7 +122,7 @@ func toBusNewHome(ctx context.Context, app NewHome) (homebus.NewHome, error) {
 		return homebus.NewHome{}, fmt.Errorf("parse: %w", err)
 	}
 
-	hme := homebus.NewHome{
+	bus := homebus.NewHome{
 		UserID: userID,
 		Type:   typ,
 		Address: homebus.Address{
@@ -111,17 +135,10 @@ func toBusNewHome(ctx context.Context, app NewHome) (homebus.NewHome, error) {
 		},
 	}
 
-	return hme, nil
+	return bus, nil
 }
 
-// Validate checks if the data in the model is considered clean.
-func (app NewHome) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
-	}
-
-	return nil
-}
+// =============================================================================
 
 // UpdateAddress defines the data needed to update an address.
 type UpdateAddress struct {
@@ -133,19 +150,24 @@ type UpdateAddress struct {
 	Country  *string `json:"country" validate:"omitempty,iso3166_1_alpha2"`
 }
 
-// Validate checks the data in the model is considered clean.
-func (app UpdateAddress) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // UpdateHome defines the data needed to update a home.
 type UpdateHome struct {
 	Type    *string        `json:"type"`
 	Address *UpdateAddress `json:"address"`
+}
+
+// Decode implments the decoder interface.
+func (app *UpdateHome) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app UpdateHome) Validate() error {
+	if err := validate.Check(app); err != nil {
+		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
+	}
+
+	return nil
 }
 
 func toBusUpdateHome(app UpdateHome) (homebus.UpdateHome, error) {
@@ -158,12 +180,12 @@ func toBusUpdateHome(app UpdateHome) (homebus.UpdateHome, error) {
 		}
 	}
 
-	core := homebus.UpdateHome{
+	bus := homebus.UpdateHome{
 		Type: &typ,
 	}
 
 	if app.Address != nil {
-		core.Address = &homebus.UpdateAddress{
+		bus.Address = &homebus.UpdateAddress{
 			Address1: app.Address.Address1,
 			Address2: app.Address.Address2,
 			ZipCode:  app.Address.ZipCode,
@@ -173,14 +195,5 @@ func toBusUpdateHome(app UpdateHome) (homebus.UpdateHome, error) {
 		}
 	}
 
-	return core, nil
-}
-
-// Validate checks the data in the model is considered clean.
-func (app UpdateHome) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
-	}
-
-	return nil
+	return bus, nil
 }

@@ -7,24 +7,24 @@ import (
 	"errors"
 	"fmt"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 // Store manages the set of APIs for product database access.
 type Store struct {
-	log rlog.Ctx
+	log *logger.Logger
 	db  sqlx.ExtContext
 }
 
 // NewStore constructs the api for data access.
-func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
+func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	return &Store{
 		log: log,
 		db:  db,
@@ -40,7 +40,8 @@ func (s *Store) NewWithTx(tx transaction.CommitRollbacker) (productbus.Storer, e
 	}
 
 	store := Store{
-		db: ec,
+		log: s.log,
+		db:  ec,
 	}
 
 	return &store, nil
@@ -62,8 +63,8 @@ func (s *Store) Create(ctx context.Context, prd productbus.Product) error {
 	return nil
 }
 
-// Update modifies data about a Product. It will error if the specified ID is
-// invalid or does not reference an existing Product.
+// Update modifies data about a productbus. It will error if the specified ID is
+// invalid or does not reference an existing productbus.
 func (s *Store) Update(ctx context.Context, prd productbus.Product) error {
 	const q = `
 	UPDATE
@@ -138,7 +139,7 @@ func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderB
 
 // Count returns the total number of users in the DB.
 func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, error) {
-	data := map[string]interface{}{}
+	data := map[string]any{}
 
 	const q = `
 	SELECT

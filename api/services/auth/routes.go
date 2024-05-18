@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	eauth "encore.dev/beta/auth"
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/auth"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
@@ -31,7 +30,7 @@ func (s *Service) AuthHandler(ctx context.Context, ap *authParams) (eauth.UID, *
 		return mid.Basic(ctx, s.auth, s.userBus, ap.Authorization)
 	}
 
-	return "", nil, errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action")
+	return "", nil, errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action")
 }
 
 // =============================================================================
@@ -50,7 +49,7 @@ func (s *Service) UserToken(ctx context.Context, kid string) (token, error) {
 
 	tkn, err := s.auth.GenerateToken(kid, *claims)
 	if err != nil {
-		return token{}, errs.New(eerrs.Internal, err)
+		return token{}, errs.New(errs.Internal, err)
 	}
 
 	return token{tkn}, nil
@@ -60,7 +59,7 @@ func (s *Service) UserToken(ctx context.Context, kid string) (token, error) {
 //encore:api private method=POST path=/v1/authorize
 func (s *Service) Authorize(ctx context.Context, authInfo mid.AuthInfo) error {
 	if err := s.auth.Authorize(ctx, authInfo.Claims, authInfo.UserID, authInfo.Rule); err != nil {
-		return errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authInfo.Claims.Roles, authInfo.Rule, err)
+		return errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authInfo.Claims.Roles, authInfo.Rule, err)
 	}
 
 	return nil

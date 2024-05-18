@@ -3,7 +3,6 @@ package home_test
 import (
 	"context"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
 	"github.com/ardanlabs/encore/app/domain/homeapp"
@@ -71,7 +70,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "missing",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
@@ -85,7 +84,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "type",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "parse: invalid type \"BAD TYPE\""),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid type \"BAD TYPE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.NewHome{
 					Type: "BAD TYPE",
@@ -117,7 +116,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "emptytoken",
 			Token:   "&nbsp;",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
@@ -131,7 +130,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
@@ -145,7 +144,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
@@ -159,7 +158,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "wronguser",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.NewHome{
 					Type: "SINGLE FAMILY",

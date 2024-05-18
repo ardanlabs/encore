@@ -8,7 +8,6 @@ import (
 	"runtime"
 
 	"encore.dev"
-	"encore.dev/rlog"
 	esqldb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/sdk/auth"
@@ -17,6 +16,7 @@ import (
 	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/ardanlabs/encore/foundation/keystore"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -36,14 +36,14 @@ var secrets struct {
 //
 //encore:service
 type Service struct {
-	log     rlog.Ctx
+	log     *logger.Logger
 	db      *sqlx.DB
 	auth    *auth.Auth
 	userBus *userbus.Business
 }
 
 // NewService is called to create a new encore Service.
-func NewService(log rlog.Ctx, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
+func NewService(log *logger.Logger, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, userdb.NewStore(log, db))
 
@@ -60,9 +60,11 @@ func NewService(log rlog.Ctx, db *sqlx.DB, ath *auth.Auth) (*Service, error) {
 // Shutdown implements a function that will be called by encore when the service
 // is signaled to shutdown.
 func (s *Service) Shutdown(force context.Context) {
-	defer s.log.Info("shutdown", "status", "shutdown complete")
+	ctx := context.Background()
 
-	s.log.Info("shutdown", "status", "stopping database support")
+	defer s.log.Info(ctx, "shutdown", "status", "shutdown complete")
+
+	s.log.Info(ctx, "shutdown", "status", "stopping database support")
 	s.db.Close()
 }
 
@@ -72,7 +74,7 @@ func (s *Service) Shutdown(force context.Context) {
 //
 //lint:ignore U1000 "called by encore"
 func initService() (*Service, error) {
-	log := rlog.With("service", "auth")
+	log := logger.New("auth")
 
 	db, auth, err := startup(log)
 	if err != nil {
@@ -82,12 +84,13 @@ func initService() (*Service, error) {
 	return NewService(log, db, auth)
 }
 
-func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
+func startup(log *logger.Logger) (*sqlx.DB, *auth.Auth, error) {
+	ctx := context.Background()
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
 
-	log.Info("initService", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	log.Info(ctx, "initService", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// -------------------------------------------------------------------------
 	// Configuration
@@ -122,18 +125,18 @@ func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
 	// -------------------------------------------------------------------------
 	// App Starting
 
-	log.Info("initService", "environment", encore.Meta().Environment.Name)
+	log.Info(ctx, "initService", "environment", encore.Meta().Environment.Name)
 
 	out, err := conf.String(&cfg)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generating config for output: %w", err)
 	}
-	log.Info("initService", "config", out)
+	log.Info(ctx, "initService", "config", out)
 
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	log.Info("initService", "status", "initializing database support")
+	log.Info(ctx, "initService", "status", "initializing database support")
 
 	db, err := sqldb.Open(sqldb.Config{
 		EDB:          appDB,
@@ -147,7 +150,7 @@ func startup(log rlog.Ctx) (*sqlx.DB, *auth.Auth, error) {
 	// -------------------------------------------------------------------------
 	// Auth Support
 
-	log.Info("initService", "status", "initializing authentication support")
+	log.Info(ctx, "initService", "status", "initializing authentication support")
 
 	// Load the private keys files from disk. We can assume some system like
 	// Vault has created these files already. How that happens is not our

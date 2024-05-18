@@ -3,7 +3,6 @@ package mid
 import (
 	"runtime/debug"
 
-	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/metrics"
@@ -14,7 +13,7 @@ func Panics(v *metrics.Values, req middleware.Request, next middleware.Next) (re
 	defer func() {
 		if rec := recover(); rec != nil {
 			trace := debug.Stack()
-			resp = errs.NewResponsef(eerrs.Internal, "PANIC [%v] TRACE[%s]", rec, string(trace))
+			resp = errs.NewResponsef(errs.Internal, "PANIC [%v] TRACE[%s]", rec, string(trace))
 
 			v.IncPanics()
 		}

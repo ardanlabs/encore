@@ -45,7 +45,7 @@ func toDBUser(bus userbus.User) user {
 	}
 }
 
-func toCoreUser(db user) (userbus.User, error) {
+func toBusUser(db user) (userbus.User, error) {
 	addr := mail.Address{
 		Address: db.Email,
 	}
@@ -64,7 +64,7 @@ func toCoreUser(db user) (userbus.User, error) {
 		return userbus.User{}, fmt.Errorf("parse name: %w", err)
 	}
 
-	usr := userbus.User{
+	bus := userbus.User{
 		ID:           db.ID,
 		Name:         name,
 		Email:        addr,
@@ -76,19 +76,19 @@ func toCoreUser(db user) (userbus.User, error) {
 		DateUpdated:  db.DateUpdated.In(time.Local),
 	}
 
-	return usr, nil
+	return bus, nil
 }
 
 func toBusUsers(dbs []user) ([]userbus.User, error) {
-	usrs := make([]userbus.User, len(dbs))
+	bus := make([]userbus.User, len(dbs))
 
 	for i, db := range dbs {
 		var err error
-		usrs[i], err = toCoreUser(db)
+		bus[i], err = toBusUser(db)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return usrs, nil
+	return bus, nil
 }

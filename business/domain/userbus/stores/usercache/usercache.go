@@ -4,28 +4,26 @@ package usercache
 import (
 	"context"
 	"net/mail"
-	"sync"
 	"time"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/creativecreature/sturdyc"
 	"github.com/google/uuid"
 )
 
 // Store manages the set of APIs for user data and caching.
 type Store struct {
-	log    rlog.Ctx
+	log    *logger.Logger
 	storer userbus.Storer
 	cache  *sturdyc.Client[userbus.User]
-	mu     sync.RWMutex
 }
 
 // NewStore constructs the api for data and caching access.
-func NewStore(log rlog.Ctx, storer userbus.Storer, ttl time.Duration) *Store {
+func NewStore(log *logger.Logger, storer userbus.Storer, ttl time.Duration) *Store {
 	const capacity = 10000
 	const numShards = 10
 	const evictionPercentage = 10
@@ -103,16 +101,6 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, 
 	return usr, nil
 }
 
-// QueryByIDs gets the specified users from the database.
-func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]userbus.User, error) {
-	usr, err := s.storer.QueryByIDs(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	return usr, nil
-}
-
 // QueryByEmail gets the specified user from the database by email.
 func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.User, error) {
 	cachedUsr, ok := s.readCache(email.Address)
@@ -132,9 +120,6 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.U
 
 // readCache performs a safe search in the cache for the specified key.
 func (s *Store) readCache(key string) (userbus.User, bool) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	usr, exists := s.cache.Get(key)
 	if !exists {
 		return userbus.User{}, false
@@ -144,19 +129,13 @@ func (s *Store) readCache(key string) (userbus.User, bool) {
 }
 
 // writeCache performs a safe write to the cache for the specified userbus.
-func (s *Store) writeCache(usr userbus.User) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.cache.Set(usr.ID.String(), usr)
-	s.cache.Set(usr.Email.Address, usr)
+func (s *Store) writeCache(bus userbus.User) {
+	s.cache.Set(bus.ID.String(), bus)
+	s.cache.Set(bus.Email.Address, bus)
 }
 
 // deleteCache performs a safe removal from the cache for the specified userbus.
-func (s *Store) deleteCache(usr userbus.User) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.cache.Delete(usr.ID.String())
-	s.cache.Delete(usr.Email.Address)
+func (s *Store) deleteCache(bus userbus.User) {
+	s.cache.Delete(bus.ID.String())
+	s.cache.Delete(bus.Email.Address)
 }

@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/usercache"
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -49,7 +49,7 @@ type KeyLookup interface {
 
 // Config represents information required to initialize auth.
 type Config struct {
-	Log       rlog.Ctx
+	Log       *logger.Logger
 	DB        *sqlx.DB
 	KeyLookup KeyLookup
 	Issuer    string
@@ -139,7 +139,7 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 
 	pem, err := a.keyLookup.PublicKey(kid)
 	if err != nil {
-		return Claims{}, fmt.Errorf("failed to fetch public key: %s: %w", kid, err)
+		return Claims{}, fmt.Errorf("failed to fetch public key: %w", err)
 	}
 
 	input := map[string]any{
@@ -148,7 +148,7 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 		"ISS":   a.issuer,
 	}
 
-	if err := a.opaPolicyEvaluation(ctx, opaAuthentication, RuleAuthenticate, input); err != nil {
+	if err := a.opaPolicyEvaluation(ctx, regoAuthentication, RuleAuthenticate, input); err != nil {
 		return Claims{}, fmt.Errorf("authentication failed : %w", err)
 	}
 
@@ -171,7 +171,7 @@ func (a *Auth) Authorize(ctx context.Context, claims Claims, userID uuid.UUID, r
 		"UserID":  userID,
 	}
 
-	if err := a.opaPolicyEvaluation(ctx, opaAuthorization, rule, input); err != nil {
+	if err := a.opaPolicyEvaluation(ctx, regoAuthorization, rule, input); err != nil {
 		return fmt.Errorf("rego evaluation failed : %w", err)
 	}
 
@@ -180,12 +180,12 @@ func (a *Auth) Authorize(ctx context.Context, claims Claims, userID uuid.UUID, r
 
 // opaPolicyEvaluation asks opa to evaluate the token against the specified token
 // policy and public key.
-func (a *Auth) opaPolicyEvaluation(ctx context.Context, opaPolicy string, rule string, input any) error {
+func (a *Auth) opaPolicyEvaluation(ctx context.Context, regoScript string, rule string, input any) error {
 	query := fmt.Sprintf("x = data.%s.%s", opaPackage, rule)
 
 	q, err := rego.New(
 		rego.Query(query),
-		rego.Module("policy.rego", opaPolicy),
+		rego.Module("policy.rego", regoScript),
 	).PrepareForEval(ctx)
 	if err != nil {
 		return err

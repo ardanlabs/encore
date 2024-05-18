@@ -7,24 +7,24 @@ import (
 	"errors"
 	"fmt"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 // Store manages the set of APIs for home database access.
 type Store struct {
-	log rlog.Ctx
+	log *logger.Logger
 	db  sqlx.ExtContext
 }
 
 // NewStore constructs the api for data access.
-func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
+func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	return &Store{
 		log: log,
 		db:  db,
@@ -40,7 +40,8 @@ func (s *Store) NewWithTx(tx transaction.CommitRollbacker) (homebus.Storer, erro
 	}
 
 	store := Store{
-		db: ec,
+		log: s.log,
+		db:  ec,
 	}
 
 	return &store, nil
@@ -145,7 +146,7 @@ func (s *Store) Query(ctx context.Context, filter homebus.QueryFilter, orderBy o
 
 // Count returns the total number of homes in the DB.
 func (s *Store) Count(ctx context.Context, filter homebus.QueryFilter) (int, error) {
-	data := map[string]interface{}{}
+	data := map[string]any{}
 
 	const q = `
     SELECT

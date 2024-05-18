@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
 	"github.com/ardanlabs/encore/app/domain/userapp"
@@ -60,7 +59,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "input",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUser{
 					Email:           dbtest.StringPointer("jack@"),
@@ -79,7 +78,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "role",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "parse: invalid role \"BAD ROLE\""),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUserRole{
 					Roles: []string{"BAD ROLE"},
@@ -104,7 +103,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "emptytoken",
 			Token:   "&nbsp;",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserUpdate(ctx, "", userapp.UpdateUser{})
 				if err != nil {
@@ -118,7 +117,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
 				if err != nil {
@@ -132,7 +131,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserUpdate(ctx, sd.Admins[0].ID.String(), userapp.UpdateUser{})
 				if err != nil {
@@ -146,7 +145,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUser{
 					Name:            dbtest.StringPointer("Jack Kennedy"),
@@ -168,7 +167,7 @@ func updateAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "roleadminonly",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUserRole{
 					Roles: []string{"ADMIN"},

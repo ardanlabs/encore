@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"encore.dev/rlog"
 	esqldb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/homebus/stores/homedb"
@@ -19,6 +18,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/vproductbus/stores/vproductdb"
 	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,11 +31,11 @@ type BusDomain struct {
 	VProduct *vproductbus.Business
 }
 
-func newBusDomains(log rlog.Ctx, db *sqlx.DB) BusDomain {
+func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
 	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
-	homeBus := homebus.NewBusiness(userBus, delegate, homedb.NewStore(log, db))
+	homeBus := homebus.NewBusiness(log, userBus, delegate, homedb.NewStore(log, db))
 	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))
 
 	return BusDomain{
@@ -51,8 +51,8 @@ func newBusDomains(log rlog.Ctx, db *sqlx.DB) BusDomain {
 
 // Database owns state for running and shutting down tests.
 type Database struct {
-	Log       rlog.Ctx
 	DB        *sqlx.DB
+	Log       *logger.Logger
 	BusDomain BusDomain
 	Teardown  func()
 }
@@ -86,7 +86,7 @@ func NewDatabase(t *testing.T, edb *esqldb.Database) *Database {
 		db.Close()
 	}
 
-	log := rlog.With("service", "test")
+	log := logger.New("test")
 
 	return &Database{
 		Log:       log,

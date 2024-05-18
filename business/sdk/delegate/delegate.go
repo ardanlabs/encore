@@ -1,11 +1,11 @@
 // Package delegate provides the ability to make function calls between
-// different core packages when an import is not possible.
+// different domain packages when an import is not possible.
 package delegate
 
 import (
 	"context"
 
-	"encore.dev/rlog"
+	"github.com/ardanlabs/encore/foundation/logger"
 )
 
 // These types are just for documentation so we know what keys go
@@ -15,15 +15,15 @@ type (
 	action string
 )
 
-// Delegate manages the set of functions to be called by core
+// Delegate manages the set of functions to be called by domain
 // packages when an import is not possible.
 type Delegate struct {
-	log   rlog.Ctx
+	log   *logger.Logger
 	funcs map[domain]map[action][]Func
 }
 
 // New constructs a delegate for indirect api access.
-func New(log rlog.Ctx) *Delegate {
+func New(log *logger.Logger) *Delegate {
 	return &Delegate{
 		log:   log,
 		funcs: make(map[domain]map[action][]Func),
@@ -46,16 +46,16 @@ func (d *Delegate) Register(domainType string, actionType string, fn Func) {
 // Call executes all functions registered for the specified domain and
 // action. These functions are executed synchronously on the G making the call.
 func (d *Delegate) Call(ctx context.Context, data Data) error {
-	d.log.Info("delegate call", "status", "started", "domain", data.Domain, "action", data.Action, "params", data.RawParams)
-	defer d.log.Info("delegate call", "status", "completed")
+	d.log.Info(ctx, "delegate call", "status", "started", "domain", data.Domain, "action", data.Action, "params", data.RawParams)
+	defer d.log.Info(ctx, "delegate call", "status", "completed")
 
 	if dMap, ok := d.funcs[domain(data.Domain)]; ok {
 		if funcs, ok := dMap[action(data.Action)]; ok {
 			for _, fn := range funcs {
-				d.log.Info("delegate call", "status", "sending")
+				d.log.Info(ctx, "delegate call", "status", "sending")
 
 				if err := fn(ctx, data); err != nil {
-					d.log.Error("delegate call", "msg", err)
+					d.log.Error(ctx, "delegate call", "msg", err)
 				}
 			}
 		}

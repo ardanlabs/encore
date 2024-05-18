@@ -9,7 +9,6 @@ import (
 	"runtime"
 
 	"encore.dev"
-	"encore.dev/rlog"
 	esqldb "encore.dev/storage/sqldb"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/ardanlabs/encore/app/domain/homeapp"
@@ -30,6 +29,7 @@ import (
 	"github.com/ardanlabs/encore/business/sdk/appdb/migrate"
 	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -43,7 +43,7 @@ var appDB = esqldb.Named("app")
 //
 //encore:service
 type Service struct {
-	log   rlog.Ctx
+	log   *logger.Logger
 	mtrcs *metrics.Values
 	db    *sqlx.DB
 	debug http.Handler
@@ -52,11 +52,11 @@ type Service struct {
 }
 
 // NewService is called to create a new encore Service.
-func NewService(log rlog.Ctx, db *sqlx.DB) (*Service, error) {
+func NewService(log *logger.Logger, db *sqlx.DB) (*Service, error) {
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, userdb.NewStore(log, db))
 	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
-	homeBus := homebus.NewBusiness(userBus, delegate, homedb.NewStore(log, db))
+	homeBus := homebus.NewBusiness(log, userBus, delegate, homedb.NewStore(log, db))
 	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))
 
 	s := Service{
@@ -85,9 +85,11 @@ func NewService(log rlog.Ctx, db *sqlx.DB) (*Service, error) {
 // Shutdown implements a function that will be called by encore when the service
 // is signaled to shutdown.
 func (s *Service) Shutdown(force context.Context) {
-	defer s.log.Info("shutdown", "status", "shutdown complete")
+	ctx := context.Background()
 
-	s.log.Info("shutdown", "status", "stopping database support")
+	defer s.log.Info(ctx, "shutdown", "status", "shutdown complete")
+
+	s.log.Info(ctx, "shutdown", "status", "stopping database support")
 	s.db.Close()
 }
 
@@ -97,7 +99,7 @@ func (s *Service) Shutdown(force context.Context) {
 //
 //lint:ignore U1000 "called by encore"
 func initService() (*Service, error) {
-	log := rlog.With("service", "sales")
+	log := logger.New("sales")
 
 	db, err := startup(log)
 	if err != nil {
@@ -107,12 +109,13 @@ func initService() (*Service, error) {
 	return NewService(log, db)
 }
 
-func startup(log rlog.Ctx) (*sqlx.DB, error) {
+func startup(log *logger.Logger) (*sqlx.DB, error) {
+	ctx := context.Background()
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
 
-	log.Info("initService", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	log.Info(ctx, "initService", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// -------------------------------------------------------------------------
 	// Configuration
@@ -143,18 +146,18 @@ func startup(log rlog.Ctx) (*sqlx.DB, error) {
 	// -------------------------------------------------------------------------
 	// App Starting
 
-	log.Info("initService", "environment", encore.Meta().Environment.Name)
+	log.Info(ctx, "initService", "environment", encore.Meta().Environment.Name)
 
 	out, err := conf.String(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("generating config for output: %w", err)
 	}
-	log.Info("initService", "config", out)
+	log.Info(ctx, "initService", "config", out)
 
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	log.Info("initService", "status", "initializing database support")
+	log.Info(ctx, "initService", "status", "initializing database support")
 
 	db, err := sqldb.Open(sqldb.Config{
 		EDB:          appDB,

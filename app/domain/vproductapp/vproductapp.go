@@ -4,7 +4,6 @@ package vproductapp
 import (
 	"context"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/query"
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
@@ -43,12 +42,12 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (query.Result[Product],
 
 	prds, err := a.vproductBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
-		return query.Result[Product]{}, errs.Newf(eerrs.Internal, "query: %s", err)
+		return query.Result[Product]{}, errs.Newf(errs.Internal, "query: %s", err)
 	}
 
 	total, err := a.vproductBus.Count(ctx, filter)
 	if err != nil {
-		return query.Result[Product]{}, errs.Newf(eerrs.Internal, "count: %s", err)
+		return query.Result[Product]{}, errs.Newf(errs.Internal, "count: %s", err)
 	}
 
 	return query.NewResult(toAppProducts(prds), total, page), nil

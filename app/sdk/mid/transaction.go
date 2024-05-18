@@ -1,36 +1,38 @@
 package mid
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
-	eerrs "encore.dev/beta/errs"
 	"encore.dev/middleware"
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 )
 
 // BeginCommitRollback starts a transaction for the domain call.
-func BeginCommitRollback(log rlog.Ctx, bgn transaction.Beginner, req middleware.Request, next middleware.Next) middleware.Response {
+func BeginCommitRollback(log *logger.Logger, bgn transaction.Beginner, req middleware.Request, next middleware.Next) middleware.Response {
+	ctx := context.Background()
+
 	hasCommitted := false
 
-	log.Info("BEGIN TRANSACTION")
+	log.Info(ctx, "BEGIN TRANSACTION")
 	tx, err := bgn.Begin()
 	if err != nil {
-		return errs.NewResponsef(eerrs.Internal, "BEGIN TRANSACTION: %s", err)
+		return errs.NewResponsef(errs.Internal, "BEGIN TRANSACTION: %s", err)
 	}
 
 	defer func() {
 		if !hasCommitted {
-			log.Info("ROLLBACK TRANSACTION")
+			log.Info(ctx, "ROLLBACK TRANSACTION")
 		}
 
 		if err := tx.Rollback(); err != nil {
 			if errors.Is(err, sql.ErrTxDone) {
 				return
 			}
-			log.Info("ROLLBACK TRANSACTION", "ERROR", err)
+			log.Info(ctx, "ROLLBACK TRANSACTION", "ERROR", err)
 		}
 	}()
 
@@ -38,12 +40,12 @@ func BeginCommitRollback(log rlog.Ctx, bgn transaction.Beginner, req middleware.
 
 	resp := next(req)
 	if resp.Err != nil {
-		return errs.NewResponsef(eerrs.Internal, "EXECUTE TRANSACTION: %s", resp.Err)
+		return errs.NewResponsef(errs.Internal, "EXECUTE TRANSACTION: %s", resp.Err)
 	}
 
-	log.Info("COMMIT TRANSACTION")
+	log.Info(ctx, "COMMIT TRANSACTION")
 	if err := tx.Commit(); err != nil {
-		return errs.NewResponsef(eerrs.Internal, "COMMIT TRANSACTION: %s", err)
+		return errs.NewResponsef(errs.Internal, "COMMIT TRANSACTION: %s", err)
 	}
 
 	hasCommitted = true

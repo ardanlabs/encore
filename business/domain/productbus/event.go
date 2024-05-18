@@ -2,15 +2,15 @@ package productbus
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/delegate"
-	"github.com/go-json-experiment/json"
 )
 
 // registerDelegateFunctions will register action functions with the delegate
-// system. If the core was constructed for query only, there won't be a
+// system. If the business was constructed for query only, there won't be a
 // delegate provided.
 func (b *Business) registerDelegateFunctions() {
 	if b.delegate != nil {
@@ -26,7 +26,7 @@ func (b *Business) actionUserUpdated(ctx context.Context, data delegate.Data) er
 		return fmt.Errorf("expected an encoded %T: %w", params, err)
 	}
 
-	b.log.Info("product-action-userupdate", "user_id", params.UserID, "enabled", params.Enabled)
+	b.log.Info(ctx, "action-userupdate", "user_id", params.UserID, "enabled", params.Enabled)
 
 	// Now we can see if this user has been disabled. If they have been, we will
 	// want to disable to mark all these products as deleted. Right now we don't

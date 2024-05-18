@@ -3,7 +3,6 @@ package user_test
 import (
 	"context"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/api/services/sales"
 	"github.com/ardanlabs/encore/api/services/sales/tests/apitest"
 	"github.com/ardanlabs/encore/app/domain/userapp"
@@ -65,7 +64,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "missing",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
@@ -79,7 +78,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "role",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(eerrs.FailedPrecondition, "parse: invalid role \"BAD ROLE\""),
+			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.NewUser{
 					Name:            "Bill Kennedy",
@@ -109,7 +108,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "emptytoken",
 			Token:   "&nbsp;",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
@@ -123,7 +122,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "token",
 			Token:   sd.Admins[0].Token[:10],
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
@@ -137,7 +136,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "sig",
 			Token:   sd.Admins[0].Token + "A",
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
@@ -151,7 +150,7 @@ func createAuth(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "wronguser",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.NewUser{
 					Name:            "Bill Kennedy",

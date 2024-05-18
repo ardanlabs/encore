@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
 	"github.com/ardanlabs/encore/business/domain/productbus"
@@ -26,7 +25,7 @@ func NewApp(userBus *userbus.Business, productBus *productbus.Business) *App {
 	}
 }
 
-// newWithTx constructs a new Handlers value with the core apis
+// newWithTx constructs a new Handlers value with the domain apis
 // using a store transaction that was created via middleware.
 func (a *App) newWithTx(ctx context.Context) (*App, error) {
 	tx, err := mid.GetTran(ctx)
@@ -53,35 +52,35 @@ func (a *App) newWithTx(ctx context.Context) (*App, error) {
 }
 
 // Create adds a new user and product at the same time under a single transaction.
-func (a *App) Create(ctx context.Context, app NewTran) (Product, error) {
-	h, err := a.newWithTx(ctx)
+func (a *App) Create(ctx context.Context, nt NewTran) (Product, error) {
+	a, err := a.newWithTx(ctx)
 	if err != nil {
-		return Product{}, errs.New(eerrs.Internal, err)
+		return Product{}, errs.New(errs.Internal, err)
 	}
 
-	np, err := toBusNewProduct(app.Product)
+	np, err := toBusNewProduct(nt.Product)
 	if err != nil {
-		return Product{}, errs.New(eerrs.FailedPrecondition, err)
+		return Product{}, errs.New(errs.FailedPrecondition, err)
 	}
 
-	nu, err := toBusNewUser(app.User)
+	nu, err := toBusNewUser(nt.User)
 	if err != nil {
-		return Product{}, errs.New(eerrs.FailedPrecondition, err)
+		return Product{}, errs.New(errs.FailedPrecondition, err)
 	}
 
-	usr, err := h.userBus.Create(ctx, nu)
+	usr, err := a.userBus.Create(ctx, nu)
 	if err != nil {
 		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return Product{}, errs.New(eerrs.Aborted, userbus.ErrUniqueEmail)
+			return Product{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
 		}
-		return Product{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
+		return Product{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
 
 	np.UserID = usr.ID
 
-	prd, err := h.productBus.Create(ctx, np)
+	prd, err := a.productBus.Create(ctx, np)
 	if err != nil {
-		return Product{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
+		return Product{}, errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
 	return toAppProduct(prd), nil

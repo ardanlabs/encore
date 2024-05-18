@@ -4,7 +4,6 @@ package productapp
 import (
 	"context"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
 	"github.com/ardanlabs/encore/app/sdk/query"
@@ -29,12 +28,12 @@ func NewApp(productBus *productbus.Business) *App {
 func (a *App) Create(ctx context.Context, app NewProduct) (Product, error) {
 	np, err := toBusNewProduct(ctx, app)
 	if err != nil {
-		return Product{}, errs.New(eerrs.FailedPrecondition, err)
+		return Product{}, errs.New(errs.FailedPrecondition, err)
 	}
 
 	prd, err := a.productBus.Create(ctx, np)
 	if err != nil {
-		return Product{}, errs.Newf(eerrs.Internal, "create: prd[%+v]: %s", prd, err)
+		return Product{}, errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
 	return toAppProduct(prd), nil
@@ -44,17 +43,17 @@ func (a *App) Create(ctx context.Context, app NewProduct) (Product, error) {
 func (a *App) Update(ctx context.Context, app UpdateProduct) (Product, error) {
 	up, err := toBusUpdateProduct(app)
 	if err != nil {
-		return Product{}, errs.New(eerrs.FailedPrecondition, err)
+		return Product{}, errs.New(errs.FailedPrecondition, err)
 	}
 
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
-		return Product{}, errs.Newf(eerrs.Internal, "product missing in context: %s", err)
+		return Product{}, errs.Newf(errs.Internal, "product missing in context: %s", err)
 	}
 
 	updPrd, err := a.productBus.Update(ctx, prd, up)
 	if err != nil {
-		return Product{}, errs.Newf(eerrs.Internal, "update: productID[%s] up[%+v]: %s", prd.ID, app, err)
+		return Product{}, errs.Newf(errs.Internal, "update: productID[%s] up[%+v]: %s", prd.ID, app, err)
 	}
 
 	return toAppProduct(updPrd), nil
@@ -64,11 +63,11 @@ func (a *App) Update(ctx context.Context, app UpdateProduct) (Product, error) {
 func (a *App) Delete(ctx context.Context) error {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
-		return errs.Newf(eerrs.Internal, "productID missing in context: %s", err)
+		return errs.Newf(errs.Internal, "productID missing in context: %s", err)
 	}
 
 	if err := a.productBus.Delete(ctx, prd); err != nil {
-		return errs.Newf(eerrs.Internal, "delete: productID[%s]: %s", prd.ID, err)
+		return errs.Newf(errs.Internal, "delete: productID[%s]: %s", prd.ID, err)
 	}
 
 	return nil
@@ -93,22 +92,22 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (query.Result[Product],
 
 	prds, err := a.productBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
-		return query.Result[Product]{}, errs.Newf(eerrs.Internal, "query: %s", err)
+		return query.Result[Product]{}, errs.Newf(errs.Internal, "query: %s", err)
 	}
 
 	total, err := a.productBus.Count(ctx, filter)
 	if err != nil {
-		return query.Result[Product]{}, errs.Newf(eerrs.Internal, "count: %s", err)
+		return query.Result[Product]{}, errs.Newf(errs.Internal, "count: %s", err)
 	}
 
 	return query.NewResult(toAppProducts(prds), total, page), nil
 }
 
-// QueryByID returns a product by its ID.
+// QueryByID returns a product by its Ia.
 func (a *App) QueryByID(ctx context.Context) (Product, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
-		return Product{}, errs.Newf(eerrs.Internal, "querybyid: %s", err)
+		return Product{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
 	return toAppProduct(prd), nil

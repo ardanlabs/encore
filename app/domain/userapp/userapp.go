@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/auth"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
@@ -40,15 +39,15 @@ func NewAppWithAuth(userBus *userbus.Business, ath *auth.Auth) *App {
 func (a *App) Create(ctx context.Context, app NewUser) (User, error) {
 	nc, err := toBusNewUser(app)
 	if err != nil {
-		return User{}, errs.New(eerrs.FailedPrecondition, err)
+		return User{}, errs.New(errs.FailedPrecondition, err)
 	}
 
 	usr, err := a.userBus.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return User{}, errs.New(eerrs.Aborted, userbus.ErrUniqueEmail)
+			return User{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
 		}
-		return User{}, errs.Newf(eerrs.Internal, "create: usr[%+v]: %s", usr, err)
+		return User{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
 
 	return toAppUser(usr), nil
@@ -58,17 +57,17 @@ func (a *App) Create(ctx context.Context, app NewUser) (User, error) {
 func (a *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 	uu, err := toBusUpdateUser(app)
 	if err != nil {
-		return User{}, errs.New(eerrs.FailedPrecondition, err)
+		return User{}, errs.New(errs.FailedPrecondition, err)
 	}
 
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return User{}, errs.Newf(eerrs.Internal, "user missing in context: %s", err)
+		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
 
 	updUsr, err := a.userBus.Update(ctx, usr, uu)
 	if err != nil {
-		return User{}, errs.Newf(eerrs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
 
 	return toAppUser(updUsr), nil
@@ -78,17 +77,17 @@ func (a *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 func (a *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
 	uu, err := toBusUpdateUserRole(app)
 	if err != nil {
-		return User{}, errs.New(eerrs.FailedPrecondition, err)
+		return User{}, errs.New(errs.FailedPrecondition, err)
 	}
 
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return User{}, errs.Newf(eerrs.Internal, "user missing in context: %s", err)
+		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
 
 	updUsr, err := a.userBus.Update(ctx, usr, uu)
 	if err != nil {
-		return User{}, errs.Newf(eerrs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+		return User{}, errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
 
 	return toAppUser(updUsr), nil
@@ -98,11 +97,11 @@ func (a *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 func (a *App) Delete(ctx context.Context) error {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return errs.Newf(eerrs.Internal, "userID missing in context: %s", err)
+		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
 	}
 
 	if err := a.userBus.Delete(ctx, usr); err != nil {
-		return errs.Newf(eerrs.Internal, "delete: userID[%s]: %s", usr.ID, err)
+		return errs.Newf(errs.Internal, "delete: userID[%s]: %s", usr.ID, err)
 	}
 
 	return nil
@@ -127,22 +126,22 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (query.Result[User], er
 
 	usrs, err := a.userBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
-		return query.Result[User]{}, errs.Newf(eerrs.Internal, "query: %s", err)
+		return query.Result[User]{}, errs.Newf(errs.Internal, "query: %s", err)
 	}
 
 	total, err := a.userBus.Count(ctx, filter)
 	if err != nil {
-		return query.Result[User]{}, errs.Newf(eerrs.Internal, "count: %s", err)
+		return query.Result[User]{}, errs.Newf(errs.Internal, "count: %s", err)
 	}
 
 	return query.NewResult(toAppUsers(usrs), total, page), nil
 }
 
-// QueryByID returns a user by its ID.
+// QueryByID returns a user by its Ia.
 func (a *App) QueryByID(ctx context.Context) (User, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return User{}, errs.Newf(eerrs.Internal, "querybyid: %s", err)
+		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
 	return toAppUser(usr), nil

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/app/sdk/auth"
 	"github.com/ardanlabs/encore/business/domain/userbus"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -70,17 +70,17 @@ func test1(ath *auth.Auth) func(t *testing.T) {
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RoleAdmin claims : %s", err)
+			t.Errorf("Should be able to authorize the Roles.Admin claims : %s", err)
 		}
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
 		if err == nil {
-			t.Error("Should NOT be able to authorize the RoleUser claim")
+			t.Error("Should NOT be able to authorize the Roles.User claim")
 		}
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with RoleAdmin only : %s", err)
+			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.Admin only : %s", err)
 		}
 	}
 
@@ -113,22 +113,22 @@ func test2(ath *auth.Auth) func(t *testing.T) {
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RuleUserOnly claim with RoleUser only : %s", err)
+			t.Errorf("Should be able to authorize the RuleUserOnly claim with Roles.User only : %s", err)
 		}
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
 		if err == nil {
-			t.Error("Should NOT be able to authorize the RuleAdminOnly claim with RoleUser only")
+			t.Error("Should NOT be able to authorize the RuleAdminOnly claim with Roles.User only")
 		}
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with RoleUser only : %s", err)
+			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.User only : %s", err)
 		}
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAny any claim with RoleUser only : %s", err)
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User only : %s", err)
 		}
 	}
 
@@ -161,7 +161,7 @@ func test3(ath *auth.Auth) func(t *testing.T) {
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
 		if err == nil {
-			t.Error("Should NOT be able to authorize the RuleAdminOrSubject claim with RoleUser only and different userID")
+			t.Error("Should NOT be able to authorize the RuleAdminOrSubject claim with Roles.User only and different userID")
 		}
 	}
 
@@ -193,7 +193,7 @@ func test4(ath *auth.Auth) func(t *testing.T) {
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAny any claim with RoleUser and RoleAdmin : %s", err)
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User and Roles.Admin : %s", err)
 		}
 	}
 
@@ -225,7 +225,7 @@ func test5(ath *auth.Auth) func(t *testing.T) {
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAny any claim with RoleUser only : %s", err)
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User only : %s", err)
 		}
 	}
 
@@ -257,7 +257,7 @@ func test6(ath *auth.Auth) func(t *testing.T) {
 
 		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
 		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAny any claim with RoleAdmin only : %s", err)
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.Admin only : %s", err)
 		}
 	}
 
@@ -266,9 +266,9 @@ func test6(ath *auth.Auth) func(t *testing.T) {
 
 // =============================================================================
 
-func newUnit(t *testing.T) (rlog.Ctx, *sqlx.DB, func()) {
+func newUnit(t *testing.T) (*logger.Logger, *sqlx.DB, func()) {
 	var buf bytes.Buffer
-	log := rlog.With("service", "auth-test")
+	log := logger.New("TEST")
 
 	// teardown is the function that should be invoked when the caller is done
 	// with the database.
@@ -282,6 +282,8 @@ func newUnit(t *testing.T) (rlog.Ctx, *sqlx.DB, func()) {
 
 	return log, nil, teardown
 }
+
+// =============================================================================
 
 type keyStore struct{}
 

@@ -8,12 +8,11 @@ import (
 	"net/mail"
 	"time"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
-	"github.com/ardanlabs/encore/business/sdk/pubsub"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,19 +34,18 @@ type Storer interface {
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]User, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
-	QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]User, error)
 	QueryByEmail(ctx context.Context, email mail.Address) (User, error)
 }
 
 // Business manages the set of APIs for user access.
 type Business struct {
-	log      rlog.Ctx
+	log      *logger.Logger
 	storer   Storer
 	delegate *delegate.Delegate
 }
 
 // NewBusiness constructs a user business API for use.
-func NewBusiness(log rlog.Ctx, delegate *delegate.Delegate, storer Storer) *Business {
+func NewBusiness(log *logger.Logger, delegate *delegate.Delegate, storer Storer) *Business {
 	return &Business{
 		log:      log,
 		delegate: delegate,
@@ -55,10 +53,10 @@ func NewBusiness(log rlog.Ctx, delegate *delegate.Delegate, storer Storer) *Busi
 	}
 }
 
-// NewWithTx constructs a new Core value that will use the
+// NewWithTx constructs a new business value that will use the
 // specified transaction in any store related calls.
 func (b *Business) NewWithTx(tx transaction.CommitRollbacker) (*Business, error) {
-	trS, err := b.storer.NewWithTx(tx)
+	storer, err := b.storer.NewWithTx(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +64,7 @@ func (b *Business) NewWithTx(tx transaction.CommitRollbacker) (*Business, error)
 	bus := Business{
 		log:      b.log,
 		delegate: b.delegate,
-		storer:   trS,
+		storer:   storer,
 	}
 
 	return &bus, nil
@@ -136,10 +134,8 @@ func (b *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, e
 	}
 
 	// Other domains may need to know when a user is updated so business
-	// logic can be applied. This represents a delegate call to other domains.
-	data := ActionUpdatedData(uu, usr.ID)
-	b.log.Info("user.pubsub.Delegate.Publish", "data", data)
-	if _, err := pubsub.Delegate.Publish(ctx, data); err != nil {
+	// logic can be applieb. This represents a delegate call to other domains.
+	if err := b.delegate.Call(ctx, ActionUpdatedData(uu, usr.ID)); err != nil {
 		return User{}, fmt.Errorf("failed to execute `%s` action: %w", ActionUpdated, err)
 	}
 
@@ -170,21 +166,11 @@ func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return b.storer.Count(ctx, filter)
 }
 
-// QueryByID finds the user by the specified ID.
+// QueryByID finds the user by the specified Ib.
 func (b *Business) QueryByID(ctx context.Context, userID uuid.UUID) (User, error) {
 	user, err := b.storer.QueryByID(ctx, userID)
 	if err != nil {
 		return User{}, fmt.Errorf("query: userID[%s]: %w", userID, err)
-	}
-
-	return user, nil
-}
-
-// QueryByIDs finds the users by a specified User IDs.
-func (b *Business) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]User, error) {
-	user, err := b.storer.QueryByIDs(ctx, userIDs)
-	if err != nil {
-		return nil, fmt.Errorf("query: userIDs[%s]: %w", userIDs, err)
 	}
 
 	return user, nil
@@ -200,7 +186,7 @@ func (b *Business) QueryByEmail(ctx context.Context, email mail.Address) (User, 
 	return user, nil
 }
 
-// Authenticate finds a user by their email and verifies their password. On
+// Authenticate finds a user by their email and verifies their passworb. On
 // success it returns a Claims User representing this user. The claims can be
 // used to generate a token for future authentication.
 func (b *Business) Authenticate(ctx context.Context, email mail.Address, password string) (User, error) {

@@ -21,7 +21,7 @@ type Business struct {
 	storer Storer
 }
 
-// NewBusiness manages the set of APIs for view product access.
+// NewBusiness constructs a vproduct business API for use.
 func NewBusiness(storer Storer) *Business {
 	return &Business{
 		storer: storer,

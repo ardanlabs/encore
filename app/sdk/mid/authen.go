@@ -9,7 +9,6 @@ import (
 	"time"
 
 	eauth "encore.dev/beta/auth"
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/auth"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/business/domain/userbus"
@@ -21,16 +20,16 @@ import (
 func Bearer(ctx context.Context, ath *auth.Auth, authorization string) (eauth.UID, *auth.Claims, error) {
 	claims, err := ath.Authenticate(ctx, authorization)
 	if err != nil {
-		return "", nil, errs.New(eerrs.Unauthenticated, err)
+		return "", nil, errs.New(errs.Unauthenticated, err)
 	}
 
 	if claims.Subject == "" {
-		return "", nil, errs.Newf(eerrs.Unauthenticated, "authorize: you are not authorized for that action, no claims")
+		return "", nil, errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, no claims")
 	}
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		return "", nil, errs.New(eerrs.Unauthenticated, fmt.Errorf("parsing subject: %w", err))
+		return "", nil, errs.New(errs.Unauthenticated, fmt.Errorf("parsing subject: %w", err))
 	}
 
 	return eauth.UID(subjectID.String()), &claims, nil
@@ -40,17 +39,17 @@ func Bearer(ctx context.Context, ath *auth.Auth, authorization string) (eauth.UI
 func Basic(ctx context.Context, ath *auth.Auth, userBus *userbus.Business, authorization string) (eauth.UID, *auth.Claims, error) {
 	email, pass, ok := parseBasicAuth(authorization)
 	if !ok {
-		return "", nil, errs.Newf(eerrs.Unauthenticated, "invalid Basic auth")
+		return "", nil, errs.Newf(errs.Unauthenticated, "invalid Basic auth")
 	}
 
 	addr, err := mail.ParseAddress(email)
 	if err != nil {
-		return "", nil, errs.New(eerrs.Unauthenticated, err)
+		return "", nil, errs.New(errs.Unauthenticated, err)
 	}
 
 	usr, err := userBus.Authenticate(ctx, *addr, pass)
 	if err != nil {
-		return "", nil, errs.New(eerrs.Unauthenticated, err)
+		return "", nil, errs.New(errs.Unauthenticated, err)
 	}
 
 	claims := auth.Claims{
@@ -65,7 +64,7 @@ func Basic(ctx context.Context, ath *auth.Auth, userBus *userbus.Business, autho
 
 	subjectID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		return "", nil, errs.Newf(eerrs.Unauthenticated, "parsing subject: %s", err)
+		return "", nil, errs.Newf(errs.Unauthenticated, "parsing subject: %s", err)
 	}
 
 	return eauth.UID(subjectID.String()), &claims, nil

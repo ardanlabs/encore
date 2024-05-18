@@ -1,6 +1,7 @@
 package vproductapp
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/ardanlabs/encore/business/domain/vproductbus"
@@ -8,15 +9,17 @@ import (
 
 // QueryParams represents the set of possible query strings.
 type QueryParams struct {
-	Page     string `query:"page"`
-	Rows     string `query:"rows"`
-	OrderBy  string `query:"orderBy"`
-	ID       string `query:"product_id"`
-	Name     string `query:"name"`
-	Cost     string `query:"cost"`
-	Quantity string `query:"quantity"`
-	UserName string `query:"user_name"`
+	Page     string
+	Rows     string
+	OrderBy  string
+	ID       string
+	Name     string
+	Cost     string
+	Quantity string
+	UserName string
 }
+
+// =============================================================================
 
 // Product represents information about an individual product with
 // extended information.
@@ -29,6 +32,12 @@ type Product struct {
 	DateCreated string  `json:"dateCreated"`
 	DateUpdated string  `json:"dateUpdated"`
 	UserName    string  `json:"userName"`
+}
+
+// Encode implments the encoder interface.
+func (app Product) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(app)
+	return data, "application/json", err
 }
 
 func toAppProduct(prd vproductbus.Product) Product {
@@ -45,10 +54,10 @@ func toAppProduct(prd vproductbus.Product) Product {
 }
 
 func toAppProducts(prds []vproductbus.Product) []Product {
-	items := make([]Product, len(prds))
+	app := make([]Product, len(prds))
 	for i, prd := range prds {
-		items[i] = toAppProduct(prd)
+		app[i] = toAppProduct(prd)
 	}
 
-	return items
+	return app
 }

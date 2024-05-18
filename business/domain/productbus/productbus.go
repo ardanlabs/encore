@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"time"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/delegate"
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 )
 
@@ -38,14 +38,14 @@ type Storer interface {
 
 // Business manages the set of APIs for product access.
 type Business struct {
-	log      rlog.Ctx
+	log      *logger.Logger
 	userBus  *userbus.Business
 	delegate *delegate.Delegate
 	storer   Storer
 }
 
 // NewBusiness constructs a product business API for use.
-func NewBusiness(log rlog.Ctx, userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
+func NewBusiness(log *logger.Logger, userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
 	b := Business{
 		log:      log,
 		userBus:  userBus,
@@ -58,7 +58,7 @@ func NewBusiness(log rlog.Ctx, userBus *userbus.Business, delegate *delegate.Del
 	return &b
 }
 
-// NewWithTx constructs a new Core value that will use the
+// NewWithTx constructs a new business value that will use the
 // specified transaction in any store related calls.
 func (b *Business) NewWithTx(tx transaction.CommitRollbacker) (*Business, error) {
 	storer, err := b.storer.NewWithTx(tx)
@@ -71,13 +71,14 @@ func (b *Business) NewWithTx(tx transaction.CommitRollbacker) (*Business, error)
 		return nil, err
 	}
 
-	core := Business{
+	bus := Business{
+		log:      b.log,
 		userBus:  userBus,
 		delegate: b.delegate,
 		storer:   storer,
 	}
 
-	return &core, nil
+	return &bus, nil
 }
 
 // Create adds a new product to the system.
@@ -161,7 +162,7 @@ func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return b.storer.Count(ctx, filter)
 }
 
-// QueryByID finds the product by the specified ID.
+// QueryByID finds the product by the specified Ib.
 func (b *Business) QueryByID(ctx context.Context, productID uuid.UUID) (Product, error) {
 	prd, err := b.storer.QueryByID(ctx, productID)
 	if err != nil {
@@ -171,7 +172,7 @@ func (b *Business) QueryByID(ctx context.Context, productID uuid.UUID) (Product,
 	return prd, nil
 }
 
-// QueryByUserID finds the products by a specified User ID.
+// QueryByUserID finds the products by a specified User Ib.
 func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Product, error) {
 	prds, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {

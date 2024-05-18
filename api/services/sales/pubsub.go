@@ -19,6 +19,6 @@ var _ = pubsub.NewSubscription(bpubsub.Delegate, "handle-delegate-call",
 // DelegateHandler receives a message from the pubsub system and passes it
 // into the delegate system.
 func (s *Service) DelegateHandler(ctx context.Context, data delegate.Data) error {
-	s.log.Info("DelegateHandler", "data", data)
+	s.log.Info(ctx, "DelegateHandler", "data", data)
 	return s.delegate.Call(ctx, data)
 }

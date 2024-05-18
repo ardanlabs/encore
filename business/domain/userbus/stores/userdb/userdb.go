@@ -8,25 +8,24 @@ import (
 	"fmt"
 	"net/mail"
 
-	"encore.dev/rlog"
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
-	"github.com/ardanlabs/encore/business/sdk/sqldb/dbarray"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 // Store manages the set of APIs for user database access.
 type Store struct {
-	log rlog.Ctx
+	log *logger.Logger
 	db  sqlx.ExtContext
 }
 
 // NewStore constructs the api for data access.
-func NewStore(log rlog.Ctx, db *sqlx.DB) *Store {
+func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	return &Store{
 		log: log,
 		db:  db,
@@ -95,19 +94,13 @@ func (s *Store) Update(ctx context.Context, usr userbus.User) error {
 
 // Delete removes a user from the database.
 func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
-	data := struct {
-		ID string `db:"user_id"`
-	}{
-		ID: usr.ID.String(),
-	}
-
 	const q = `
 	DELETE FROM
 		users
 	WHERE
 		user_id = :user_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, data); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -116,7 +109,7 @@ func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
 
 // Query retrieves a list of existing users from the database.
 func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, page page.Page) ([]userbus.User, error) {
-	data := map[string]interface{}{
+	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),
 		"rows_per_page": page.RowsPerPage(),
 	}
@@ -148,7 +141,7 @@ func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy o
 
 // Count returns the total number of users in the DB.
 func (s *Store) Count(ctx context.Context, filter userbus.QueryFilter) (int, error) {
-	data := map[string]interface{}{}
+	data := map[string]any{}
 
 	const q = `
 	SELECT
@@ -193,39 +186,7 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, 
 		return userbus.User{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toCoreUser(dbUsr)
-}
-
-// QueryByIDs gets the specified users from the database.
-func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]userbus.User, error) {
-	ids := make([]string, len(userIDs))
-	for i, userID := range userIDs {
-		ids[i] = userID.String()
-	}
-
-	data := struct {
-		ID any `db:"user_id"`
-	}{
-		ID: dbarray.Array(ids),
-	}
-
-	const q = `
-	SELECT
-        user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
-	FROM
-		users
-	WHERE
-		user_id = ANY(:user_id)`
-
-	var dbUsrs []user
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbUsrs); err != nil {
-		if errors.Is(err, sqldb.ErrDBNotFound) {
-			return nil, userbus.ErrNotFound
-		}
-		return nil, fmt.Errorf("db: %w", err)
-	}
-
-	return toBusUsers(dbUsrs)
+	return toBusUser(dbUsr)
 }
 
 // QueryByEmail gets the specified user from the database by email.
@@ -252,5 +213,5 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.U
 		return userbus.User{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toCoreUser(dbUsr)
+	return toBusUser(dbUsr)
 }

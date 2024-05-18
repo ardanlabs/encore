@@ -53,7 +53,7 @@ func Test_User(t *testing.T) {
 func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	ctx := context.Background()
 
-	usrs, err := userbus.TestGenerateSeedUsers(ctx, 2, userbus.Roles.Admin, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 2, userbus.Roles.Admin, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -68,7 +68,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestGenerateSeedUsers(ctx, 2, userbus.Roles.User, busDomain.User)
+	usrs, err = userbus.TestSeedUsers(ctx, 2, userbus.Roles.User, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -195,12 +195,11 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				nu := userbus.NewUser{
-					Name:            userbus.Names.MustParse("Bill Kennedy"),
-					Email:           *email,
-					Roles:           []userbus.Role{userbus.Roles.Admin},
-					Department:      "IT",
-					Password:        "123",
-					PasswordConfirm: "123",
+					Name:       userbus.Names.MustParse("Bill Kennedy"),
+					Email:      *email,
+					Roles:      []userbus.Role{userbus.Roles.Admin},
+					Department: "IT",
+					Password:   "123",
 				}
 
 				resp, err := busDomain.User.Create(ctx, nu)
@@ -252,12 +251,11 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				uu := userbus.UpdateUser{
-					Name:            dbtest.UserNamePointer("Jack Kennedy"),
-					Email:           email,
-					Roles:           []userbus.Role{userbus.Roles.Admin},
-					Department:      dbtest.StringPointer("IT"),
-					Password:        dbtest.StringPointer("1234"),
-					PasswordConfirm: dbtest.StringPointer("1234"),
+					Name:       dbtest.UserNamePointer("Jack Kennedy"),
+					Email:      email,
+					Roles:      []userbus.Role{userbus.Roles.Admin},
+					Department: dbtest.StringPointer("IT"),
+					Password:   dbtest.StringPointer("1234"),
 				}
 
 				resp, err := busDomain.User.Update(ctx, sd.Users[0].User, uu)

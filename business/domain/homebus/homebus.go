@@ -12,6 +12,7 @@ import (
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 )
 
@@ -36,21 +37,23 @@ type Storer interface {
 
 // Business manages the set of APIs for home api access.
 type Business struct {
+	log      *logger.Logger
 	userBus  *userbus.Business
 	delegate *delegate.Delegate
 	storer   Storer
 }
 
 // NewBusiness constructs a home business API for use.
-func NewBusiness(userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
+func NewBusiness(log *logger.Logger, userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
 	return &Business{
+		log:      log,
 		userBus:  userBus,
 		delegate: delegate,
 		storer:   storer,
 	}
 }
 
-// NewWithTx constructs a new Core value that will use the
+// NewWithTx constructs a new domain value that will use the
 // specified transaction in any store related calls.
 func (b *Business) NewWithTx(tx transaction.CommitRollbacker) (*Business, error) {
 	storer, err := b.storer.NewWithTx(tx)
@@ -64,6 +67,7 @@ func (b *Business) NewWithTx(tx transaction.CommitRollbacker) (*Business, error)
 	}
 
 	bus := Business{
+		log:      b.log,
 		userBus:  userBus,
 		delegate: b.delegate,
 		storer:   storer,
@@ -173,7 +177,7 @@ func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return b.storer.Count(ctx, filter)
 }
 
-// QueryByID finds the home by the specified ID.
+// QueryByID finds the home by the specified Ib.
 func (b *Business) QueryByID(ctx context.Context, homeID uuid.UUID) (Home, error) {
 	hme, err := b.storer.QueryByID(ctx, homeID)
 	if err != nil {
@@ -183,7 +187,7 @@ func (b *Business) QueryByID(ctx context.Context, homeID uuid.UUID) (Home, error
 	return hme, nil
 }
 
-// QueryByUserID finds the homes by a specified User ID.
+// QueryByUserID finds the homes by a specified User Ib.
 func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Home, error) {
 	hmes, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {

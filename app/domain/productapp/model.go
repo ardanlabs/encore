@@ -2,10 +2,10 @@ package productapp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
-	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/app/sdk/mid"
 	"github.com/ardanlabs/encore/business/domain/productbus"
@@ -14,14 +14,16 @@ import (
 
 // QueryParams represents the set of possible query strings.
 type QueryParams struct {
-	Page     string `query:"page"`
-	Rows     string `query:"rows"`
-	OrderBy  string `query:"orderBy"`
-	ID       string `query:"product_id"`
-	Name     string `query:"name"`
-	Cost     string `query:"cost"`
-	Quantity string `query:"quantity"`
+	Page     string
+	Rows     string
+	OrderBy  string
+	ID       string
+	Name     string
+	Cost     string
+	Quantity string
 }
+
+// =============================================================================
 
 // Product represents information about an individual product.
 type Product struct {
@@ -32,6 +34,12 @@ type Product struct {
 	Quantity    int     `json:"quantity"`
 	DateCreated string  `json:"dateCreated"`
 	DateUpdated string  `json:"dateUpdated"`
+}
+
+// Encode implments the encoder interface.
+func (app Product) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(app)
+	return data, "application/json", err
 }
 
 func toAppProduct(prd productbus.Product) Product {
@@ -47,19 +55,35 @@ func toAppProduct(prd productbus.Product) Product {
 }
 
 func toAppProducts(prds []productbus.Product) []Product {
-	items := make([]Product, len(prds))
+	app := make([]Product, len(prds))
 	for i, prd := range prds {
-		items[i] = toAppProduct(prd)
+		app[i] = toAppProduct(prd)
 	}
 
-	return items
+	return app
 }
+
+// =============================================================================
 
 // NewProduct defines the data needed to add a new product.
 type NewProduct struct {
 	Name     string  `json:"name" validate:"required"`
 	Cost     float64 `json:"cost" validate:"required,gte=0"`
 	Quantity int     `json:"quantity" validate:"required,gte=1"`
+}
+
+// Decode implments the decoder interface.
+func (app *NewProduct) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app NewProduct) Validate() error {
+	if err := validate.Check(app); err != nil {
+		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
+	}
+
+	return nil
 }
 
 func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct, error) {
@@ -73,30 +97,37 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 		return productbus.NewProduct{}, fmt.Errorf("parse name: %w", err)
 	}
 
-	prd := productbus.NewProduct{
+	bus := productbus.NewProduct{
 		UserID:   userID,
 		Name:     name,
 		Cost:     app.Cost,
 		Quantity: app.Quantity,
 	}
 
-	return prd, nil
+	return bus, nil
 }
 
-// Validate checks the data in the model is considered clean.
-func (app NewProduct) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
-	}
-
-	return nil
-}
+// =============================================================================
 
 // UpdateProduct defines the data needed to update a product.
 type UpdateProduct struct {
 	Name     *string  `json:"name"`
 	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
 	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
+}
+
+// Decode implments the decoder interface.
+func (app *UpdateProduct) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app UpdateProduct) Validate() error {
+	if err := validate.Check(app); err != nil {
+		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
+	}
+
+	return nil
 }
 
 func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
@@ -116,13 +147,4 @@ func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
 	}
 
 	return bus, nil
-}
-
-// Validate checks the data in the model is considered clean.
-func (app UpdateProduct) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(eerrs.FailedPrecondition, "validate: %s", err)
-	}
-
-	return nil
 }
