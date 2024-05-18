@@ -87,7 +87,7 @@ func StatusCheck(ctx context.Context, db *sqlx.DB) error {
 
 	// Run a simple query to determine connectivity.
 	// Running this query forces a round trip through the database.
-	const q = `SELECT true`
+	const q = `SELECT TRUE`
 	var tmp bool
 	return db.QueryRowContext(ctx, q).Scan(&tmp)
 }
@@ -110,7 +110,8 @@ func NamedExecContext(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, que
 	}()
 
 	if _, err := sqlx.NamedExecContext(ctx, db, query, data); err != nil {
-		if pqerr, ok := err.(*pgconn.PgError); ok {
+		var pqerr *pgconn.PgError
+		if errors.As(err, &pqerr) {
 			switch pqerr.Code {
 			case undefinedTable:
 				return ErrUndefinedTable
@@ -177,7 +178,8 @@ func namedQuerySlice[T any](ctx context.Context, log rlog.Ctx, db sqlx.ExtContex
 	}
 
 	if err != nil {
-		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == undefinedTable {
+		var pqerr *pgconn.PgError
+		if errors.As(err, &pqerr) && pqerr.Code == undefinedTable {
 			return ErrUndefinedTable
 		}
 		return err
@@ -249,7 +251,8 @@ func namedQueryStruct(ctx context.Context, log rlog.Ctx, db sqlx.ExtContext, que
 	}
 
 	if err != nil {
-		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == undefinedTable {
+		var pqerr *pgconn.PgError
+		if errors.As(err, &pqerr) && pqerr.Code == undefinedTable {
 			return ErrUndefinedTable
 		}
 		return err
