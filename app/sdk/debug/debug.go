@@ -25,8 +25,9 @@ func Mux() *http.ServeMux {
 
 	if encore.Meta().Environment.Type == encore.EnvDevelopment {
 		mux.Handle("/debug/vars/", expvar.Handler())
-		statsviz.Register(mux)
 	}
+
+	statsviz.Register(mux)
 
 	return mux
 }
