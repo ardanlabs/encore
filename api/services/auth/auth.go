@@ -165,6 +165,7 @@ func startup(log *logger.Logger) (*sqlx.DB, *auth.Auth, error) {
 		Log:       log,
 		DB:        db,
 		KeyLookup: ks,
+		Issuer:    cfg.Auth.Issuer,
 	}
 
 	auth, err := auth.New(authCfg)
