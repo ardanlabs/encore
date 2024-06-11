@@ -59,7 +59,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "input",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUser{
 					Email:           dbtest.StringPointer("jack@"),
@@ -78,7 +78,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "role",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid role \"BAD ROLE\""),
+			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.UpdateUserRole{
 					Roles: []string{"BAD ROLE"},

@@ -70,7 +70,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "missing",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.HomeCreate(ctx, homeapp.NewHome{})
 				if err != nil {
@@ -84,7 +84,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "type",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid type \"BAD TYPE\""),
+			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid type \"BAD TYPE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.NewHome{
 					Type: "BAD TYPE",

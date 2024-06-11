@@ -64,7 +64,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "missing",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.UserCreate(ctx, userapp.NewUser{})
 				if err != nil {
@@ -78,7 +78,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "role",
 			Token:   sd.Admins[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid role \"BAD ROLE\""),
+			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid role \"BAD ROLE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := userapp.NewUser{
 					Name:            "Bill Kennedy",

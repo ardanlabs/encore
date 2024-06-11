@@ -60,7 +60,7 @@ func createBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "missing",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := sales.ProductCreate(ctx, productapp.NewProduct{})
 				if err != nil {

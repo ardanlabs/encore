@@ -60,7 +60,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "input",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"cost\",\"error\":\"cost must be 0 or greater\"},{\"field\":\"quantity\",\"error\":\"quantity must be 1 or greater\"}]"),
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"cost\",\"error\":\"cost must be 0 or greater\"},{\"field\":\"quantity\",\"error\":\"quantity must be 1 or greater\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := productapp.UpdateProduct{
 					Cost:     dbtest.FloatPointer(-10.34),

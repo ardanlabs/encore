@@ -68,7 +68,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "input",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "validate: [{\"field\":\"address1\",\"error\":\"address1 must be at least 1 character in length\"},{\"field\":\"zipCode\",\"error\":\"zipCode must be a valid numeric value\"},{\"field\":\"state\",\"error\":\"state must be at least 1 character in length\"},{\"field\":\"country\",\"error\":\"Key: 'UpdateHome.address.country' Error:Field validation for 'country' failed on the 'iso3166_1_alpha2' tag\"}]"),
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"address1\",\"error\":\"address1 must be at least 1 character in length\"},{\"field\":\"zipCode\",\"error\":\"zipCode must be a valid numeric value\"},{\"field\":\"state\",\"error\":\"state must be at least 1 character in length\"},{\"field\":\"country\",\"error\":\"Key: 'UpdateHome.address.country' Error:Field validation for 'country' failed on the 'iso3166_1_alpha2' tag\"}]"),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.UpdateHome{
 					Address: &homeapp.UpdateAddress{
@@ -93,7 +93,7 @@ func updateBad(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:    "type",
 			Token:   sd.Users[0].Token,
-			ExpResp: errs.Newf(errs.FailedPrecondition, "parse: invalid type \"BAD TYPE\""),
+			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid type \"BAD TYPE\""),
 			ExcFunc: func(ctx context.Context) any {
 				app := homeapp.UpdateHome{
 					Type: dbtest.StringPointer("BAD TYPE"),
