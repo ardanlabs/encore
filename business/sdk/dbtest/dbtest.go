@@ -54,7 +54,6 @@ type Database struct {
 	DB        *sqlx.DB
 	Log       *logger.Logger
 	BusDomain BusDomain
-	Teardown  func()
 }
 
 // NewDatabase uses the specified database to perform testing. This database
@@ -86,13 +85,14 @@ func NewDatabase(t *testing.T, edb *esqldb.Database) *Database {
 		db.Close()
 	}
 
+	t.Cleanup(teardown)
+
 	log := logger.New("test")
 
 	return &Database{
 		Log:       log,
 		DB:        db,
 		BusDomain: newBusDomains(log, db),
-		Teardown:  teardown,
 	}
 }
 
