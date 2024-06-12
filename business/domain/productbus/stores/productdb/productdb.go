@@ -11,7 +11,6 @@ import (
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
 	"github.com/ardanlabs/encore/business/sdk/sqldb"
-	"github.com/ardanlabs/encore/business/sdk/transaction"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -33,7 +32,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 
 // NewWithTx constructs a new Store value replacing the sqlx DB
 // value with a sqlx DB value that is currently inside a transaction.
-func (s *Store) NewWithTx(tx transaction.CommitRollbacker) (productbus.Storer, error) {
+func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (productbus.Storer, error) {
 	ec, err := sqldb.GetExtContext(tx)
 	if err != nil {
 		return nil, err

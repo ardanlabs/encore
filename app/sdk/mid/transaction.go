@@ -7,12 +7,12 @@ import (
 
 	"encore.dev/middleware"
 	"github.com/ardanlabs/encore/app/sdk/errs"
-	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/ardanlabs/encore/foundation/logger"
 )
 
 // BeginCommitRollback starts a transaction for the domain call.
-func BeginCommitRollback(log *logger.Logger, bgn transaction.Beginner, req middleware.Request, next middleware.Next) middleware.Response {
+func BeginCommitRollback(log *logger.Logger, bgn sqldb.Beginner, req middleware.Request, next middleware.Next) middleware.Response {
 	ctx := context.Background()
 
 	hasCommitted := false

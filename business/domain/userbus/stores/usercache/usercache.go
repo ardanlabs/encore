@@ -9,7 +9,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/sdk/order"
 	"github.com/ardanlabs/encore/business/sdk/page"
-	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/creativecreature/sturdyc"
 	"github.com/google/uuid"
@@ -37,7 +37,7 @@ func NewStore(log *logger.Logger, storer userbus.Storer, ttl time.Duration) *Sto
 
 // NewWithTx constructs a new Store value replacing the sqlx DB
 // value with a sqlx DB value that is currently inside a transaction.
-func (s *Store) NewWithTx(tx transaction.CommitRollbacker) (userbus.Storer, error) {
+func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (userbus.Storer, error) {
 	return s.storer.NewWithTx(tx)
 }
 

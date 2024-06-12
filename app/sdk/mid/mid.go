@@ -11,7 +11,7 @@ import (
 	"github.com/ardanlabs/encore/business/domain/homebus"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
-	"github.com/ardanlabs/encore/business/sdk/transaction"
+	"github.com/ardanlabs/encore/business/sdk/sqldb"
 	"github.com/google/uuid"
 )
 
@@ -94,14 +94,14 @@ func GetHome(ctx context.Context) (homebus.Home, error) {
 	return v, nil
 }
 
-func setTran(req middleware.Request, tx transaction.CommitRollbacker) middleware.Request {
+func setTran(req middleware.Request, tx sqldb.CommitRollbacker) middleware.Request {
 	ctx := context.WithValue(req.Context(), trKey, tx)
 	return req.WithContext(ctx)
 }
 
 // GetTran retrieves the value that can manage a transaction.
-func GetTran(ctx context.Context) (transaction.CommitRollbacker, error) {
-	v, ok := ctx.Value(trKey).(transaction.CommitRollbacker)
+func GetTran(ctx context.Context) (sqldb.CommitRollbacker, error) {
+	v, ok := ctx.Value(trKey).(sqldb.CommitRollbacker)
 	if !ok {
 		return nil, errors.New("transaction not found in context")
 	}
