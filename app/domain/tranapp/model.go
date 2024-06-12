@@ -6,9 +6,9 @@ import (
 	"net/mail"
 	"time"
 
+	"github.com/ardanlabs/encore/app/sdk/errs"
 	"github.com/ardanlabs/encore/business/domain/productbus"
 	"github.com/ardanlabs/encore/business/domain/userbus"
-	"github.com/ardanlabs/encore/foundation/validate"
 )
 
 // Product represents an individual product.
@@ -68,7 +68,7 @@ type NewUser struct {
 
 // Validate checks the data in the model is considered clean.
 func (app NewUser) Validate() error {
-	if err := validate.Check(app); err != nil {
+	if err := errs.Check(app); err != nil {
 		return err
 	}
 
@@ -117,7 +117,7 @@ type NewProduct struct {
 
 // Validate checks the data in the model is considered clean.
 func (app NewProduct) Validate() error {
-	if err := validate.Check(app); err != nil {
+	if err := errs.Check(app); err != nil {
 		return err
 	}
 
