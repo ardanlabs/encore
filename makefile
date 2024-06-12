@@ -112,6 +112,7 @@ gotooling:
 brew:
 	brew update
 	brew list encore || brew install encoredev/tap/encore
+	brew list pgcli || brew install pgcli
 
 # ==============================================================================
 # Manage Project
