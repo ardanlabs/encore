@@ -2,8 +2,6 @@
 package query
 
 import (
-	"encoding/json"
-
 	"github.com/ardanlabs/encore/business/sdk/page"
 )
 
@@ -23,10 +21,4 @@ func NewResult[T any](items []T, total int, page page.Page) Result[T] {
 		Page:        page.Number(),
 		RowsPerPage: page.RowsPerPage(),
 	}
-}
-
-// Encode implments the encoder interface.
-func (r Result[T]) Encode() ([]byte, string, error) {
-	data, err := json.Marshal(r)
-	return data, "application/json", err
 }

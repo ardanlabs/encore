@@ -1,7 +1,6 @@
 package userapp
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/mail"
 	"time"
@@ -35,12 +34,6 @@ type User struct {
 	Enabled      bool     `json:"enabled"`
 	DateCreated  string   `json:"dateCreated"`
 	DateUpdated  string   `json:"dateUpdated"`
-}
-
-// Encode implments the encoder interface.
-func (app User) Encode() ([]byte, string, error) {
-	data, err := json.Marshal(app)
-	return data, "application/json", err
 }
 
 func toAppUser(bus userbus.User) User {
@@ -81,11 +74,6 @@ type NewUser struct {
 	Department      string   `json:"department"`
 	Password        string   `json:"password" validate:"required"`
 	PasswordConfirm string   `json:"passwordConfirm" validate:"eqfield=Password"`
-}
-
-// Decode implments the decoder interface.
-func (app *NewUser) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
 }
 
 // Validate checks the data in the model is considered clean.
@@ -135,11 +123,6 @@ type UpdateUserRole struct {
 	Roles []string `json:"roles" validate:"required"`
 }
 
-// Decode implments the decoder interface.
-func (app *UpdateUserRole) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
-}
-
 // Validate checks the data in the model is considered clean.
 func (app UpdateUserRole) Validate() error {
 	if err := errs.Check(app); err != nil {
@@ -179,11 +162,6 @@ type UpdateUser struct {
 	Password        *string `json:"password"`
 	PasswordConfirm *string `json:"passwordConfirm" validate:"omitempty,eqfield=Password"`
 	Enabled         *bool   `json:"enabled"`
-}
-
-// Decode implments the decoder interface.
-func (app *UpdateUser) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
 }
 
 // Validate checks the data in the model is considered clean.
