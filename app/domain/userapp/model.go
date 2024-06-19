@@ -88,7 +88,7 @@ func (app NewUser) Validate() error {
 func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 	roles := make([]userbus.Role, len(app.Roles))
 	for i, roleStr := range app.Roles {
-		role, err := userbus.Roles.Parse(roleStr)
+		role, err := userbus.ParseRole(roleStr)
 		if err != nil {
 			return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 		}
@@ -100,7 +100,7 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	name, err := userbus.Names.Parse(app.Name)
+	name, err := userbus.ParseName(app.Name)
 	if err != nil {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
@@ -137,7 +137,7 @@ func toBusUpdateUserRole(app UpdateUserRole) (userbus.UpdateUser, error) {
 	if app.Roles != nil {
 		roles = make([]userbus.Role, len(app.Roles))
 		for i, roleStr := range app.Roles {
-			role, err := userbus.Roles.Parse(roleStr)
+			role, err := userbus.ParseRole(roleStr)
 			if err != nil {
 				return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
 			}
@@ -185,7 +185,7 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 
 	var name *userbus.Name
 	if app.Name != nil {
-		nm, err := userbus.Names.Parse(*app.Name)
+		nm, err := userbus.ParseName(*app.Name)
 		if err != nil {
 			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
 		}

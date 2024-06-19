@@ -179,7 +179,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 		{
 			Name: "basic",
 			ExpResp: userbus.User{
-				Name:       userbus.Names.MustParse("Bill Kennedy"),
+				Name:       userbus.MustParseName("Bill Kennedy"),
 				Email:      *email,
 				Roles:      []userbus.Role{userbus.Roles.Admin},
 				Department: "IT",
@@ -187,7 +187,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				nu := userbus.NewUser{
-					Name:       userbus.Names.MustParse("Bill Kennedy"),
+					Name:       userbus.MustParseName("Bill Kennedy"),
 					Email:      *email,
 					Roles:      []userbus.Role{userbus.Roles.Admin},
 					Department: "IT",
@@ -234,7 +234,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name: "basic",
 			ExpResp: userbus.User{
 				ID:          sd.Users[0].ID,
-				Name:        userbus.Names.MustParse("Jack Kennedy"),
+				Name:        userbus.MustParseName("Jack Kennedy"),
 				Email:       *email,
 				Roles:       []userbus.Role{userbus.Roles.Admin},
 				Department:  "IT",

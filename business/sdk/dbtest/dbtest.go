@@ -78,14 +78,10 @@ func NewDatabase(t *testing.T, edb *esqldb.Database) *Database {
 
 	// -------------------------------------------------------------------------
 
-	// teardown is the function that should be invoked when the caller is done
-	// with the database.
-	teardown := func() {
+	t.Cleanup(func() {
 		t.Helper()
 		db.Close()
-	}
-
-	t.Cleanup(teardown)
+	})
 
 	log := logger.New("test")
 
@@ -130,7 +126,7 @@ func BoolPointer(b bool) *bool {
 // package because we normally don't want to deal with pointers to basic types
 // but it's useful in some tests.
 func UserNamePointer(value string) *userbus.Name {
-	name := userbus.Names.MustParse(value)
+	name := userbus.MustParseName(value)
 	return &name
 }
 
@@ -138,6 +134,6 @@ func UserNamePointer(value string) *userbus.Name {
 // package because we normally don't want to deal with pointers to basic types
 // but it's useful in some tests.
 func ProductNamePointer(value string) *productbus.Name {
-	name := productbus.Names.MustParse(value)
+	name := productbus.MustParseName(value)
 	return &name
 }

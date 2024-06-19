@@ -53,13 +53,13 @@ func toBusUser(db user) (userbus.User, error) {
 	roles := make([]userbus.Role, len(db.Roles))
 	for i, value := range db.Roles {
 		var err error
-		roles[i], err = userbus.Roles.Parse(value)
+		roles[i], err = userbus.ParseRole(value)
 		if err != nil {
 			return userbus.User{}, fmt.Errorf("parse role: %w", err)
 		}
 	}
 
-	name, err := userbus.Names.Parse(db.Name)
+	name, err := userbus.ParseName(db.Name)
 	if err != nil {
 		return userbus.User{}, fmt.Errorf("parse name: %w", err)
 	}

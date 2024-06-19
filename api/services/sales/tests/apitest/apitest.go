@@ -10,6 +10,7 @@ import (
 	eauth "encore.dev/beta/auth"
 	eerrs "encore.dev/beta/errs"
 	"github.com/ardanlabs/encore/app/sdk/auth"
+	"github.com/ardanlabs/encore/business/domain/userbus"
 	"github.com/ardanlabs/encore/business/domain/userbus/stores/userdb"
 	"github.com/ardanlabs/encore/business/sdk/dbtest"
 	"github.com/golang-jwt/jwt/v4"
@@ -123,7 +124,7 @@ func Token(db *dbtest.Database, ath *auth.Auth, email string) string {
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},
-		Roles: dbUsr.Roles,
+		Roles: userbus.ParseRolesToString(dbUsr.Roles),
 	}
 
 	token, err := ath.GenerateToken(kid, claims)

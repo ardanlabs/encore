@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"runtime/debug"
 	"testing"
 	"time"
 
@@ -13,22 +12,14 @@ import (
 	"github.com/ardanlabs/encore/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 func Test_Auth(t *testing.T) {
-	log, db, teardown := newUnit(t)
-	defer func() {
-		if r := recover(); r != nil {
-			t.Log(r)
-			t.Error(string(debug.Stack()))
-		}
-		teardown()
-	}()
+	log := newUnit(t)
 
 	ath, err := auth.New(auth.Config{
 		Log:       log,
-		DB:        db,
+		DB:        nil,
 		KeyLookup: &keyStore{},
 		Issuer:    "service project",
 	})
@@ -53,7 +44,7 @@ func test1(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.Roles.Admin},
+			Roles: []string{userbus.Roles.Admin.String()},
 		}
 
 		token, err := ath.GenerateToken(kid, claims)
@@ -96,7 +87,7 @@ func test2(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.Roles.User},
+			Roles: []string{userbus.Roles.User.String()},
 		}
 
 		token, err := ath.GenerateToken(kid, claims)
@@ -144,7 +135,7 @@ func test3(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.Roles.User},
+			Roles: []string{userbus.Roles.User.String()},
 		}
 
 		token, err := ath.GenerateToken(kid, claims)
@@ -177,7 +168,7 @@ func test4(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.Roles.User, userbus.Roles.Admin},
+			Roles: []string{userbus.Roles.User.String(), userbus.Roles.Admin.String()},
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
@@ -209,7 +200,7 @@ func test5(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.Roles.User},
+			Roles: []string{userbus.Roles.User.String()},
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
@@ -241,7 +232,7 @@ func test6(ath *auth.Auth) func(t *testing.T) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: []userbus.Role{userbus.Roles.Admin},
+			Roles: []string{userbus.Roles.Admin.String()},
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
@@ -266,21 +257,21 @@ func test6(ath *auth.Auth) func(t *testing.T) {
 
 // =============================================================================
 
-func newUnit(t *testing.T) (*logger.Logger, *sqlx.DB, func()) {
+func newUnit(t *testing.T) *logger.Logger {
 	var buf bytes.Buffer
 	log := logger.New("TEST")
 
 	// teardown is the function that should be invoked when the caller is done
 	// with the database.
-	teardown := func() {
+	t.Cleanup(func() {
 		t.Helper()
 
 		fmt.Println("******************** LOGS ********************")
 		fmt.Print(buf.String())
 		fmt.Println("******************** LOGS ********************")
-	}
+	})
 
-	return log, nil, teardown
+	return log
 }
 
 // =============================================================================
