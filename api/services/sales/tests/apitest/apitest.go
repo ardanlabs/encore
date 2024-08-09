@@ -34,10 +34,6 @@ func New(db *dbtest.Database, ath *auth.Auth, handler AuthHandler) *Test {
 
 // Run performs the actual test logic based on the table data.
 func (at *Test) Run(t *testing.T, table []Table, testName string) {
-	log := func(diff string, got any, exp any) {
-
-	}
-
 	for _, tt := range table {
 		f := func(t *testing.T) {
 			t.Logf("\n***** Running Test: %s *****\n", testName+"-"+tt.Name)
@@ -49,7 +45,13 @@ func (at *Test) Run(t *testing.T, table []Table, testName string) {
 			if err != nil {
 				diff := tt.CmpFunc(err, tt.ExpResp)
 				if diff != "" {
-					log(diff, err, tt.ExpResp)
+					t.Log("DIFF")
+					t.Logf("%s", diff)
+					t.Log("GOT")
+					t.Logf("%#v", err)
+					t.Log("EXP")
+					t.Logf("%#v", tt.ExpResp)
+					t.Fatalf("Should get the expected response")
 				}
 				return
 			}
