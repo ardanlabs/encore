@@ -6,7 +6,6 @@ require (
 	encore.dev v1.44.6
 	github.com/ardanlabs/conf/v3 v3.2.0
 	github.com/arl/statsviz v0.6.0
-	github.com/creativecreature/sturdyc v1.0.7
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.23.0
@@ -16,6 +15,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/open-policy-agent/opa v0.70.0
+	github.com/viccon/sturdyc v1.1.0
 	golang.org/x/crypto v0.31.0
 )
 
