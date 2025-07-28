@@ -9,46 +9,46 @@ jobs:
       - run:
           name: Install Encore
           command: |
-              curl -L https://encore.dev/install.sh | bash
-              export ENCORE_INSTALL="/home/circleci/.encore"
-              export PATH="$ENCORE_INSTALL/bin:$PATH"
-              which encore
-              encore version
+            curl -L https://encore.dev/install.sh | bash
+            export ENCORE_INSTALL="/home/circleci/.encore"
+            export PATH="$ENCORE_INSTALL/bin:$PATH"
+            which encore
+            encore version
       - run:
           name: Install Go 1.24
           command: |
-              sudo rm -rf /usr/local/go
-              wget -O go.tgz https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
-              sudo tar -C /usr/local -xzf go.tgz
-              which go
-              go version
+            sudo rm -rf /usr/local/go
+            wget -O go.tgz https://go.dev/dl/go1.24.5.linux-amd64.tar.gz
+            sudo tar -C /usr/local -xzf go.tgz
+            which go
+            go version
       - run:
           name: Download Dependencies
           command: |
-              go mod download -x
+            go mod download -x
       - run:
           name: Encore Check
           command: |
-              export ENCORE_INSTALL="/home/circleci/.encore"
-              export PATH="$ENCORE_INSTALL/bin:$PATH"
-              CGO_ENABLED=0 encore check -v
+            export ENCORE_INSTALL="/home/circleci/.encore"
+            export PATH="$ENCORE_INSTALL/bin:$PATH"
+            CGO_ENABLED=0 encore check -v
       - run:
           name: Run Tests
           command: |
-              export ENCORE_INSTALL="/home/circleci/.encore"
-              export PATH="$ENCORE_INSTALL/bin:$PATH"
-              CGO_ENABLED=0 encore test ./...
+            export ENCORE_INSTALL="/home/circleci/.encore"
+            export PATH="$ENCORE_INSTALL/bin:$PATH"
+            CGO_ENABLED=0 encore test ./...
       - run:
           name: Run vet
           command: |
-              CGO_ENABLED=0 go vet ./...
+            CGO_ENABLED=0 go vet ./...
       - run:
           name: Run staticheck
           command: |
-              go install honnef.co/go/tools/cmd/staticcheck@latest
-              staticcheck -checks=all ./...
+            go install honnef.co/go/tools/cmd/staticcheck@latest
+            staticcheck -checks=all ./...
       - run:
           name: Run govulncheck
           command: |
-              go install golang.org/x/vuln/cmd/govulncheck@latest
-              govulncheck ./...
+            go install golang.org/x/vuln/cmd/govulncheck@latest
+            govulncheck ./...
