@@ -1,8 +1,6 @@
 module github.com/ardanlabs/encore
 
-go 1.23.8
-
-toolchain go1.24.3
+go 1.24.2
 
 require (
 	encore.dev v1.46.1
